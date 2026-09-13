@@ -21,7 +21,7 @@ export const getOfficerHeaders = () => ({
   'X-Jurisdiction': currentOfficerSession.jurisdiction
 });
 
-// Fallback review queue dataset for SIH26189 duplicate entity resolution
+// Fallback review queue dataset for duplicate entity resolution
 const MOCK_REVIEW_QUEUE = [
   {
     entity1_id: 'P003',

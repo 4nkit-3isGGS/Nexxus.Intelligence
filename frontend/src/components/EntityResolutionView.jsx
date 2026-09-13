@@ -140,7 +140,7 @@ export default function EntityResolutionView({ onFocusEntity, onJumpToGraph }) {
               <span className="text-outline-variant font-label-sm text-label-sm">•</span>
               <span className="text-verified-emerald font-label-sm text-label-sm font-semibold flex items-center gap-1">
                 <span className="material-symbols-outlined text-[14px]">verified</span>
-                SIH-2026-NEXXUS-TRIPLET
+                NEXXUS-INTEL-TRIPLET
               </span>
             </div>
 

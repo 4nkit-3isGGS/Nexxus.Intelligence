@@ -43,7 +43,7 @@ export default function FinancialFlowView({ onSelectEntity }) {
               PMLA SEC 3/4 FINANCIAL CRIME VECTOR
             </span>
             <span className="text-on-surface-variant font-label-sm text-label-sm tracking-widest uppercase">
-              SIH-2026-NEXXUS-TRIPLET
+              NEXXUS-INTEL-TRIPLET
             </span>
             <span className="text-outline-variant font-label-sm text-label-sm">•</span>
             <span className="text-verified-emerald font-label-sm text-label-sm font-semibold flex items-center gap-1">

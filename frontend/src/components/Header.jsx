@@ -49,7 +49,7 @@ export default function Header({
                   NEXXUS.INTELLIGENCE
                 </span>
                 <span className="px-1.5 py-0.5 rounded bg-surface-container-high text-primary font-label-sm text-label-sm uppercase tracking-wider border border-primary/20">
-                  SIH 2026
+                  TACTICAL v2.6
                 </span>
               </div>
               <div className="flex items-center gap-space-xs">

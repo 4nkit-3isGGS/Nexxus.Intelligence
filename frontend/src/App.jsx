@@ -358,7 +358,7 @@ export default function App() {
           </div>
         )}
 
-        {/* VIEW 3: ENTITY RESOLUTION & DUPLICATE REVIEW QUEUE (SIH26189) */}
+        {/* VIEW 3: ENTITY RESOLUTION & DUPLICATE REVIEW QUEUE */}
         {activeTab === 'resolution' && (
           <EntityResolutionView
             onFocusEntity={(node) => {
