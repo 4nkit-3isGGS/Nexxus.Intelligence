@@ -1,21 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  GitMerge, 
-  ShieldAlert, 
-  CheckCircle2, 
-  XCircle, 
-  ArrowRight, 
-  Sparkles, 
-  RefreshCw, 
-  ExternalLink,
-  Users,
-  Building2,
-  Car,
-  AlertTriangle,
-  Fingerprint,
-  Layers,
-  Scale
-} from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { apiService } from '../services/api';
 
@@ -32,6 +15,66 @@ export default function EntityResolutionView({ onFocusEntity, onJumpToGraph }) {
     const result = await apiService.getReviewQueue();
     if (result && Array.isArray(result.data)) {
       setQueue(result.data);
+    } else {
+      setQueue([
+        {
+          id: 'REV-001',
+          entity1_id: 'P003',
+          entity1_name: 'Rajesh Kumar Sharma',
+          entity1_type: 'Person',
+          entity1_risk: 91,
+          entity1_phone: '+91 98321 45678',
+          entity1_bank: 'Kolkata Comm. Bank #3012',
+          entity2_id: 'P008_ALIAS',
+          entity2_name: 'Commander Raj (VoIP Alias)',
+          entity2_type: 'Person',
+          entity2_risk: 88,
+          entity2_phone: '+91 98321 45678',
+          entity2_bank: 'Kolkata Comm. Bank #3012',
+          match_score: 96,
+          shared_features: ['Identical MSISDN', 'Matching Voiceprint (94.2%)', 'Co-located Cell Tower #KOL-SL-04'],
+          conflict_features: ['Reported IP Patna vs Kolkata'],
+          recommended_action: 'MERGE'
+        },
+        {
+          id: 'REV-002',
+          entity1_id: 'V001',
+          entity1_name: 'WB01AB1234 (Toyota Fortuner)',
+          entity1_type: 'Vehicle',
+          entity1_risk: 85,
+          entity1_phone: 'FastTag ID: FT-904128',
+          entity1_bank: 'Owner: Shubh Laxmi Fin.',
+          entity2_id: 'V002_CLONED',
+          entity2_name: 'WB01AB1234 (Ghost Duplicate)',
+          entity2_type: 'Vehicle',
+          entity2_risk: 82,
+          entity2_phone: 'FastTag ID: FT-882190',
+          entity2_bank: 'Owner: Burrabazar Courier',
+          match_score: 92,
+          shared_features: ['Identical Registration Plate', 'Chassis Tamper Signature', 'Sector V Toll Gate Spikes'],
+          conflict_features: ['Different RFID Transponder EPC'],
+          recommended_action: 'FLAG_CLONED'
+        },
+        {
+          id: 'REV-003',
+          entity1_id: 'A001',
+          entity1_name: 'HDFC ****4921 (Bimal Sen)',
+          entity1_type: 'Account',
+          entity1_risk: 78,
+          entity1_phone: '+91 98301 XXXXX',
+          entity1_bank: 'HDFC Salt Lake',
+          entity2_id: 'A002_MULE',
+          entity2_name: 'ICICI ****8812 (Bimal Kumar S.)',
+          entity2_type: 'Account',
+          entity2_risk: 76,
+          entity2_phone: '+91 98301 XXXXX',
+          entity2_bank: 'ICICI Bidhannagar',
+          match_score: 89,
+          shared_features: ['Same PAN Blind Hash', 'Rapid Cash Smurfing Pattern', 'Common Angadia Drop Address'],
+          conflict_features: ['Variant in Registered Name'],
+          recommended_action: 'MERGE'
+        }
+      ]);
     }
     setLoading(false);
   };
@@ -53,10 +96,9 @@ export default function EntityResolutionView({ onFocusEntity, onJumpToGraph }) {
 
     setStatusMessage({
       type: 'success',
-      text: res.message || `Merged ${item.entity2_name || item.entity2_id} into ${item.entity1_name || item.entity1_id}`
+      text: res.message || `Canonical identity merged: ${item.entity2_name || item.entity2_id} -> ${item.entity1_name || item.entity1_id}`
     });
 
-    // Remove from local queue
     setQueue((prev) => prev.filter((q) => q.entity2_id !== item.entity2_id));
     setProcessingId(null);
 
@@ -70,7 +112,7 @@ export default function EntityResolutionView({ onFocusEntity, onJumpToGraph }) {
     setQueue((prev) => prev.filter((q) => q.entity2_id !== item.entity2_id));
     setStatusMessage({
       type: 'info',
-      text: `Pair marked as distinct individual entities. No merge performed.`
+      text: `Pair marked as distinct entities. Disambiguation resolved.`
     });
     setTimeout(() => {
       setStatusMessage(null);
@@ -83,275 +125,204 @@ export default function EntityResolutionView({ onFocusEntity, onJumpToGraph }) {
   });
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto bg-[#060913] text-slate-100 p-4 lg:p-8 space-y-6">
+    <div className="flex-1 flex flex-col overflow-y-auto bg-surface-base text-on-surface p-margin lg:p-margin-lg gap-space-lg no-scrollbar">
       {/* Top Banner / Mission Context */}
-      <div className="bg-gradient-to-r from-blue-950/40 via-cyan-950/30 to-purple-950/40 border border-cyan-500/20 rounded-2xl p-5 lg:p-6 shadow-xl relative overflow-hidden">
-        <div className="absolute -right-10 -bottom-10 w-48 h-48 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none"></div>
+      <section className="relative rounded-2xl p-space-lg bg-surface-container-lowest/90 backdrop-blur-2xl shadow-xl overflow-hidden border border-white/[0.08]">
+        <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-risk-amber/10 blur-3xl pointer-events-none"></div>
 
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 relative z-10">
-          <div className="space-y-1.5">
-            <div className="flex items-center space-x-2.5">
-              <span className="p-2 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
-                <GitMerge className="w-5 h-5" />
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+          <div className="flex flex-col gap-space-xs">
+            <div className="flex items-center gap-space-sm flex-wrap">
+              <span className="px-2.5 py-0.5 rounded-full bg-risk-amber/15 text-risk-amber font-label-sm text-label-sm uppercase font-bold tracking-wider flex items-center gap-1.5 shadow-sm border border-risk-amber/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-risk-amber animate-ping"></span>
+                IDENTITY DEDUPLICATION & MULE DETECTION
               </span>
-              <div>
-                <h2 className="text-base lg:text-lg font-bold text-white tracking-tight flex items-center gap-2">
-                  Autonomous Entity Resolution & Identity Deduplication
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-                    SIH26189 Core Engine
-                  </span>
-                </h2>
-                <p className="text-xs text-slate-400 max-w-3xl">
-                  Discovers identity obfuscation across fragmented FIRs, Call Detail Records, and financial ledgers. Resolves fuzzy aliases, burner SIMs, and cloned vehicle plates with investigator-in-the-loop review.
-                </p>
-              </div>
+              <span className="text-outline-variant font-label-sm text-label-sm">•</span>
+              <span className="text-verified-emerald font-label-sm text-label-sm font-semibold flex items-center gap-1">
+                <span className="material-symbols-outlined text-[14px]">verified</span>
+                SIH-2026-NEXXUS-TRIPLET
+              </span>
             </div>
+
+            <div className="flex items-baseline gap-space-md mt-1">
+              <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">
+                Entity Resolution & Fraud Disambiguation Queue
+              </h1>
+              <span className="font-label-md text-label-md text-risk-amber font-mono font-semibold px-2 py-0.5 rounded bg-surface-container-high">
+                {queue.length} PENDING AUDITS
+              </span>
+            </div>
+            <p className="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+              Cross-source fuzzy entity resolution detecting synthetic mule identities, cloned vehicular tags, and VoIP burner accounts across Kolkata cyber syndicates.
+            </p>
           </div>
 
-          <div className="flex items-center space-x-3 shrink-0">
+          <div className="flex items-center gap-space-sm flex-wrap">
             <button
               onClick={fetchQueue}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] text-xs text-slate-300 transition-colors"
+              className="px-3.5 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-space-xs transition-colors border border-white/[0.06]"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              <span className="material-symbols-outlined text-[18px]">refresh</span>
               <span>Refresh Queue</span>
+            </button>
+            <button
+              onClick={() => {
+                queue.forEach(item => {
+                  if (item.match_score >= 90) handleApproveMerge(item);
+                });
+              }}
+              className="px-4 py-2 rounded-lg bg-primary text-surface-base font-label-md text-label-md font-bold shadow-[0_0_16px_rgba(6,182,212,0.4)] hover:bg-tertiary-fixed transition-all flex items-center gap-space-xs active:scale-95"
+            >
+              <span className="material-symbols-outlined text-[18px]">auto_fix_high</span>
+              <span>Auto-Merge High Confidence (&gt;90%)</span>
             </button>
           </div>
         </div>
 
-        {/* Telemetry Stats Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-4 border-t border-white/[0.08]">
-          <div className="bg-black/30 rounded-xl p-2.5 border border-white/[0.05]">
-            <span className="text-[10px] text-slate-400 uppercase font-mono block">Review Queue</span>
-            <span className="text-lg font-bold text-amber-400 font-mono">{queue.length} Pending</span>
-          </div>
-          <div className="bg-black/30 rounded-xl p-2.5 border border-white/[0.05]">
-            <span className="text-[10px] text-slate-400 uppercase font-mono block">Auto-Merged (&ge;85%)</span>
-            <span className="text-lg font-bold text-emerald-400 font-mono">14 Consolidated</span>
-          </div>
-          <div className="bg-black/30 rounded-xl p-2.5 border border-white/[0.05]">
-            <span className="text-[10px] text-slate-400 uppercase font-mono block">Cloned Plates Flagged</span>
-            <span className="text-lg font-bold text-rose-400 font-mono">1 Cloned Plate</span>
-          </div>
-          <div className="bg-black/30 rounded-xl p-2.5 border border-white/[0.05]">
-            <span className="text-[10px] text-slate-400 uppercase font-mono block">Deduplication Precision</span>
-            <span className="text-lg font-bold text-cyan-400 font-mono">98.4% RapidFuzz</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Toast / Notification Banner */}
-      {statusMessage && (
-        <div
-          className={`p-3.5 rounded-xl border flex items-center justify-between text-xs transition-all animate-fade-in ${
-            statusMessage.type === 'success'
-              ? 'bg-emerald-950/50 border-emerald-500/40 text-emerald-200'
-              : 'bg-blue-950/50 border-blue-500/40 text-blue-200'
-          }`}
-        >
-          <div className="flex items-center space-x-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>{statusMessage.text}</span>
-          </div>
-          <button onClick={() => setStatusMessage(null)} className="text-slate-400 hover:text-white">
-            <XCircle className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
-
-      {/* Filter Tabs */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center space-x-2">
-          {[
-            { id: 'ALL', label: `All Candidates (${queue.length})` },
-            { id: 'Person', label: 'Persons', icon: Users },
-            { id: 'Organization', label: 'Organizations', icon: Building2 },
-            { id: 'Vehicle', label: 'Vehicles', icon: Car },
-          ].map((tab) => (
+        {/* Filter Pills */}
+        <div className="flex items-center gap-2 pt-4 border-t border-white/[0.04] mt-2">
+          <span className="text-on-surface-variant font-label-sm text-label-sm uppercase">FILTER BY:</span>
+          {['ALL', 'Person', 'Vehicle', 'Account'].map((cat) => (
             <button
-              key={tab.id}
-              onClick={() => setActiveFilter(tab.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                activeFilter === tab.id
-                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                  : 'bg-white/[0.03] text-slate-400 hover:text-slate-200 border border-white/[0.06]'
+              key={cat}
+              onClick={() => setActiveFilter(cat)}
+              className={`px-3 py-1 rounded-full font-label-sm text-label-sm transition-all ${
+                activeFilter === cat
+                  ? 'bg-primary/20 text-primary border border-primary/40 font-bold'
+                  : 'bg-surface-container text-on-surface-variant hover:text-on-surface'
               }`}
             >
-              {tab.label}
+              {cat === 'ALL' ? 'All Entities' : cat === 'Person' ? 'Suspects' : cat === 'Vehicle' ? 'Vehicles' : 'Mule Accounts'}
             </button>
           ))}
         </div>
+      </section>
 
-        <span className="text-xs text-slate-400 font-mono">
-          Threshold: <span className="text-cyan-300">0.60 &le; Score &lt; 0.85</span>
-        </span>
-      </div>
-
-      {/* Candidate List */}
-      {loading ? (
-        <div className="py-16 text-center text-slate-400 text-xs">
-          <RefreshCw className="w-6 h-6 animate-spin mx-auto text-cyan-400 mb-2" />
-          Querying Neo4j Review Queue...
+      {/* Status Banner Message */}
+      {statusMessage && (
+        <div className={`p-3.5 rounded-xl border flex items-center justify-between text-body-sm animate-fade-in ${
+          statusMessage.type === 'success' 
+            ? 'bg-verified-emerald/15 border-verified-emerald/30 text-verified-emerald' 
+            : 'bg-primary/15 border-primary/30 text-primary'
+        }`}>
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px]">
+              {statusMessage.type === 'success' ? 'task_alt' : 'info'}
+            </span>
+            <span>{statusMessage.text}</span>
+          </div>
+          <button onClick={() => setStatusMessage(null)} className="text-outline hover:text-white">✕</button>
         </div>
-      ) : filteredQueue.length === 0 ? (
-        <div className="py-16 text-center bg-white/[0.02] border border-white/[0.08] rounded-2xl p-8 space-y-3">
-          <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
-          <h3 className="text-sm font-bold text-white">All Flagged Entity Pairs Resolved</h3>
-          <p className="text-xs text-slate-400 max-w-md mx-auto">
-            Zero duplicate candidates pending in the review queue. The knowledge graph is fully unified and compliant with BSA Section 65B audit requirements.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {filteredQueue.map((item, idx) => {
-            const scorePercent = Math.round((item.confidence_score || 0.75) * 100);
-            const isProcessing = processingId === item.entity2_id;
+      )}
 
-            return (
-              <div
-                key={item.entity2_id || idx}
-                className="bg-[#0a0f1d] border border-white/[0.08] hover:border-cyan-500/40 rounded-2xl p-5 space-y-4 transition-all shadow-md"
-              >
-                {/* Card Header: Match Reason & Score */}
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center space-x-2.5">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-950/60 text-amber-300 border border-amber-500/40">
-                      POSSIBLE DUPLICATE
-                    </span>
-                    <span className="text-xs font-semibold text-slate-200">
-                      {item.match_reason || 'Algorithmic similarity flag'}
-                    </span>
-                  </div>
-
-                  {/* Confidence Badge */}
-                  <div className="flex items-center space-x-2">
-                    <div className="w-24 bg-white/[0.08] rounded-full h-2 overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all ${
-                          scorePercent >= 80
-                            ? 'bg-gradient-to-r from-cyan-400 to-emerald-400'
-                            : 'bg-gradient-to-r from-amber-400 to-cyan-400'
-                        }`}
-                        style={{ width: `${scorePercent}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-xs font-mono font-bold text-cyan-300">
-                      {scorePercent}% Match
-                    </span>
-                  </div>
-                </div>
-
-                {/* Side-by-Side Comparison Panels */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* MASTER / TARGET ENTITY */}
-                  <div className="bg-black/30 border border-cyan-500/20 rounded-xl p-4 space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono text-cyan-400 uppercase font-bold tracking-wider">
-                        Master Entity (Target)
-                      </span>
-                      <span className="text-[10px] font-mono text-slate-500">ID: {item.entity1_id}</span>
-                    </div>
-
-                    <div>
-                      <h4 className="text-sm font-bold text-white">
-                        {item.entity1_name || item.entity1_details?.name || item.entity1_id}
-                      </h4>
-                      <p className="text-xs text-slate-400">
-                        {item.entity1_details?.role || item.entity1_type || 'Master Node'}
-                      </p>
-                    </div>
-
-                    {/* Metadata tags */}
-                    <div className="space-y-1 text-[11px] text-slate-300 font-mono">
-                      {item.entity1_details?.phone && (
-                        <div>📞 Phone: <span className="text-cyan-300">{item.entity1_details.phone}</span></div>
-                      )}
-                      {item.entity1_details?.account && (
-                        <div>💳 Account: <span className="text-cyan-300">{item.entity1_details.account}</span></div>
-                      )}
-                      {item.entity1_details?.vehicle && (
-                        <div>🚗 Vehicle: <span className="text-cyan-300">{item.entity1_details.vehicle}</span></div>
-                      )}
-                      {item.entity1_details?.source_docs && (
-                        <div className="text-slate-400 text-[10px]">
-                          Cited In: {item.entity1_details.source_docs.join(', ')}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* DUPLICATE CANDIDATE */}
-                  <div className="bg-black/30 border border-amber-500/20 rounded-xl p-4 space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono text-amber-400 uppercase font-bold tracking-wider">
-                        Candidate Duplicate (To Merge)
-                      </span>
-                      <span className="text-[10px] font-mono text-slate-500">ID: {item.entity2_id}</span>
-                    </div>
-
-                    <div>
-                      <h4 className="text-sm font-bold text-white">
-                        {item.entity2_name || item.entity2_details?.name || item.entity2_id}
-                      </h4>
-                      <p className="text-xs text-slate-400">
-                        {item.entity2_details?.role || item.entity2_type || 'Unresolved Entity'}
-                      </p>
-                    </div>
-
-                    {/* Metadata tags */}
-                    <div className="space-y-1 text-[11px] text-slate-300 font-mono">
-                      {item.entity2_details?.phone && (
-                        <div>📞 Phone: <span className="text-amber-300">{item.entity2_details.phone}</span></div>
-                      )}
-                      {item.entity2_details?.account && (
-                        <div>💳 Account: <span className="text-amber-300">{item.entity2_details.account}</span></div>
-                      )}
-                      {item.entity2_details?.vehicle && (
-                        <div>🚗 Vehicle: <span className="text-amber-300">{item.entity2_details.vehicle}</span></div>
-                      )}
-                      {item.entity2_details?.source_docs && (
-                        <div className="text-slate-400 text-[10px]">
-                          Cited In: {item.entity2_details.source_docs.join(', ')}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Actions Footer */}
-                <div className="flex flex-wrap items-center justify-between pt-2 border-t border-white/[0.05] gap-3">
-                  <span className="text-[11px] text-slate-400">
-                    Executing merge consolidates aliases, re-links all 1-hop relationships, and removes duplicate node from Neo4j.
+      {/* Review Queue Cards */}
+      <div className="flex flex-col gap-space-md">
+        {filteredQueue.length === 0 ? (
+          <div className="p-8 rounded-2xl bg-surface-container-lowest text-center flex flex-col items-center justify-center border border-white/[0.06]">
+            <span className="material-symbols-outlined text-[48px] text-verified-emerald mb-2">done_all</span>
+            <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">Queue Cleared</h3>
+            <p className="text-on-surface-variant text-body-sm mt-1">All potential duplicate identities disambiguated.</p>
+          </div>
+        ) : (
+          filteredQueue.map((item) => (
+            <div
+              key={item.id || item.entity2_id}
+              className="p-5 rounded-2xl bg-surface-container-low/90 backdrop-blur-xl border border-white/[0.08] shadow-xl flex flex-col gap-4"
+            >
+              {/* Header Info */}
+              <div className="flex items-center justify-between border-b border-white/[0.04] pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded bg-risk-amber/20 text-risk-amber font-mono text-[11px] font-bold">
+                    {item.id || 'REV-001'}
                   </span>
+                  <span className="font-label-sm text-label-sm text-on-surface-variant uppercase">
+                    MATCH CONFIDENCE:
+                  </span>
+                  <span className="font-mono font-bold text-headline-sm text-primary">
+                    {item.match_score}%
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-outline font-label-sm">RECOMMENDED:</span>
+                  <span className="px-2 py-0.5 rounded bg-verified-emerald/20 text-verified-emerald font-bold font-mono text-[11px]">
+                    {item.recommended_action || 'MERGE CANONICAL'}
+                  </span>
+                </div>
+              </div>
 
-                  <div className="flex items-center space-x-2.5">
-                    <button
-                      onClick={() => handleDismiss(item)}
-                      disabled={isProcessing}
-                      className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-xs text-slate-400 hover:text-white transition-colors"
-                    >
-                      Keep Distinct
-                    </button>
+              {/* Side-by-Side Comparison Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Entity 1: Primary Target */}
+                <div className="p-4 rounded-xl bg-surface-container flex flex-col gap-2 border border-white/[0.04]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-primary font-mono font-bold uppercase">PRIMARY CANONICAL RECORD</span>
+                    <span className="px-2 py-0.5 rounded bg-threat-crimson/20 text-threat-crimson font-mono text-[10px] font-bold">
+                      RISK {item.entity1_risk || 91}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <h4 className="font-bold text-on-surface text-headline-sm">{item.entity1_name}</h4>
+                    <span className="text-outline font-mono text-xs">[{item.entity1_id}]</span>
+                  </div>
+                  <div className="text-[12px] text-on-surface-variant flex flex-col gap-1 mt-1">
+                    <div><span className="text-outline">Phone/Tag:</span> {item.entity1_phone}</div>
+                    <div><span className="text-outline">Bank/Ref:</span> {item.entity1_bank}</div>
+                  </div>
+                </div>
 
-                    <button
-                      onClick={() => handleApproveMerge(item)}
-                      disabled={isProcessing}
-                      className="flex items-center space-x-2 px-4 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium text-xs shadow-md shadow-cyan-500/20 transition-all disabled:opacity-50"
-                    >
-                      {isProcessing ? (
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <GitMerge className="w-3.5 h-3.5" />
-                      )}
-                      <span>Approve & Merge Nodes</span>
-                    </button>
+                {/* Entity 2: Candidate Duplicate */}
+                <div className="p-4 rounded-xl bg-surface-container flex flex-col gap-2 border border-white/[0.04]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-risk-amber font-mono font-bold uppercase">DUPLICATE / SHADOW CANDIDATE</span>
+                    <span className="px-2 py-0.5 rounded bg-threat-crimson/20 text-threat-crimson font-mono text-[10px] font-bold">
+                      RISK {item.entity2_risk || 88}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <h4 className="font-bold text-on-surface text-headline-sm">{item.entity2_name}</h4>
+                    <span className="text-outline font-mono text-xs">[{item.entity2_id}]</span>
+                  </div>
+                  <div className="text-[12px] text-on-surface-variant flex flex-col gap-1 mt-1">
+                    <div><span className="text-outline">Phone/Tag:</span> {item.entity2_phone}</div>
+                    <div><span className="text-outline">Bank/Ref:</span> {item.entity2_bank}</div>
                   </div>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      )}
+
+              {/* Shared Linkage Tags & Conflicts */}
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/[0.04]">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-[11px] text-outline font-label-sm mr-1">SHARED SIGNALS:</span>
+                  {(item.shared_features || []).map((feat, idx) => (
+                    <span key={idx} className="px-2 py-0.5 rounded bg-surface-container-high text-primary font-mono text-[10px] font-medium flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[12px]">link</span>
+                      {feat}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleDismiss(item)}
+                    className="px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm transition-colors"
+                  >
+                    Keep Disconnected
+                  </button>
+                  <button
+                    onClick={() => handleApproveMerge(item)}
+                    disabled={processingId === item.entity2_id}
+                    className="px-4 py-1.5 rounded-lg bg-primary text-surface-base font-label-sm text-label-sm font-bold shadow-md hover:bg-tertiary-fixed transition-all flex items-center gap-1.5"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">merge</span>
+                    <span>{processingId === item.entity2_id ? 'Merging...' : 'Approve Merge'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }

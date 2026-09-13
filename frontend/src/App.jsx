@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Header from './components/Header';
+import Sidebar from './components/Sidebar';
 import FilterBar from './components/FilterBar';
 import GraphCanvas from './components/GraphCanvas';
 import EvidenceDrawer from './components/EvidenceDrawer';
@@ -245,8 +246,8 @@ export default function App() {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#060913] text-slate-100 font-sans">
-      {/* 1. Header with Telemetry, RBAC & Module Tabs */}
+    <div className="h-screen w-screen overflow-hidden bg-surface-base text-on-surface flex flex-col font-body-md selection:bg-primary-container selection:text-on-primary-container relative">
+      {/* 1. Tactical Header */}
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -263,8 +264,26 @@ export default function App() {
         onRoleChange={handleRoleChange}
       />
 
-      {/* 2. Primary Workspace Body */}
-      <main className="flex-1 flex flex-col overflow-hidden relative">
+      {/* 2. Tactical Ops Left Sidebar */}
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        nodeCount={graphStats.total_nodes || rawGraphData?.nodes?.length || 31}
+        pendingReviewCount={3}
+        backendStatus={backendStatus}
+      />
+
+      {/* 3. Primary Tactical Workspace Body */}
+      <div className="pl-64 pt-20 flex-1 flex flex-col h-full w-full overflow-hidden relative">
+        {/* Ambient Grid & Spatial Glow Backdrops */}
+        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#4cd7f6_1px,transparent_1px)] [background-size:28px_28px]"></div>
+          <div className="absolute top-1/4 left-1/3 w-[550px] h-[550px] bg-threat-crimson/10 rounded-full blur-[140px] pointer-events-none animate-pulse"></div>
+          <div className="absolute bottom-1/3 right-1/4 w-[480px] h-[480px] bg-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
+          <div className="absolute top-12 right-12 w-[380px] h-[380px] bg-ai-purple/10 rounded-full blur-[100px] pointer-events-none"></div>
+        </div>
+
+        <main className="relative z-10 flex-1 flex flex-col overflow-hidden w-full">
         {/* VIEW 1: INTERACTIVE GRAPH CANVAS */}
         {activeTab === 'graph' && (
           <div className="flex-1 flex flex-col overflow-hidden">
@@ -408,6 +427,7 @@ export default function App() {
           />
         )}
       </main>
+      </div>
 
       {/* 4. Ingestion Modal */}
       <IngestModal

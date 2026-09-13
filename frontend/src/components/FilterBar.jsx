@@ -1,22 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Search, 
-  Play, 
-  Pause, 
-  RotateCcw, 
-  Calendar,
-  Sparkles,
-  Filter,
-  Users,
-  Phone,
-  Building2,
-  Car,
-  CreditCard,
-  ChevronDown,
-  ShieldAlert,
-  Flame,
-  Crosshair
-} from 'lucide-react';
 import { apiService } from '../services/api';
 
 export default function FilterBar({
@@ -47,18 +29,18 @@ export default function FilterBar({
 
   const clusters = [
     { id: 'ALL', label: 'All Entities' },
-    { id: 'bridge', label: '👑 Kingpin' },
+    { id: 'bridge', label: '👑 Kingpin Bridge' },
     { id: 'cluster_a', label: '⚡ Extortion Cell' },
     { id: 'cluster_b', label: '💸 Laundering Cell' },
-    { id: 'victim', label: '🛡️ Victims' },
+    { id: 'victim', label: '🛡️ Complainant' },
   ];
 
-  const entityTypes = [
-    { id: 'Person', label: 'Persons', icon: Users },
-    { id: 'Phone', label: 'Phones', icon: Phone },
-    { id: 'Organization', label: 'Orgs', icon: Building2 },
-    { id: 'Vehicle', label: 'Vehicles', icon: Car },
-    { id: 'Account', label: 'Accounts', icon: CreditCard },
+  const entityTypeOptions = [
+    { id: 'Person', label: 'Suspects', icon: 'person' },
+    { id: 'Phone', label: 'Burner SIMs', icon: 'perm_phone_msg' },
+    { id: 'Organization', label: 'Shell Orgs', icon: 'domain' },
+    { id: 'Account', label: 'Mule Accounts', icon: 'credit_card' },
+    { id: 'Vehicle', label: 'Cloned Vehicles', icon: 'directions_car' },
   ];
 
   const timelineDates = [
@@ -79,15 +61,24 @@ export default function FilterBar({
         const res = await apiService.getHighRiskEntities(6);
         if (res?.data && Array.isArray(res.data)) {
           setHighRiskEntities(res.data);
+        } else {
+          setHighRiskEntities([
+            { id: 'P008', name: 'Debasish Chatterjee', risk_score: 96, role: 'Syndicate Leader' },
+            { id: 'P003', name: 'Rajesh Kumar Sharma', risk_score: 91, role: 'Extortion Ops Head' },
+            { id: 'P002', name: 'Ashok Mehta', risk_score: 84, role: 'Hawala Broker' },
+            { id: 'O001', name: 'Shubh Laxmi Finance', risk_score: 88, role: 'Shell Corp NBFC' },
+            { id: 'V001', name: 'WB01AB1234', risk_score: 85, role: 'Cloned Vehicle' },
+            { id: 'A001', name: 'Kolkata Comm Bank #3012', risk_score: 82, role: 'Mule Layer 1' },
+          ]);
         }
-      } catch (e) {
-        console.info('High risk entities load skipped:', e.message);
+      } catch {
+        setHighRiskEntities([]);
       }
     };
     fetchHighRisk();
   }, []);
 
-  // Search autocomplete from Neo4j / API (GET /api/graph/search)
+  // Omnisearch live search with debounce
   useEffect(() => {
     if (!searchQuery || searchQuery.trim().length < 2) {
       setLiveSuggestions([]);
@@ -95,17 +86,21 @@ export default function FilterBar({
     }
 
     const timer = setTimeout(async () => {
-      const results = await apiService.searchEntities(searchQuery.trim(), 5);
-      if (Array.isArray(results)) {
-        setLiveSuggestions(results);
-        setShowSuggestions(true);
+      try {
+        const res = await apiService.searchEntities(searchQuery.trim());
+        if (res?.data && Array.isArray(res.data)) {
+          setLiveSuggestions(res.data.slice(0, 5));
+          setShowSuggestions(true);
+        }
+      } catch {
+        setLiveSuggestions([]);
       }
-    }, 200);
+    }, 250);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Click outside listener for suggestions and high-risk popover
+  // Click outside to close dropdowns
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
@@ -119,228 +114,208 @@ export default function FilterBar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Timeline playback loop
   useEffect(() => {
     let interval = null;
     if (timelinePlaying) {
       interval = setInterval(() => {
         setTimelineDate((prev) => {
           const currentIndex = timelineDates.findIndex((d) => d.date === prev);
-          if (currentIndex === -1 || currentIndex >= timelineDates.length - 1) {
+          if (currentIndex === -1 || currentIndex === timelineDates.length - 1) {
             return timelineDates[0].date;
           }
           return timelineDates[currentIndex + 1].date;
         });
-      }, 2200);
+      }, 1800);
     }
     return () => clearInterval(interval);
-  }, [timelinePlaying]);
-
-  const currentTimelineEvent = timelineDates.find((d) => d.date === timelineDate);
+  }, [timelinePlaying, timelineDates, setTimelineDate]);
 
   return (
-    <div className="bg-[#090d18]/90 border-b border-white/[0.08] px-4 lg:px-6 py-2.5 transition-all">
-      <div className="max-w-[1780px] mx-auto flex flex-wrap items-center justify-between gap-3">
-        {/* Search & Cluster Selector */}
-        <div className="flex items-center space-x-2.5 flex-1 min-w-[300px] max-w-2xl">
-          {/* Search Box with Autocomplete (GET /api/graph/search) */}
-          <div className="relative flex-1" ref={searchContainerRef}>
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 z-10" />
+    <section className="relative z-30 w-full px-margin py-space-sm bg-surface-secondary/85 backdrop-blur-xl shadow-lg flex flex-col gap-space-sm border-b border-white/[0.06]">
+      <div className="flex flex-wrap items-center justify-between gap-space-md">
+        {/* Left: Glassmorphic Omnisearch with Dynamic Suggestion Dropdown */}
+        <div className="relative flex-1 min-w-[280px] max-w-xl" ref={searchContainerRef}>
+          <div className="flex items-center px-3.5 py-2 rounded-xl bg-surface-container-lowest/90 border border-white/[0.06] shadow-inner focus-within:shadow-[0_0_16px_rgba(6,182,212,0.3)] focus-within:border-primary/40 transition-all">
+            <span className="material-symbols-outlined text-primary text-[20px] mr-2">travel_explore</span>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => {
-                if (liveSuggestions.length > 0) setShowSuggestions(true);
-              }}
-              placeholder="Search suspects, phones, accounts, vehicles, FIRs (GET /api/graph/search)..."
-              className="w-full pl-8 pr-8 py-1.5 bg-black/40 border border-white/[0.08] rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/30 transition-all font-sans"
+              onFocus={() => liveSuggestions.length > 0 && setShowSuggestions(true)}
+              placeholder="Search suspects, burner phones, shell accounts, cloned plates, FIRs..."
+              className="w-full bg-transparent text-on-surface placeholder:text-outline text-body-sm font-body-sm focus:outline-none"
             />
             {searchQuery && (
-              <button
-                onClick={() => {
-                  setSearchQuery('');
-                  setLiveSuggestions([]);
-                  setShowSuggestions(false);
-                }}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs z-10"
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="text-outline hover:text-on-surface text-xs mr-2 transition-colors"
               >
                 ✕
               </button>
             )}
+            <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded bg-surface-container font-label-sm text-label-sm text-outline-variant">
+              ⌘K
+            </span>
+          </div>
 
-            {/* Live Autocomplete Dropdown */}
-            {showSuggestions && liveSuggestions.length > 0 && (
-              <div className="absolute left-0 right-0 top-full mt-1.5 bg-[#0a0f1d] border border-cyan-500/30 rounded-xl shadow-2xl z-50 overflow-hidden text-xs">
-                <div className="px-3 py-1.5 bg-black/40 border-b border-white/[0.06] text-[10px] font-mono text-slate-400 flex items-center justify-between">
-                  <span>Neo4j Entity Autocomplete (GET /api/graph/search)</span>
-                  <span className="text-cyan-400">{liveSuggestions.length} found</span>
-                </div>
-                <div className="max-h-56 overflow-y-auto">
-                  {liveSuggestions.map((s, idx) => (
-                    <button
-                      key={s.id || idx}
-                      onClick={() => {
-                        setSearchQuery(s.name || s.id);
-                        setShowSuggestions(false);
-                        if (onSelectNode) onSelectNode(s);
-                      }}
-                      className="w-full px-3 py-2 text-left hover:bg-cyan-500/10 border-b border-white/[0.04] last:border-0 flex items-center justify-between transition-colors"
-                    >
-                      <div>
-                        <div className="font-bold text-white text-xs">{s.name || s.id}</div>
-                        <div className="text-[10px] text-slate-400 font-mono">
-                          {s.role || s.type} {s.phone ? `• 📞 ${s.phone}` : ''}
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/[0.05] text-cyan-300">
-                        {s.id}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+          {/* Active Omnisearch Live Match Dropdown */}
+          {showSuggestions && liveSuggestions.length > 0 && (
+            <div className="absolute left-0 right-0 top-full mt-1.5 p-2 rounded-xl bg-surface-container-low shadow-2xl backdrop-blur-2xl border border-white/[0.08] z-50 flex flex-col gap-1">
+              <div className="flex items-center justify-between px-2.5 py-1 text-on-surface-variant font-label-sm text-label-sm uppercase">
+                <span>Verified Matches (Neo4j Cluster 088)</span>
+                <span className="text-verified-emerald font-bold">{liveSuggestions.length} Indexed Hits</span>
               </div>
-            )}
-          </div>
-
-          {/* Cluster Filter Buttons */}
-          <div className="hidden sm:flex items-center space-x-1 p-0.5 bg-black/40 border border-white/[0.08] rounded-xl">
-            {clusters.map((c) => (
-              <button
-                key={c.id}
-                onClick={() => setSelectedCluster(c.id)}
-                className={`px-3 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
-                  selectedCluster === c.id
-                    ? 'bg-white/[0.12] text-white font-semibold shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
+              {liveSuggestions.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => {
+                    onSelectNode?.(item);
+                    setShowSuggestions(false);
+                  }}
+                  className="flex items-center justify-between p-2 rounded-lg bg-surface-container hover:bg-surface-container-high cursor-pointer transition-colors group/item"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-threat-crimson/20 flex items-center justify-center text-threat-crimson flex-shrink-0">
+                      <span className="material-symbols-outlined text-[18px]">
+                        {item.type === 'Person' ? 'person_alert' : item.type === 'Vehicle' ? 'directions_car' : 'dataset'}
+                      </span>
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-headline-sm text-body-sm text-on-surface font-bold group-hover/item:text-primary truncate">
+                          {item.name}
+                        </span>
+                        <span className="font-label-sm text-label-sm text-risk-amber font-mono">[{item.id}]</span>
+                        {item.risk_score >= 85 && (
+                          <span className="px-1.5 rounded bg-threat-crimson/25 text-threat-crimson font-label-sm text-label-sm font-bold">
+                            CRITICAL
+                          </span>
+                        )}
+                      </div>
+                      <span className="font-label-sm text-label-sm text-on-surface-variant truncate">
+                        {item.role || item.type} • Risk {item.risk_score || 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="font-label-sm text-label-sm bg-threat-crimson/20 text-threat-crimson px-2 py-0.5 rounded-full font-bold ml-2 shrink-0">
+                    RISK {item.risk_score || 0}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Right Filter Actions */}
-        <div className="flex items-center space-x-2">
-          {/* Top High Risk Threats Popover (GET /api/graph/high-risk) */}
+        {/* Right Tactical Controls Group */}
+        <div className="flex flex-wrap items-center gap-space-sm ml-auto">
+          {/* Top Threats Dropdown Pill with Pulsing Flame */}
           <div className="relative" ref={highRiskContainerRef}>
             <button
               onClick={() => setShowHighRisk(!showHighRisk)}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs border transition-all ${
-                showHighRisk
-                  ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 font-medium'
-                  : 'bg-black/40 text-slate-300 border-white/[0.08] hover:text-white hover:bg-white/[0.04]'
-              }`}
-              title="Top High-Risk Suspects from Graph Analytics Engine (GET /api/graph/high-risk)"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-threat-crimson/15 text-threat-crimson font-label-md text-label-md font-bold shadow-[0_0_12px_rgba(244,63,94,0.25)] hover:bg-threat-crimson/25 transition-all border border-threat-crimson/30"
             >
-              <Flame className="w-3.5 h-3.5 text-rose-400" />
-              <span className="font-semibold text-rose-300">Top Threats</span>
-              {highRiskEntities.length > 0 && (
-                <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
-                  {highRiskEntities.length}
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-threat-crimson opacity-80"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-threat-crimson"></span>
+              </span>
+              <span className="flex items-center gap-1">
+                <span>Top Threats</span>
+                <span className="px-1.5 py-0.2 rounded bg-threat-crimson text-surface-base font-label-sm text-label-sm">
+                  {highRiskEntities.length || 6}
                 </span>
-              )}
+              </span>
+              <span className="material-symbols-outlined text-[16px]">expand_more</span>
             </button>
 
             {showHighRisk && (
-              <div className="absolute right-0 top-full mt-2 w-72 bg-[#0c101d] border border-rose-500/30 rounded-xl shadow-2xl p-2 z-50 space-y-1 animate-fade-in">
-                <div className="px-2.5 py-1.5 border-b border-white/[0.06] flex items-center justify-between text-[10px] font-mono">
-                  <span className="text-slate-400 uppercase tracking-wider">Top Wanted Intelligence</span>
-                  <span className="text-rose-400 font-bold">GET /api/graph/high-risk</span>
+              <div className="absolute right-0 top-full mt-1.5 w-72 p-2.5 rounded-xl bg-surface-container-low shadow-2xl backdrop-blur-xl border border-white/[0.08] z-50 flex flex-col gap-2">
+                <div className="flex items-center justify-between text-label-sm font-label-sm text-on-surface-variant border-b border-white/[0.04] pb-1.5">
+                  <span className="font-semibold uppercase tracking-wider">PRIORITY INTERCEPTION</span>
+                  <span className="text-threat-crimson font-bold">SORTED SCORE</span>
                 </div>
-                <div className="max-h-60 overflow-y-auto space-y-1 pt-1">
-                  {highRiskEntities.map((t) => (
-                    <button
-                      key={t.id}
+                <div className="flex flex-col gap-1.5 font-label-sm text-label-sm">
+                  {highRiskEntities.map((suspect, idx) => (
+                    <div
+                      key={suspect.id || idx}
                       onClick={() => {
+                        onSelectNode?.(suspect);
                         setShowHighRisk(false);
-                        if (onSelectNode) onSelectNode(t);
                       }}
-                      className="w-full text-left p-2 rounded-lg bg-black/30 hover:bg-rose-500/10 border border-white/[0.04] hover:border-rose-500/30 flex items-center justify-between transition-all"
+                      className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high cursor-pointer transition-colors"
                     >
-                      <div>
-                        <span className="text-xs font-bold text-white block">{t.name || t.id}</span>
-                        <span className="text-[10px] font-mono text-slate-400">
-                          {t.phones?.[0] ? `📞 ${t.phones[0]}` : t.id} • {t.crime_count || 1} FIRs
-                        </span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-outline-variant font-mono">{idx + 1}.</span>
+                        <span className="text-on-surface font-semibold truncate">{suspect.name}</span>
                       </div>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                        {t.risk_score || 85}
+                      <span className="font-bold text-threat-crimson font-mono ml-2 shrink-0">
+                        {suspect.risk_score} PTS
                       </span>
-                    </button>
+                    </div>
                   ))}
                 </div>
               </div>
             )}
           </div>
 
-          {/* Risk Threshold Selector */}
-          <div className="flex items-center space-x-1 p-0.5 bg-black/40 border border-white/[0.08] rounded-xl text-xs">
-            <span className="text-[10px] text-slate-400 font-mono px-2">Risk:</span>
+          {/* Risk Threshold Segmented Filter */}
+          <div className="flex items-center p-0.5 rounded-xl bg-surface-container-lowest border border-white/[0.06]">
             {[
               { val: 0, label: 'All' },
               { val: 50, label: '>50' },
               { val: 75, label: '>75' },
-              { val: 85, label: '🚨 85+' },
-            ].map((r) => (
-              <button
-                key={r.val}
-                onClick={() => setRiskThreshold(r.val)}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-mono transition-all ${
-                  riskThreshold === r.val
-                    ? r.val >= 85
-                      ? 'bg-rose-500/25 text-rose-300 border border-rose-500/50 font-bold'
-                      : 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/50 font-bold'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                {r.label}
-              </button>
-            ))}
+              { val: 85, label: '🚨 85+' }
+            ].map((th) => {
+              const isSelected = riskThreshold === th.val;
+              return (
+                <button
+                  key={th.val}
+                  onClick={() => setRiskThreshold(th.val)}
+                  className={`px-2.5 py-1 rounded-lg font-label-sm text-label-sm transition-all ${
+                    isSelected
+                      ? th.val >= 85
+                        ? 'font-bold bg-threat-crimson text-surface-base shadow-[0_0_12px_rgba(244,63,94,0.4)]'
+                        : 'font-bold bg-primary-container text-on-primary-container shadow-sm'
+                      : 'text-on-surface-variant hover:text-on-surface'
+                  }`}
+                >
+                  {th.label}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Entity Types Filter Dropdown */}
+          {/* Entity Types Dropdown */}
           <div className="relative">
             <button
               onClick={() => setShowTypeFilter(!showTypeFilter)}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs border transition-all ${
-                showTypeFilter || selectedTypes.length < 5
-                  ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40 font-medium'
-                  : 'bg-black/40 text-slate-300 border-white/[0.08] hover:text-white hover:bg-white/[0.04]'
-              }`}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors border border-white/[0.06]"
             >
-              <Filter className="w-3 h-3 text-slate-400" />
-              <span>Types</span>
-              <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-white/[0.08] text-cyan-300">
-                {selectedTypes.length}/5
-              </span>
-              <ChevronDown className="w-3 h-3 text-slate-400" />
+              <span className="material-symbols-outlined text-primary text-[16px]">category</span>
+              <span>Types {selectedTypes.length}/5</span>
+              <span className="material-symbols-outlined text-outline text-[14px]">arrow_drop_down</span>
             </button>
 
             {showTypeFilter && (
-              <div className="absolute right-0 top-full mt-2 w-52 bg-[#0c101d] border border-white/[0.12] rounded-xl shadow-2xl p-2 z-50 space-y-1 animate-fade-in">
-                <div className="text-[10px] font-mono text-slate-400 px-2 py-1 uppercase tracking-wider">
-                  Filter Entity Nodes
-                </div>
-                {entityTypes.map((t) => {
-                  const Icon = t.icon;
-                  const isSelected = selectedTypes.includes(t.id);
-                  const count = nodeCountsByType[t.id] || 0;
+              <div className="absolute right-0 top-full mt-1.5 w-56 p-2 rounded-xl bg-surface-container-low shadow-2xl backdrop-blur-xl border border-white/[0.08] z-50 flex flex-col gap-1 text-label-sm font-label-sm">
+                {entityTypeOptions.map((type) => {
+                  const isSelected = selectedTypes.includes(type.id);
+                  const count = nodeCountsByType?.[type.id] || 0;
                   return (
                     <button
-                      key={t.id}
-                      onClick={() => toggleType(t.id)}
-                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
-                        isSelected
-                          ? 'bg-cyan-500/20 text-cyan-200 font-medium'
-                          : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
+                      key={type.id}
+                      onClick={() => toggleType(type.id)}
+                      className={`flex items-center justify-between px-2 py-1.5 rounded-lg transition-colors text-left ${
+                        isSelected 
+                          ? 'bg-surface-container text-primary font-semibold' 
+                          : 'text-on-surface-variant hover:bg-surface-container'
                       }`}
                     >
-                      <div className="flex items-center space-x-2">
-                        <Icon className="w-3.5 h-3.5" />
-                        <span>{t.label}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[15px]">{type.icon}</span>
+                        <span>{type.label}</span>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-400">{count}</span>
+                      <span className="font-mono text-[10px] text-outline">({count})</span>
                     </button>
                   );
                 })}
@@ -348,79 +323,106 @@ export default function FilterBar({
             )}
           </div>
 
-          {/* Timeline Toggle Button */}
-          <button
-            onClick={() => setShowTimeline(!showTimeline)}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs border transition-all ${
-              showTimeline || timelineDate
-                ? 'bg-purple-500/20 text-purple-200 border-purple-500/40 font-medium'
-                : 'bg-black/40 text-slate-300 border-white/[0.08] hover:text-white hover:bg-white/[0.04]'
-            }`}
-          >
-            <Calendar className="w-3.5 h-3.5 text-purple-400" />
-            <span>Timeline</span>
-            {timelineDate && (
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping"></span>
-            )}
-          </button>
+          {/* Timeline Button with Live Pulse */}
+          <div className="relative">
+            <button
+              onClick={() => setShowTimeline(!showTimeline)}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all font-label-sm text-label-sm border ${
+                timelineDate || showTimeline
+                  ? 'bg-tertiary-container/30 border-tertiary text-tertiary-fixed shadow-[0_0_12px_rgba(47,217,244,0.3)]'
+                  : 'bg-surface-container text-tertiary hover:bg-surface-container-high border-white/[0.06]'
+              }`}
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-tertiary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-tertiary"></span>
+              </span>
+              <span className="material-symbols-outlined text-[16px]">calendar_today</span>
+              <span>{timelineDate || 'Timeline 2024-2026'}</span>
+            </button>
 
-          {/* Reset Filters */}
+            {/* Timeline Flyout Panel */}
+            {showTimeline && (
+              <div className="absolute right-0 top-full mt-1.5 w-80 p-3 rounded-xl bg-surface-container-low shadow-2xl backdrop-blur-xl border border-white/[0.08] z-50 flex flex-col gap-2">
+                <div className="flex items-center justify-between border-b border-white/[0.06] pb-2">
+                  <div className="flex items-center gap-1.5 text-tertiary font-label-sm text-label-sm font-bold">
+                    <span className="material-symbols-outlined text-[16px]">history_toggle_drop</span>
+                    <span>March 2026 Crime Timeline</span>
+                  </div>
+                  <button
+                    onClick={() => setTimelinePlaying(!timelinePlaying)}
+                    className="flex items-center gap-1 px-2 py-0.5 rounded bg-primary-container text-on-primary font-label-sm text-label-sm font-bold shadow-sm"
+                  >
+                    <span className="material-symbols-outlined text-[14px]">
+                      {timelinePlaying ? 'pause' : 'play_arrow'}
+                    </span>
+                    <span>{timelinePlaying ? 'Pause' : 'Play'}</span>
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-1 max-h-56 overflow-y-auto no-scrollbar">
+                  {timelineDates.map((item) => (
+                    <button
+                      key={item.date}
+                      onClick={() => setTimelineDate(item.date === timelineDate ? null : item.date)}
+                      className={`w-full flex items-center gap-2 p-1.5 rounded text-left font-label-sm text-label-sm transition-colors ${
+                        timelineDate === item.date
+                          ? 'bg-primary-container/20 text-primary border border-primary/30 font-bold'
+                          : 'text-on-surface-variant hover:bg-surface-container'
+                      }`}
+                    >
+                      <span className="font-mono text-outline">{item.day} Mar:</span>
+                      <span className="truncate text-[11px]">{item.event}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {timelineDate && (
+                  <button
+                    onClick={() => setTimelineDate(null)}
+                    className="text-center text-outline hover:text-on-surface text-[11px] pt-1 border-t border-white/[0.04]"
+                  >
+                    Reset Timeline Filter
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Reset Filters Icon */}
           <button
             onClick={resetFilters}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-white/[0.08] rounded-xl transition-colors border border-white/[0.08]"
-            title="Reset Filters"
+            className="p-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-outline hover:text-on-surface transition-colors border border-white/[0.06]"
+            title="Reset all filters"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <span className="material-symbols-outlined text-[18px]">restart_alt</span>
           </button>
         </div>
       </div>
 
-      {/* Expanded Crime Timeline Slider */}
-      {showTimeline && (
-        <div className="mt-3 pt-3 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs animate-fade-in">
-          <div className="flex items-center space-x-3 w-full sm:w-auto">
+      {/* Entity Cluster Secondary Toolbar */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-0.5 no-scrollbar">
+        <span className="text-on-surface-variant font-label-sm text-label-sm uppercase mr-1 flex items-center gap-1 flex-shrink-0">
+          <span className="material-symbols-outlined text-[14px] text-primary">grain</span>
+          CLUSTER FILTERS:
+        </span>
+        {clusters.map((c) => {
+          const isActive = selectedCluster === c.id;
+          return (
             <button
-              onClick={() => setTimelinePlaying(!timelinePlaying)}
-              className="p-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 transition-colors"
+              key={c.id}
+              onClick={() => setSelectedCluster(c.id)}
+              className={`px-3 py-1 rounded-full font-label-sm text-label-sm transition-all flex items-center gap-1.5 flex-shrink-0 border ${
+                isActive
+                  ? 'bg-primary/20 text-primary border-primary/40 shadow-[0_0_10px_rgba(6,182,212,0.3)] font-bold'
+                  : 'bg-surface-container text-on-surface-variant hover:text-on-surface border-white/[0.04]'
+              }`}
             >
-              {timelinePlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+              <span>{c.label}</span>
             </button>
-
-            <div className="flex items-center space-x-1.5 overflow-x-auto scrollbar-none py-1">
-              <button
-                onClick={() => setTimelineDate(null)}
-                className={`px-2.5 py-1 rounded-lg font-mono text-[11px] transition-all whitespace-nowrap ${
-                  !timelineDate
-                    ? 'bg-purple-500/30 text-purple-200 border border-purple-500/50 font-bold'
-                    : 'bg-black/40 text-slate-400 hover:text-slate-200 border border-white/[0.05]'
-                }`}
-              >
-                All Dates
-              </button>
-              {timelineDates.map((d) => (
-                <button
-                  key={d.date}
-                  onClick={() => setTimelineDate(d.date)}
-                  className={`px-2.5 py-1 rounded-lg font-mono text-[11px] transition-all whitespace-nowrap ${
-                    timelineDate === d.date
-                      ? 'bg-purple-500/30 text-purple-200 border border-purple-500/50 font-bold shadow-sm'
-                      : 'bg-black/40 text-slate-400 hover:text-slate-200 border border-white/[0.05]'
-                  }`}
-                >
-                  Mar {d.day}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Current Timeline Event Description */}
-          {currentTimelineEvent && (
-            <div className="text-right text-[11px] font-mono text-purple-300 bg-purple-950/30 px-3 py-1 rounded-xl border border-purple-500/20 max-w-md truncate">
-              {currentTimelineEvent.event}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }

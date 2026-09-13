@@ -1,21 +1,4 @@
-import React from 'react';
-import { 
-  ShieldAlert, 
-  Network, 
-  Bot, 
-  CircleDollarSign, 
-  PhoneCall, 
-  FileText, 
-  Scale, 
-  RefreshCw, 
-  Sparkles, 
-  Lock, 
-  GitMerge,
-  Database,
-  UploadCloud,
-  ShieldCheck,
-  UserCheck
-} from 'lucide-react';
+import React, { useState } from 'react';
 
 export default function Header({ 
   activeTab, 
@@ -23,80 +6,93 @@ export default function Header({
   backendStatus, 
   refreshData, 
   caseInfo, 
-  kpiStats,
+  kpiStats = { totalNodes: 31 },
   pendingReviewCount = 3,
   onOpenIngest,
   officerRole = 'LEAD_INVESTIGATOR',
   onRoleChange
 }) {
+  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
+
   const tabs = [
-    { id: 'graph', label: 'Graph Canvas', icon: Network, badge: `${kpiStats.totalNodes}` },
-    { id: 'agent', label: 'AI Investigation', icon: Bot, isHighlight: true },
-    { id: 'resolution', label: 'Entity Resolution', icon: GitMerge, badge: pendingReviewCount > 0 ? `${pendingReviewCount}` : null },
-    { id: 'financial', label: 'Money Trail', icon: CircleDollarSign },
-    { id: 'cdr', label: 'Call Matrix', icon: PhoneCall },
-    { id: 'fir', label: 'FIR Corpus', icon: FileText },
-    { id: 'audit', label: 'Legal Vault', icon: Scale },
+    { id: 'graph', label: 'Graph Canvas', count: kpiStats?.totalNodes || 31 },
+    { id: 'agent', label: 'AI Investigation', badge: 'AI', badgeColor: 'bg-ai-purple/25 text-ai-purple-light shadow-[0_0_8px_rgba(139,92,246,0.3)]' },
+    { id: 'resolution', label: 'Entity Resolution', badge: `${pendingReviewCount} Pending`, badgeColor: 'bg-risk-amber/20 text-risk-amber' },
+    { id: 'financial', label: 'Money Trail' },
+    { id: 'cdr', label: 'Call Matrix' },
+    { id: 'fir', label: 'FIR Corpus' },
+    { id: 'audit', label: 'Legal Vault' },
   ];
 
-  return (
-    <header className="border-b border-white/[0.08] bg-[#070a13]/90 backdrop-blur-2xl sticky top-0 z-40 transition-all">
-      <div className="max-w-[1780px] mx-auto px-4 lg:px-6 py-2.5 flex items-center justify-between gap-4">
-        {/* Left: Brand Identity & Active Case */}
-        <div className="flex items-center space-x-3.5 shrink-0">
-          <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500/20 via-blue-600/20 to-purple-600/20 border border-cyan-500/40 text-cyan-400 shadow-sm">
-            <ShieldAlert className="w-5 h-5" />
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-          </div>
+  const roleLabels = {
+    LEAD_INVESTIGATOR: { short: 'LEAD', sub: 'Unmasked PII' },
+    INVESTIGATOR: { short: 'INVESTIGATOR', sub: 'Masked' },
+    ANALYST: { short: 'ANALYST', sub: 'Full Masked' },
+    AUDITOR: { short: 'AUDITOR', sub: 'Read-Only' }
+  };
 
-          <div>
-            <div className="flex items-center space-x-2">
-              <h1 className="font-display font-black text-sm tracking-tight bg-gradient-to-r from-white via-slate-200 to-cyan-200 bg-clip-text text-transparent">
-                NEXXUS.INTELLIGENCE
-              </h1>
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-cyan-950/60 text-cyan-300 border border-cyan-500/30">
-                SIH 2026
-              </span>
+  const currentRoleInfo = roleLabels[officerRole] || { short: 'LEAD', sub: 'Unmasked PII' };
+
+  return (
+    <header className="fixed top-0 left-0 right-0 z-50 h-20 bg-surface-secondary/90 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.6)] border-b border-white/[0.08]">
+      <div className="h-20 w-full px-margin flex items-center justify-between gap-space-md">
+        {/* Left Brand Identity & Active Case */}
+        <div className="flex items-center gap-space-lg flex-shrink-0">
+          <div className="flex items-center gap-space-sm">
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-lg bg-surface-container shadow-[0_0_16px_rgba(6,182,212,0.35)] border border-primary/30">
+              <span className="material-symbols-outlined text-primary text-[24px]">shield</span>
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-verified-emerald ring-2 ring-surface-base animate-pulse"></span>
             </div>
-            <div className="flex items-center space-x-2 text-[11px] text-slate-400">
-              <span className="text-amber-300 font-mono font-medium">
-                {caseInfo?.id || 'CASE-KOL-2026'}
-              </span>
-              <span className="text-slate-600">•</span>
-              <span className="text-slate-300 truncate max-w-[240px] xl:max-w-none">
-                {caseInfo?.title || 'Cyber Extortion & Laundering Syndicate'}
-              </span>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-space-xs">
+                <span className="font-headline-sm text-headline-sm font-bold tracking-tight bg-gradient-to-r from-primary via-tertiary-fixed to-primary-container bg-clip-text text-transparent">
+                  NEXXUS.INTELLIGENCE
+                </span>
+                <span className="px-1.5 py-0.5 rounded bg-surface-container-high text-primary font-label-sm text-label-sm uppercase tracking-wider border border-primary/20">
+                  SIH 2026
+                </span>
+              </div>
+              <div className="flex items-center gap-space-xs">
+                <span className="font-label-sm text-label-sm text-risk-amber tracking-widest font-semibold">
+                  {caseInfo?.id || 'CASE-KOL-2026-088'}
+                </span>
+                <span className="text-outline-variant font-label-sm text-label-sm">•</span>
+                <span 
+                  className="font-body-sm text-body-sm text-on-surface-variant truncate max-w-[240px] lg:max-w-xs" 
+                  title={caseInfo?.title || "Operation Kolkata Synergy: Cyber Extortion & Multi-Tier Money Laundering"}
+                >
+                  {caseInfo?.title || 'Operation Kolkata Synergy: Cyber Extortion & Multi-Tier Money Laundering'}
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Center: Modern Segmented Navigation Tabs */}
-        <nav className="flex items-center p-1 bg-black/40 border border-white/[0.08] rounded-xl overflow-x-auto scrollbar-none">
+        {/* Center: Top Segmented Navigation Tabs (for XL viewports) */}
+        <nav className="hidden xl:flex items-center bg-surface-container-lowest/80 p-1 rounded-xl shadow-inner border border-white/[0.04]">
           {tabs.map((tab) => {
-            const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+                className={`flex items-center gap-space-xs px-3.5 py-2 rounded-lg transition-all text-left ${
                   isActive
-                    ? 'bg-cyan-500/20 text-cyan-200 border border-cyan-500/40 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04] border border-transparent'
+                    ? 'bg-primary-container text-on-primary font-semibold shadow-[0_0_14px_rgba(6,182,212,0.4)]'
+                    : 'font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-cyan-400' : 'text-slate-400'}`} />
                 <span>{tab.label}</span>
-                {tab.isHighlight && (
-                  <span className="px-1 py-0.2 rounded text-[9px] font-mono bg-cyan-400/20 text-cyan-300 font-bold">
-                    AI
+                {tab.count !== undefined && (
+                  <span className={`px-1.5 py-0.2 rounded-full font-label-sm text-label-sm font-bold ${
+                    isActive ? 'bg-black/20 text-white' : 'bg-primary/20 text-primary'
+                  }`}>
+                    {tab.count}
                   </span>
                 )}
                 {tab.badge && (
-                  <span className={`px-1.5 py-0.2 rounded text-[10px] font-mono ${
-                    tab.id === 'resolution'
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold'
-                      : 'bg-white/[0.06] text-slate-400'
+                  <span className={`px-1.5 py-0.2 rounded-full font-label-sm text-label-sm font-bold ${
+                    isActive ? 'bg-black/20 text-white' : tab.badgeColor
                   }`}>
                     {tab.badge}
                   </span>
@@ -106,70 +102,91 @@ export default function Header({
           })}
         </nav>
 
-        {/* Right: Telemetry & Actions */}
-        <div className="flex items-center space-x-2.5 shrink-0">
-          {/* Officer RBAC Clearance Selector */}
-          <div className="hidden sm:flex items-center space-x-1.5 px-2 py-1 rounded-lg bg-black/40 border border-white/[0.08] text-xs font-mono">
-            <UserCheck className="w-3.5 h-3.5 text-cyan-400" />
-            <select
-              value={officerRole}
-              onChange={(e) => onRoleChange?.(e.target.value)}
-              className="bg-transparent text-slate-200 focus:outline-none cursor-pointer text-[11px] font-mono"
-              title="Law Enforcement RBAC Officer Clearance (Controls dynamic PII masking and permission checks under BSA §65B)"
-            >
-              <option value="LEAD_INVESTIGATOR" className="bg-[#0b101f] text-slate-200">LEAD (Unmasked PII)</option>
-              <option value="INVESTIGATOR" className="bg-[#0b101f] text-slate-200">INVESTIGATOR (Masked)</option>
-              <option value="ANALYST" className="bg-[#0b101f] text-slate-200">ANALYST (Full Masked)</option>
-              <option value="AUDITOR" className="bg-[#0b101f] text-slate-200">AUDITOR (Read-Only)</option>
-            </select>
+        {/* Right Tactical Telemetry & RBAC Tier */}
+        <div className="flex items-center gap-space-md flex-shrink-0">
+          {/* Neo4j Live Connection Pill */}
+          <div className="hidden md:flex items-center gap-space-xs px-3 py-1.5 rounded-lg bg-surface-container-lowest border border-white/[0.06] font-label-sm text-label-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-verified-emerald opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-verified-emerald"></span>
+            </span>
+            <span className="text-on-surface-variant font-medium">Neo4j:</span>
+            <span className="text-verified-emerald font-bold tracking-wide">
+              {backendStatus?.isLive ? 'CONNECTED' : 'LOCAL DEMO'}
+            </span>
           </div>
 
-          {/* Live DB / Backend Connection Indicator */}
-          {backendStatus?.isLive ? (
-            <div
-              className="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 text-xs font-mono shadow-sm"
-              title="Connected to live nexxus-db Neo4j knowledge graph API"
+          {/* Law Enforcement RBAC Clearance Selector Dropdown */}
+          <div className="relative">
+            <button 
+              onClick={() => setShowRoleDropdown(!showRoleDropdown)}
+              className="flex items-center gap-space-xs px-3 py-1.5 rounded-lg bg-surface-container-high text-on-surface font-label-sm text-label-sm hover:bg-surface-bright transition-colors border border-white/[0.06]"
+              title="Switch Law Enforcement RBAC Clearance Tier"
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="hidden sm:inline">Neo4j: CONNECTED</span>
-              <span className="sm:hidden">LIVE</span>
-            </div>
-          ) : (
-            <button
-              onClick={refreshData}
-              className="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-amber-950/40 hover:bg-amber-900/50 border border-amber-500/30 text-amber-300 text-xs font-mono transition-colors"
-              title="FastAPI server offline. Click to test live connection."
-            >
-              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-              <span className="hidden sm:inline">DEMO DATASET</span>
-              <span className="sm:hidden">DEMO</span>
+              <span className="material-symbols-outlined text-primary text-[16px]">admin_panel_settings</span>
+              <div className="flex flex-col text-left">
+                <span className="font-label-sm text-label-sm font-bold text-on-surface leading-tight">
+                  {currentRoleInfo.short}
+                </span>
+                <span className="text-[9px] text-on-surface-variant uppercase tracking-tighter leading-none">
+                  {currentRoleInfo.sub}
+                </span>
+              </div>
+              <span className="material-symbols-outlined text-outline text-[16px]">arrow_drop_down</span>
             </button>
-          )}
 
-          {/* Ingest Payload Action */}
-          <button
-            onClick={onOpenIngest}
-            className="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-cyan-950/40 hover:bg-cyan-900/50 border border-cyan-500/30 text-cyan-300 text-xs font-mono transition-colors"
-            title="Ingest Abhidha's NLP extraction payload into knowledge graph (POST /api/graph/ingest)"
-          >
-            <UploadCloud className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="hidden xl:inline">Ingest NLP</span>
-          </button>
-
-          {/* BSA Compliance Badge */}
-          <div className="hidden lg:flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/30 border border-emerald-500/20 text-emerald-300 text-xs font-mono">
-            <Lock className="w-3 h-3 text-emerald-400" />
-            <span>BSA §65B</span>
+            {showRoleDropdown && (
+              <div className="absolute right-0 top-full mt-1.5 w-52 bg-surface-container-low rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.7)] py-1.5 border border-white/[0.08] z-50">
+                <div className="px-3 py-1.5 text-on-surface-variant font-label-sm text-label-sm uppercase font-semibold border-b border-white/[0.06]">
+                  Switch RBAC Tier
+                </div>
+                {Object.entries(roleLabels).map(([roleKey, roleMeta]) => (
+                  <button
+                    key={roleKey}
+                    onClick={() => {
+                      onRoleChange?.(roleKey);
+                      setShowRoleDropdown(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-left font-label-sm text-label-sm transition-colors ${
+                      officerRole === roleKey 
+                        ? 'bg-surface-container-high text-primary font-bold' 
+                        : 'text-on-surface hover:bg-surface-container hover:text-white'
+                    }`}
+                  >
+                    <span>{roleMeta.short}</span>
+                    <span className="text-[10px] text-on-surface-variant">{roleMeta.sub}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Refresh Action */}
-          <button 
-            onClick={refreshData} 
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-white/[0.08] rounded-lg transition-colors border border-white/[0.08]"
-            title="Refresh Knowledge Graph & Live Stats"
+          {/* BSA §65B Certified Seal */}
+          <div 
+            className="hidden lg:flex items-center gap-space-xs px-2.5 py-1.5 rounded-lg bg-surface-container-lowest text-verified-emerald font-label-sm text-label-sm border border-verified-emerald/20" 
+            title="Bharatiya Sakshya Adhiniyam, 2023 Electronic Evidence Seal"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
+            <span className="material-symbols-outlined text-[15px]">verified_user</span>
+            <span className="font-bold tracking-tight">BSA §65B CERTIFIED</span>
+          </div>
+
+          {/* Ingest NLP Button */}
+          <button 
+            onClick={onOpenIngest}
+            className="flex items-center gap-space-xs px-3.5 py-2 rounded-lg bg-primary text-surface-base font-label-md text-label-md font-bold shadow-[0_0_16px_rgba(6,182,212,0.4)] hover:bg-tertiary-fixed transition-all active:scale-95"
+            title="Ingest FIR document / unstructured OCR text into Neo4j"
+          >
+            <span className="material-symbols-outlined text-[18px]">cloud_upload</span>
+            <span className="hidden sm:inline">Ingest NLP</span>
           </button>
+
+          {/* Officer Avatar */}
+          <div 
+            className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 cursor-pointer shadow-[0_0_12px_rgba(6,182,212,0.3)] hover:scale-105 transition-transform"
+            title="Logged in as Sub-Inspector B. Banerjee (CID West Bengal)"
+          >
+            <span className="material-symbols-outlined text-on-primary text-[18px]">person</span>
+          </div>
         </div>
       </div>
     </header>

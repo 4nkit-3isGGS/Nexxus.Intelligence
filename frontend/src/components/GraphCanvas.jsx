@@ -573,127 +573,149 @@ export default function GraphCanvas({
         className="w-full h-full cursor-grab active:cursor-grabbing block"
       />
 
-      {/* Sleek Floating Controls */}
-      <div className="absolute top-4 left-4 flex items-center space-x-1 p-1 bg-[#0b101c]/90 backdrop-blur-2xl rounded-2xl border border-white/[0.08] shadow-2xl z-20">
-        <button
-          onClick={() => setZoom((z) => Math.min(z * 1.2, 3.0))}
-          className="p-1.5 text-slate-300 hover:text-white hover:bg-white/[0.08] rounded-xl transition-colors"
-          title="Zoom In"
-        >
-          <ZoomIn className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => setZoom((z) => Math.max(z * 0.8, 0.4))}
-          className="p-1.5 text-slate-300 hover:text-white hover:bg-white/[0.08] rounded-xl transition-colors"
-          title="Zoom Out"
-        >
-          <ZoomOut className="w-4 h-4" />
-        </button>
-        <button
-          onClick={resetView}
-          className="p-1.5 text-slate-300 hover:text-white hover:bg-white/[0.08] rounded-xl transition-colors"
-          title="Center View"
-        >
-          <Maximize2 className="w-4 h-4" />
-        </button>
+      {/* Canvas Floating Bottom Controls & Legend Strip (Stitch Deep Obsidian Specification) */}
+      <div className="absolute left-6 bottom-6 z-30 flex flex-col gap-3 pointer-events-auto">
+        {/* Layout Switcher & Navigation Controls */}
+        <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-surface-secondary/90 shadow-2xl backdrop-blur-xl border border-white/[0.08]">
+          {/* Topology Engine Switcher */}
+          <div className="flex items-center p-0.5 rounded-xl bg-surface-container-lowest text-label-sm font-label-sm border border-white/[0.04]">
+            <button
+              onClick={() => {
+                applyLayout('force');
+                onLayoutChange?.('force');
+              }}
+              className={`px-3 py-1 rounded-lg transition-all font-bold ${
+                activeLayout === 'force'
+                  ? 'bg-primary-container text-on-primary-container shadow-sm'
+                  : 'text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              Force-Directed
+            </button>
+            <button
+              onClick={() => {
+                applyLayout('cluster');
+                onLayoutChange?.('cluster');
+              }}
+              className={`px-3 py-1 rounded-lg transition-all font-bold ${
+                activeLayout === 'cluster'
+                  ? 'bg-primary-container text-on-primary-container shadow-sm'
+                  : 'text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              Cluster Hierarchy
+            </button>
+            <button
+              onClick={() => {
+                applyLayout('radial');
+                onLayoutChange?.('radial');
+              }}
+              className={`px-3 py-1 rounded-lg transition-all font-bold ${
+                activeLayout === 'radial'
+                  ? 'bg-primary-container text-on-primary-container shadow-sm'
+                  : 'text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              Radial Multi-Tier
+            </button>
+          </div>
 
-        <div className="w-[1px] h-4 bg-white/[0.1] mx-0.5"></div>
+          <div className="h-5 w-px bg-surface-container-high mx-1"></div>
 
-        <button
-          onClick={() => setPhysicsRunning(!physicsRunning)}
-          className={`p-1.5 rounded-xl transition-colors ${
-            physicsRunning
-              ? 'text-cyan-400 hover:bg-white/[0.08]'
-              : 'text-amber-400 bg-amber-500/15'
-          }`}
-          title={physicsRunning ? 'Pause Physics' : 'Resume Physics'}
-        >
-          {physicsRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-        </button>
+          {/* Canvas Operations */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setZoom((z) => Math.min(z * 1.2, 3.0))}
+              className="w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors"
+              title="Zoom In"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+            </button>
+            <button
+              onClick={() => setZoom((z) => Math.max(z * 0.8, 0.4))}
+              className="w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors"
+              title="Zoom Out"
+            >
+              <span className="material-symbols-outlined text-[18px]">remove</span>
+            </button>
+            <button
+              onClick={resetView}
+              className="w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors"
+              title="Reset Canvas Centering"
+            >
+              <span className="material-symbols-outlined text-[18px]">filter_center_focus</span>
+            </button>
+            <button
+              onClick={() => setPhysicsRunning(!physicsRunning)}
+              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                physicsRunning 
+                  ? 'bg-surface-container hover:bg-surface-container-high text-primary' 
+                  : 'bg-risk-amber/20 text-risk-amber'
+              }`}
+              title={physicsRunning ? 'Pause Physics' : 'Resume Physics'}
+            >
+              <span className="material-symbols-outlined text-[18px]">
+                {physicsRunning ? 'pause' : 'play_arrow'}
+              </span>
+            </button>
+          </div>
+        </div>
 
-        <div className="w-[1px] h-4 bg-white/[0.1] mx-0.5"></div>
-
-        {/* Layout Presets */}
-        <div className="flex items-center space-x-1 text-xs">
-          <button
-            onClick={() => {
-              applyLayout('force');
-              onLayoutChange?.('force');
-            }}
-            className="px-2.5 py-1 text-[11px] rounded-lg text-slate-300 hover:text-white hover:bg-white/[0.08] transition-colors font-medium"
-          >
-            Force
-          </button>
-          <button
-            onClick={() => {
-              applyLayout('cluster');
-              onLayoutChange?.('cluster');
-            }}
-            className="px-2.5 py-1 text-[11px] rounded-lg text-slate-300 hover:text-white hover:bg-white/[0.08] transition-colors font-medium"
-          >
-            Cluster
-          </button>
-          <button
-            onClick={() => {
-              applyLayout('radial');
-              onLayoutChange?.('radial');
-            }}
-            className="px-2.5 py-1 text-[11px] rounded-lg text-slate-300 hover:text-white hover:bg-white/[0.08] transition-colors font-medium"
-          >
-            Radial
-          </button>
+        {/* Network Legend Overlay */}
+        <div className="p-3 rounded-2xl bg-surface-secondary/90 shadow-2xl backdrop-blur-xl border border-white/[0.08] flex items-center gap-4 text-label-sm font-label-sm">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-threat-crimson"></span>
+            <span className="text-on-surface">Critical (&gt;85)</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-risk-amber"></span>
+            <span className="text-on-surface">High (70-84)</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-primary"></span>
+            <span className="text-on-surface">Moderate (50-69)</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-verified-emerald"></span>
+            <span className="text-on-surface">Witness/Victim</span>
+          </div>
+          <div className="h-3.5 w-px bg-surface-container-high"></div>
+          <div className="flex items-center gap-1 text-risk-amber">
+            <span className="material-symbols-outlined text-[14px]">payments</span> Financial Flow
+          </div>
+          <div className="flex items-center gap-1 text-primary">
+            <span className="material-symbols-outlined text-[14px]">cell_tower</span> Comms Edge
+          </div>
         </div>
       </div>
 
       {/* Floating Hover Tooltip */}
       {hoveredNode && !isDraggingCanvas && !draggingNodeId && (
         <div 
-          className="absolute pointer-events-none bg-[#0c101d]/95 border border-cyan-500/40 rounded-2xl p-3.5 shadow-2xl z-30 max-w-xs transition-opacity animate-fade-in backdrop-blur-2xl"
+          className="absolute pointer-events-none bg-surface-secondary/95 border border-primary/40 rounded-2xl p-3.5 shadow-2xl z-40 max-w-xs transition-opacity animate-fade-in backdrop-blur-2xl"
           style={{
             left: `${hoveredNode.x * zoom + pan.x + 18}px`,
             top: `${hoveredNode.y * zoom + pan.y - 18}px`,
           }}
         >
           <div className="flex items-center justify-between space-x-2 mb-1">
-            <span className="font-semibold text-white text-xs truncate">{hoveredNode.name}</span>
+            <span className="font-bold text-on-surface text-body-sm truncate">{hoveredNode.name}</span>
             <span
               className={`px-1.5 py-0.2 rounded text-[10px] font-mono font-bold ${
                 hoveredNode.risk_score >= 85
-                  ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                  ? 'bg-threat-crimson/20 text-threat-crimson border border-threat-crimson/40'
                   : hoveredNode.risk_score >= 70
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                  : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                  ? 'bg-risk-amber/20 text-risk-amber border border-risk-amber/40'
+                  : 'bg-primary/20 text-primary border border-primary/40'
               }`}
             >
               Risk: {hoveredNode.risk_score}
             </span>
           </div>
-          <p className="text-[11px] text-cyan-300 mb-1">{hoveredNode.role || hoveredNode.type}</p>
-          <p className="text-[10px] text-slate-400 line-clamp-2">{hoveredNode.summary}</p>
+          <p className="text-[11px] text-primary font-medium mb-1">{hoveredNode.role || hoveredNode.type}</p>
+          <p className="text-[10px] text-on-surface-variant line-clamp-2">{hoveredNode.summary}</p>
         </div>
       )}
-
-      {/* Floating Modern Legend */}
-      <div className="absolute bottom-4 left-4 z-20 hidden md:block">
-        <div className="bg-[#0b101c]/80 backdrop-blur-xl border border-white/[0.08] rounded-2xl px-3.5 py-2 text-xs text-slate-300 flex items-center space-x-3.5 shadow-xl">
-          <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-glow-rose"></span>
-            <span className="text-[11px]">Critical Risk (&gt;85)</span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-            <span className="text-[11px]">High Risk (70-84)</span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>
-            <span className="text-[11px]">Moderate</span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-            <span className="text-[11px]">Witness/Victim</span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
