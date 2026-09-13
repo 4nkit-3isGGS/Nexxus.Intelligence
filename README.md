@@ -226,7 +226,7 @@ Interactive OpenAPI documentation will be accessible at `http://localhost:8000/d
 
 ## 👥 7. Task Force Team (SIH 2026 — Team Nexxus)
 
-- **Ankit (User)** — *Graph Database, Neo4j Engine, Ingestion & Entity Resolution Lead*
+- **Ankit (Me)** — *Graph Database, Neo4j Engine, Ingestion & Entity Resolution Lead*
 - **Abhidha** — *Data Pipeline, NLP & Information Extraction*
 - **Arnish** — *Risk Analytics, Centrality Modeling & Community Detection*
 - **Bishal & Jayanta** — *LangGraph Multi-Agent Platform & Cytoscape UI Integration*
