@@ -47,6 +47,7 @@ ROLE_PERMISSIONS: dict[Role, Set[Permission]] = {
         Permission.MERGE_ENTITIES,
         Permission.UNMASK_PII,
         Permission.VIEW_AUDIT_LOGS,
+        Permission.VERIFY_AUDIT_INTEGRITY,
     },
     Role.INVESTIGATOR: {
         Permission.VIEW_GRAPH,
