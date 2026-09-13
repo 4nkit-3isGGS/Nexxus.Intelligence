@@ -1,0 +1,32 @@
+# Environment variables
+.env
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Learning notes
+LESSON_3_INGESTION.md
+describe.md
+NEXT_MILESTONE.md
+GEMINI.md
+AGENTS.md
+LANGGRAPH_ROADMAP.md
+Ankit_Criminal_Network_Intelligence_Neo4j_Role_Plan.md

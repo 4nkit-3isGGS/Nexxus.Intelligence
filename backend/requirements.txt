@@ -1,0 +1,19 @@
+# Core Dependencies for Criminal Network Intelligence System (Neo4j & Ingestion Backend)
+neo4j>=5.18.0
+
+fastapi>=0.110.0
+uvicorn>=0.28.0
+pydantic>=2.6.0
+python-dotenv>=1.0.1
+rapidfuzz>=3.6.1
+pytest>=8.0.0
+
+langchain
+langchain-core
+langchain-community
+langchain-groq
+langgraph
+networkx>=3.0
+cryptography>=42.0.0
+
+scipy>=1.11.0
