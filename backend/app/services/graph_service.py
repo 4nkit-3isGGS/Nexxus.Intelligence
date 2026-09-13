@@ -5,6 +5,7 @@ Python functions wrapping reusable Cypher queries.
 Used by API routes and LangGraph agents to query the criminal network graph.
 """
 
+from typing import Optional, List, Dict, Any
 from backend.app.neo4j_driver import db
 
 
@@ -122,18 +123,36 @@ def get_graph_stats() -> list[dict]:
         return []
 
 
-def search_entities(query: str, limit: int = 20) -> list[dict]:
-    """Searches entities (Person, Phone, Location, Vehicle, Organization) by name, alias, number, etc."""
-    cypher = """
-    MATCH (e)
-    WHERE (e.name IS NOT NULL AND toLower(e.name) CONTAINS toLower($query))
+def search_entities(
+    query: str,
+    limit: int = 20,
+    entity_type: Optional[str] = None,
+) -> list[dict]:
+    """Searches entities (Person, Phone, Location, Vehicle, Organization, CryptoWallet, FIR)
+    by name, alias, phone, vehicle plate, crypto address, FIR number, or entity ID.
+    
+    Optionally filter by entity_type (e.g. 'Person', 'Phone', 'Vehicle', 'CryptoWallet', 'CrimeIncident').
+    """
+    label_filter = ""
+    if entity_type and entity_type.lower() not in ("all", "*"):
+        clean_label = "".join(c for c in entity_type if c.isalnum() or c == "_")
+        if clean_label:
+            label_filter = f":{clean_label}"
+
+    cypher = f"""
+    MATCH (e{label_filter})
+    WHERE (e.id IS NOT NULL AND toLower(e.id) CONTAINS toLower($query))
+       OR (e.name IS NOT NULL AND toLower(e.name) CONTAINS toLower($query))
        OR (e.normalized_name IS NOT NULL AND toLower(e.normalized_name) CONTAINS toLower($query))
        OR (e.number IS NOT NULL AND toLower(e.number) CONTAINS toLower($query))
        OR (e.registration_number IS NOT NULL AND toLower(e.registration_number) CONTAINS toLower($query))
+       OR (e.address IS NOT NULL AND toLower(e.address) CONTAINS toLower($query))
+       OR (e.fir_number IS NOT NULL AND toLower(e.fir_number) CONTAINS toLower($query))
+       OR (e.imei IS NOT NULL AND toLower(e.imei) CONTAINS toLower($query))
        OR any(alias IN COALESCE(e.aliases, []) WHERE toLower(alias) CONTAINS toLower($query))
-    OPTIONAL MATCH (e)-[:OWNS_PHONE]->(ph:Phone)
-    WITH e, labels(e) AS lbls, collect(ph.number) AS phones
-    RETURN e {.*, labels: lbls, phones: phones} AS person
+    OPTIONAL MATCH (e)-[:OWNS_PHONE|USES_PHONE]->(ph:Phone)
+    WITH e, labels(e) AS lbls, collect(DISTINCT ph.number) AS phones
+    RETURN e {{.*, labels: lbls, phones: phones}} AS person
     LIMIT $limit
     """
     try:
@@ -142,6 +161,7 @@ def search_entities(query: str, limit: int = 20) -> list[dict]:
     except Exception as e:
         print(f"[Neo4j Error] search_entities failed: {e}")
         return []
+
 
 
 def get_evidence(entity_id1: str, entity_id2: str) -> list[dict]:
@@ -262,4 +282,59 @@ def merge_duplicate_entities(target_id: str, duplicate_id: str) -> dict:
             "duplicate_id": duplicate_id,
             "error": str(e),
         }
+
+
+def get_graph_overview(limit: int = 100) -> dict:
+    """Returns the primary connected network perimeter formatted for UI graph canvases (Cytoscape / Vis.js)."""
+    cypher = """
+    MATCH (n)
+    OPTIONAL MATCH (n)-[r]->(m)
+    WITH n, r, m
+    LIMIT $limit
+    WITH collect(DISTINCT n {.*, labels: labels(n)}) + 
+         collect(DISTINCT CASE WHEN m IS NOT NULL THEN m {.*, labels: labels(m)} END) AS raw_nodes,
+         collect(DISTINCT CASE WHEN r IS NOT NULL THEN {
+             source: startNode(r).id,
+             target: endNode(r).id,
+             type: type(r),
+             properties: properties(r)
+         } END) AS raw_edges
+    RETURN [node IN raw_nodes WHERE node IS NOT NULL] AS nodes,
+           [edge IN raw_edges WHERE edge IS NOT NULL] AS edges
+    """
+    try:
+        result = db.query(cypher, {"limit": limit})
+        return result[0] if result else {"nodes": [], "edges": []}
+    except Exception as e:
+        print(f"[Neo4j Error] get_graph_overview failed: {e}")
+        return {"nodes": [], "edges": [], "error": str(e)}
+
+
+def get_high_risk_entities(limit: int = 10) -> list[dict]:
+    """Retrieves top suspects sorted by risk_score descending with connected phones and crimes."""
+    cypher = """
+    MATCH (p:Person)
+    WHERE p.risk_score IS NOT NULL
+    OPTIONAL MATCH (p)-[:USES_PHONE|OWNS_PHONE]->(ph:Phone)
+    OPTIONAL MATCH (p)-[:INVOLVED_IN]->(c:CrimeIncident)
+    WITH p, 
+         collect(DISTINCT ph.number) AS phones,
+         collect(DISTINCT COALESCE(c.fir_number, c.id)) AS crime_incidents
+    RETURN p {
+        .*,
+        labels: labels(p),
+        phones: phones,
+        crime_incidents: crime_incidents,
+        crime_count: size(crime_incidents)
+    } AS suspect
+    ORDER BY p.risk_score DESC
+    LIMIT $limit
+    """
+    try:
+        result = db.query(cypher, {"limit": limit})
+        return [r["suspect"] for r in result]
+    except Exception as e:
+        print(f"[Neo4j Error] get_high_risk_entities failed: {e}")
+        return []
+
 
