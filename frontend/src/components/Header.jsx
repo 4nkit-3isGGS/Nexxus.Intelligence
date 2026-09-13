@@ -12,7 +12,9 @@ import {
   Lock, 
   GitMerge,
   Database,
-  UploadCloud
+  UploadCloud,
+  ShieldCheck,
+  UserCheck
 } from 'lucide-react';
 
 export default function Header({ 
@@ -23,7 +25,9 @@ export default function Header({
   caseInfo, 
   kpiStats,
   pendingReviewCount = 3,
-  onOpenIngest
+  onOpenIngest,
+  officerRole = 'LEAD_INVESTIGATOR',
+  onRoleChange
 }) {
   const tabs = [
     { id: 'graph', label: 'Graph Canvas', icon: Network, badge: `${kpiStats.totalNodes}` },
@@ -104,6 +108,22 @@ export default function Header({
 
         {/* Right: Telemetry & Actions */}
         <div className="flex items-center space-x-2.5 shrink-0">
+          {/* Officer RBAC Clearance Selector */}
+          <div className="hidden sm:flex items-center space-x-1.5 px-2 py-1 rounded-lg bg-black/40 border border-white/[0.08] text-xs font-mono">
+            <UserCheck className="w-3.5 h-3.5 text-cyan-400" />
+            <select
+              value={officerRole}
+              onChange={(e) => onRoleChange?.(e.target.value)}
+              className="bg-transparent text-slate-200 focus:outline-none cursor-pointer text-[11px] font-mono"
+              title="Law Enforcement RBAC Officer Clearance (Controls dynamic PII masking and permission checks under BSA §65B)"
+            >
+              <option value="LEAD_INVESTIGATOR" className="bg-[#0b101f] text-slate-200">LEAD (Unmasked PII)</option>
+              <option value="INVESTIGATOR" className="bg-[#0b101f] text-slate-200">INVESTIGATOR (Masked)</option>
+              <option value="ANALYST" className="bg-[#0b101f] text-slate-200">ANALYST (Full Masked)</option>
+              <option value="AUDITOR" className="bg-[#0b101f] text-slate-200">AUDITOR (Read-Only)</option>
+            </select>
+          </div>
+
           {/* Live DB / Backend Connection Indicator */}
           {backendStatus?.isLive ? (
             <div
@@ -130,7 +150,7 @@ export default function Header({
           <button
             onClick={onOpenIngest}
             className="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-cyan-950/40 hover:bg-cyan-900/50 border border-cyan-500/30 text-cyan-300 text-xs font-mono transition-colors"
-            title="Ingest Abhidha's NLP extraction payload into knowledge graph"
+            title="Ingest Abhidha's NLP extraction payload into knowledge graph (POST /api/graph/ingest)"
           >
             <UploadCloud className="w-3.5 h-3.5 text-cyan-400" />
             <span className="hidden xl:inline">Ingest NLP</span>

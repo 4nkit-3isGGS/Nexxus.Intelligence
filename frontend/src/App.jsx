@@ -24,6 +24,9 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [showIngestModal, setShowIngestModal] = useState(false);
 
+  // Law Enforcement RBAC Clearance State
+  const [officerRole, setOfficerRole] = useState('LEAD_INVESTIGATOR');
+
   // Filter States
   const [searchQuery, setSearchQuery] = useState('');
   const [riskThreshold, setRiskThreshold] = useState(0);
@@ -67,6 +70,13 @@ export default function App() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Handle RBAC Officer Role Change
+  const handleRoleChange = (newRole) => {
+    setOfficerRole(newRole);
+    apiService.setOfficerClearance(newRole);
+    loadData();
+  };
 
   // Node Counts by Type
   const nodeCountsByType = useMemo(() => {
@@ -138,10 +148,10 @@ export default function App() {
     return edgeList;
   }, [rawGraphData, filteredNodes, timelineDate]);
 
-  // Run LangGraph Agent Query
+  // Run LangGraph Agent Investigation (POST /api/investigate)
   const handleRunAgentQuery = async (queryText) => {
     setLoadingQuery(true);
-    const result = await apiService.queryAgent(queryText);
+    const result = await apiService.runInvestigation({ query: queryText });
     if (result?.data) {
       setAgentResponse({
         query: queryText,
@@ -170,7 +180,7 @@ export default function App() {
       return;
     }
 
-    // Hit Neo4j shortest path endpoint
+    // Hit Neo4j shortest path endpoint (GET /api/graph/path)
     const pathResult = await apiService.getShortestPath(startNode.id, kingpinId);
 
     if (pathResult && pathResult.nodes && pathResult.nodes.length > 0) {
@@ -236,7 +246,7 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#060913] text-slate-100 font-sans">
-      {/* 1. Header with Telemetry & Module Tabs */}
+      {/* 1. Header with Telemetry, RBAC & Module Tabs */}
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -249,6 +259,8 @@ export default function App() {
         }}
         pendingReviewCount={3}
         onOpenIngest={() => setShowIngestModal(true)}
+        officerRole={officerRole}
+        onRoleChange={handleRoleChange}
       />
 
       {/* 2. Primary Workspace Body */}
@@ -272,7 +284,11 @@ export default function App() {
               setTimelinePlaying={setTimelinePlaying}
               nodeCountsByType={nodeCountsByType}
               resetFilters={resetFilters}
-              onSelectNode={(node) => setSelectedNode(node)}
+              onSelectNode={(node) => {
+                const fullNode = rawGraphData?.nodes?.find((n) => n.id === node.id) || node;
+                setSelectedNode(fullNode);
+                setHighlightedNodeIds([fullNode.id]);
+              }}
             />
 
             {/* Force Canvas */}

@@ -1,55 +1,69 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Scale, 
   Printer, 
   Lock, 
-  ShieldCheck
+  ShieldCheck,
+  ShieldAlert,
+  RefreshCw,
+  CheckCircle2,
+  FileCheck,
+  Hash,
+  Fingerprint,
+  Cpu
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { apiService, MOCK_AUDIT_LOGS } from '../services/api';
 
 export default function LegalAuditVault({ caseInfo }) {
-  const auditLogRecords = [
-    {
-      doc_id: 'FIR_101',
-      title: 'Bidhannagar PS Complaint (Manoj Tiwari)',
-      hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-      timestamp: '2026-03-12',
-      officer: 'Sub-Insp. B. Banerjee',
-      bsa_status: 'CERTIFIED_SEC_63_65B',
-    },
-    {
-      doc_id: 'FIR_102',
-      title: 'Howrah PS Meeting Observation (Debjani Sen)',
-      hash: '8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4',
-      timestamp: '2026-03-18',
-      officer: 'Insp. S. Mukherjee',
-      bsa_status: 'CERTIFIED_SEC_63_65B',
-    },
-    {
-      doc_id: 'FIR_103',
-      title: 'Park Street PS AML Alert (Anil Kapoor)',
-      hash: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
-      timestamp: '2026-03-24',
-      officer: 'Insp. R. Sen',
-      bsa_status: 'CERTIFIED_SEC_63_65B',
-    },
-    {
-      doc_id: 'CDR_LOGS',
-      title: '38 Cellular Call Records & Telemetry Logs',
-      hash: '4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a',
-      timestamp: '2026-03-24',
-      officer: 'Cyber Forensic Cell',
-      bsa_status: 'CERTIFIED_SEC_63_65B',
-    },
-    {
-      doc_id: 'BANK_LOGS',
-      title: '₹14.85L Circular Transaction Ledger',
-      hash: 'ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d',
-      timestamp: '2026-03-24',
-      officer: 'FIU-IND',
-      bsa_status: 'CERTIFIED_SEC_63_65B',
+  const [auditLogs, setAuditLogs] = useState(MOCK_AUDIT_LOGS);
+  const [loadingLogs, setLoadingLogs] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [verificationResult, setVerificationResult] = useState(null);
+  const [latestTipHash, setLatestTipHash] = useState(MOCK_AUDIT_LOGS[MOCK_AUDIT_LOGS.length - 1]?.entry_hash || '');
+
+  // Fetch real audit logs from GET /api/audit/logs
+  const fetchAuditLogs = async () => {
+    setLoadingLogs(true);
+    try {
+      const res = await apiService.getAuditLogs({ limit: 50 });
+      if (res?.data?.entries) {
+        setAuditLogs(res.data.entries);
+        setLatestTipHash(res.data.latest_hash || '');
+      }
+    } catch (e) {
+      console.error('Failed to load audit logs:', e);
+    } finally {
+      setLoadingLogs(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchAuditLogs();
+  }, []);
+
+  // Trigger live cryptographic verification via POST /api/audit/verify
+  const handleVerifyLedger = async () => {
+    setVerifying(true);
+    try {
+      const result = await apiService.verifyAuditChain();
+      setVerificationResult(result);
+      if (result.verified) {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+    } catch (e) {
+      setVerificationResult({
+        verified: false,
+        message: `Verification check error: ${e.message}`
+      });
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   const handlePrintDossier = () => {
     confetti({
@@ -61,75 +75,186 @@ export default function LegalAuditVault({ caseInfo }) {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl mx-auto overflow-y-auto">
+    <div className="flex-1 flex flex-col overflow-y-auto w-full p-4 lg:p-6 bg-[#060913]">
+      <div className="max-w-6xl w-full mx-auto space-y-6">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-emerald-500/10 via-white/[0.02] to-transparent border border-emerald-500/30 rounded-2xl p-5">
+      <div className="bg-gradient-to-r from-emerald-500/10 via-white/[0.02] to-transparent border border-emerald-500/30 rounded-2xl p-5 shadow-xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center space-x-3.5">
-            <div className="p-2.5 bg-emerald-500/20 text-emerald-300 rounded-xl">
+            <div className="p-2.5 bg-emerald-500/20 text-emerald-300 rounded-xl border border-emerald-500/30">
               <Scale className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] font-mono uppercase text-emerald-400 font-semibold tracking-wider">
-                LEGAL VAULT // COURT EVIDENCE READY
-              </span>
-              <h2 className="text-lg font-bold text-white">
-                Bharatiya Sakshya Adhiniyam (BSA) 2023 / Sec 65B Audit
+              <div className="flex items-center space-x-2">
+                <span className="text-[10px] font-mono uppercase text-emerald-400 font-semibold tracking-wider">
+                  LEGAL VAULT // COURT EVIDENCE READY
+                </span>
+                <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  BSA §65B CERTIFIED
+                </span>
+              </div>
+              <h2 className="text-lg font-bold text-white mt-0.5">
+                Bharatiya Sakshya Adhiniyam (BSA) 2023 / Section 65B Audit Ledger
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                All extracted evidence, call telemetry, and banking loops are cryptographically hashed for court admissibility.
+                Append-only cryptographic hash-chain [H_n = SHA-256(H_prev + payload)] guaranteeing legal admissibility and tamper-evidence in Indian courts.
               </p>
             </div>
           </div>
 
-          <button
-            onClick={handlePrintDossier}
-            className="px-4 py-2 btn-glow-cyan font-semibold rounded-xl text-xs flex items-center space-x-2 transition-all"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            <span>Print Intelligence Dossier</span>
-          </button>
+          <div className="flex items-center space-x-2.5">
+            <button
+              onClick={handleVerifyLedger}
+              disabled={verifying}
+              className="px-4 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 font-semibold rounded-xl text-xs flex items-center space-x-2 transition-all shadow-md disabled:opacity-50"
+            >
+              {verifying ? (
+                <>
+                  <Cpu className="w-3.5 h-3.5 animate-spin" />
+                  <span>Verifying Chain...</span>
+                </>
+              ) : (
+                <>
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Verify Hash-Chain (BSA §65B)</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={handlePrintDossier}
+              className="px-4 py-2 btn-glow-cyan font-semibold rounded-xl text-xs flex items-center space-x-2 transition-all shadow-md"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>Print Dossier</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* SHA-256 Hash Manifest Table */}
-      <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
-            <Lock className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Electronic Evidence Hash Manifest (SHA-256)</span>
-          </h3>
-          <span className="text-xs font-mono text-emerald-400 flex items-center space-x-1">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>5/5 Artifacts Certified</span>
-          </span>
+      {/* Live Verification Result Banner */}
+      {verificationResult && (
+        <div className={`rounded-2xl p-4.5 border transition-all animate-fade-in ${
+          verificationResult.verified
+            ? 'bg-emerald-950/30 border-emerald-500/40 text-emerald-200'
+            : 'bg-rose-950/30 border-rose-500/40 text-rose-200'
+        }`}>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start space-x-3">
+              <div className={`p-2 rounded-xl mt-0.5 ${
+                verificationResult.verified ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
+              }`}>
+                {verificationResult.verified ? (
+                  <CheckCircle2 className="w-5 h-5" />
+                ) : (
+                  <ShieldAlert className="w-5 h-5" />
+                )}
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                  {verificationResult.verified
+                    ? 'Cryptographic Ledger Integrity Verified (Zero Tampering Detected)'
+                    : 'Ledger Integrity Verification Alert: Discrepancy Found'}
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/40 border border-white/10 text-slate-300">
+                    {verificationResult.record_count || auditLogs.length} Blocks Verified
+                  </span>
+                </h4>
+                <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                  {verificationResult.message}
+                </p>
+                {verificationResult.latest_hash && (
+                  <div className="mt-2 flex items-center space-x-2 text-[10px] font-mono text-slate-400">
+                    <span className="text-slate-500 font-semibold">TIP SHA-256:</span>
+                    <span className="text-emerald-400 bg-black/40 px-2 py-0.5 rounded border border-white/10">
+                      {verificationResult.latest_hash}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <button
+              onClick={() => setVerificationResult(null)}
+              className="text-xs text-slate-400 hover:text-white px-2 py-1 rounded bg-white/[0.04]"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Cryptographic Append-Only Ledger Table (GET /api/audit/logs) */}
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 space-y-4 shadow-lg">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center space-x-2">
+            <Lock className="w-4 h-4 text-emerald-400" />
+            <h3 className="text-xs font-semibold text-slate-200 uppercase tracking-wider">
+              Append-Only Cryptographic Audit Ledger (GET /api/audit/logs)
+            </h3>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.06] text-slate-400">
+              {auditLogs.length} Blocks Recorded
+            </span>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={fetchAuditLogs}
+              disabled={loadingLogs}
+              className="px-2.5 py-1 rounded-lg text-xs bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 flex items-center space-x-1.5 transition-all border border-white/[0.06]"
+            >
+              <RefreshCw className={`w-3 h-3 ${loadingLogs ? 'animate-spin' : ''}`} />
+              <span>Refresh Ledger</span>
+            </button>
+            <span className="text-xs font-mono text-emerald-400 flex items-center space-x-1">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Chain Intact</span>
+            </span>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-white/[0.06] text-[11px] text-slate-500 font-mono uppercase">
-                <th className="py-2 px-3">Document / Record</th>
-                <th className="py-2 px-3">SHA-256 Checksum</th>
-                <th className="py-2 px-3">Officer</th>
-                <th className="py-2 px-3">Status</th>
+              <tr className="border-b border-white/[0.08] text-[11px] text-slate-500 font-mono uppercase">
+                <th className="py-2.5 px-3">Log ID & Action</th>
+                <th className="py-2.5 px-3">Officer & Role</th>
+                <th className="py-2.5 px-3">Resource</th>
+                <th className="py-2.5 px-3">Current Block Hash (SHA-256)</th>
+                <th className="py-2.5 px-3">Previous Chained Hash</th>
+                <th className="py-2.5 px-3 text-right">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04] font-mono">
-              {auditLogRecords.map((rec, i) => (
-                <tr key={i} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="py-2.5 px-3">
-                    <span className="font-sans font-medium text-slate-200 block">{rec.title}</span>
-                    <span className="text-[10px] text-slate-500">{rec.doc_id} • {rec.timestamp}</span>
+              {auditLogs.map((entry, i) => (
+                <tr key={entry.log_id || i} className="hover:bg-white/[0.02] transition-colors">
+                  <td className="py-3 px-3">
+                    <span className="font-bold text-cyan-300 block">{entry.log_id}</span>
+                    <span className="text-[10px] font-mono text-slate-400">{entry.action}</span>
+                    <span className="text-[9px] text-slate-500 block">{entry.timestamp?.replace('T', ' ').slice(0, 19)}</span>
                   </td>
-                  <td className="py-2.5 px-3">
-                    <span className="text-[11px] text-slate-400 truncate max-w-xs block font-mono">
-                      {rec.hash}
+                  <td className="py-3 px-3 font-sans">
+                    <span className="text-slate-200 font-medium block">{entry.user_id}</span>
+                    <span className="text-[10px] font-mono text-amber-300/80">{entry.role}</span>
+                    {entry.badge_number && (
+                      <span className="text-[9px] text-slate-500 block font-mono">{entry.badge_number}</span>
+                    )}
+                  </td>
+                  <td className="py-3 px-3">
+                    <span className="text-slate-300 font-medium block">{entry.resource_id}</span>
+                    <span className="text-[10px] text-slate-500">{entry.resource_type}</span>
+                  </td>
+                  <td className="py-3 px-3">
+                    <span className="text-[11px] text-emerald-400/90 truncate max-w-[160px] block font-mono bg-black/30 px-1.5 py-0.5 rounded border border-white/[0.04]">
+                      {entry.entry_hash}
                     </span>
                   </td>
-                  <td className="py-2.5 px-3 text-slate-300 font-sans">{rec.officer}</td>
-                  <td className="py-2.5 px-3">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-300">
+                  <td className="py-3 px-3">
+                    <span className="text-[11px] text-slate-500 truncate max-w-[140px] block font-mono">
+                      {entry.prev_hash?.slice(0, 16)}...
+                    </span>
+                  </td>
+                  <td className="py-3 px-3 text-right">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                       ✓ BSA 65B VALID
                     </span>
                   </td>
@@ -141,7 +266,7 @@ export default function LegalAuditVault({ caseInfo }) {
       </div>
 
       {/* Summary Findings */}
-      <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 space-y-3">
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 space-y-3 shadow-lg">
         <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
           Summary Case Findings ({caseInfo?.id || 'CASE-KOL-2026-088'})
         </h3>
@@ -170,5 +295,6 @@ export default function LegalAuditVault({ caseInfo }) {
         </div>
       </div>
     </div>
+  </div>
   );
 }

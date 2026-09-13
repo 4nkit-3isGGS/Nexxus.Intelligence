@@ -12,7 +12,10 @@ import {
   Building2,
   Car,
   CreditCard,
-  ChevronDown
+  ChevronDown,
+  ShieldAlert,
+  Flame,
+  Crosshair
 } from 'lucide-react';
 import { apiService } from '../services/api';
 
@@ -35,9 +38,12 @@ export default function FilterBar({
 }) {
   const [showTypeFilter, setShowTypeFilter] = useState(false);
   const [showTimeline, setShowTimeline] = useState(false);
+  const [showHighRisk, setShowHighRisk] = useState(false);
+  const [highRiskEntities, setHighRiskEntities] = useState([]);
   const [liveSuggestions, setLiveSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchContainerRef = useRef(null);
+  const highRiskContainerRef = useRef(null);
 
   const clusters = [
     { id: 'ALL', label: 'All Entities' },
@@ -66,7 +72,22 @@ export default function FilterBar({
     { day: '24', date: '2026-03-24', event: 'FIR 103 Lodged (AML Bank Alert)' },
   ];
 
-  // Search autocomplete from Neo4j / API
+  // Fetch top high-risk suspects via GET /api/graph/high-risk
+  useEffect(() => {
+    const fetchHighRisk = async () => {
+      try {
+        const res = await apiService.getHighRiskEntities(6);
+        if (res?.data && Array.isArray(res.data)) {
+          setHighRiskEntities(res.data);
+        }
+      } catch (e) {
+        console.info('High risk entities load skipped:', e.message);
+      }
+    };
+    fetchHighRisk();
+  }, []);
+
+  // Search autocomplete from Neo4j / API (GET /api/graph/search)
   useEffect(() => {
     if (!searchQuery || searchQuery.trim().length < 2) {
       setLiveSuggestions([]);
@@ -84,11 +105,14 @@ export default function FilterBar({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Click outside listener for suggestions
+  // Click outside listener for suggestions and high-risk popover
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
         setShowSuggestions(false);
+      }
+      if (highRiskContainerRef.current && !highRiskContainerRef.current.contains(e.target)) {
+        setShowHighRisk(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -118,7 +142,7 @@ export default function FilterBar({
       <div className="max-w-[1780px] mx-auto flex flex-wrap items-center justify-between gap-3">
         {/* Search & Cluster Selector */}
         <div className="flex items-center space-x-2.5 flex-1 min-w-[300px] max-w-2xl">
-          {/* Search Box with Autocomplete */}
+          {/* Search Box with Autocomplete (GET /api/graph/search) */}
           <div className="relative flex-1" ref={searchContainerRef}>
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 z-10" />
             <input
@@ -128,7 +152,7 @@ export default function FilterBar({
               onFocus={() => {
                 if (liveSuggestions.length > 0) setShowSuggestions(true);
               }}
-              placeholder="Search suspects, phones, accounts, vehicles, FIRs..."
+              placeholder="Search suspects, phones, accounts, vehicles, FIRs (GET /api/graph/search)..."
               className="w-full pl-8 pr-8 py-1.5 bg-black/40 border border-white/[0.08] rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/30 transition-all font-sans"
             />
             {searchQuery && (
@@ -148,7 +172,7 @@ export default function FilterBar({
             {showSuggestions && liveSuggestions.length > 0 && (
               <div className="absolute left-0 right-0 top-full mt-1.5 bg-[#0a0f1d] border border-cyan-500/30 rounded-xl shadow-2xl z-50 overflow-hidden text-xs">
                 <div className="px-3 py-1.5 bg-black/40 border-b border-white/[0.06] text-[10px] font-mono text-slate-400 flex items-center justify-between">
-                  <span>Neo4j Entity Autocomplete</span>
+                  <span>Neo4j Entity Autocomplete (GET /api/graph/search)</span>
                   <span className="text-cyan-400">{liveSuggestions.length} found</span>
                 </div>
                 <div className="max-h-56 overflow-y-auto">
@@ -198,6 +222,58 @@ export default function FilterBar({
 
         {/* Right Filter Actions */}
         <div className="flex items-center space-x-2">
+          {/* Top High Risk Threats Popover (GET /api/graph/high-risk) */}
+          <div className="relative" ref={highRiskContainerRef}>
+            <button
+              onClick={() => setShowHighRisk(!showHighRisk)}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs border transition-all ${
+                showHighRisk
+                  ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 font-medium'
+                  : 'bg-black/40 text-slate-300 border-white/[0.08] hover:text-white hover:bg-white/[0.04]'
+              }`}
+              title="Top High-Risk Suspects from Graph Analytics Engine (GET /api/graph/high-risk)"
+            >
+              <Flame className="w-3.5 h-3.5 text-rose-400" />
+              <span className="font-semibold text-rose-300">Top Threats</span>
+              {highRiskEntities.length > 0 && (
+                <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
+                  {highRiskEntities.length}
+                </span>
+              )}
+            </button>
+
+            {showHighRisk && (
+              <div className="absolute right-0 top-full mt-2 w-72 bg-[#0c101d] border border-rose-500/30 rounded-xl shadow-2xl p-2 z-50 space-y-1 animate-fade-in">
+                <div className="px-2.5 py-1.5 border-b border-white/[0.06] flex items-center justify-between text-[10px] font-mono">
+                  <span className="text-slate-400 uppercase tracking-wider">Top Wanted Intelligence</span>
+                  <span className="text-rose-400 font-bold">GET /api/graph/high-risk</span>
+                </div>
+                <div className="max-h-60 overflow-y-auto space-y-1 pt-1">
+                  {highRiskEntities.map((t) => (
+                    <button
+                      key={t.id}
+                      onClick={() => {
+                        setShowHighRisk(false);
+                        if (onSelectNode) onSelectNode(t);
+                      }}
+                      className="w-full text-left p-2 rounded-lg bg-black/30 hover:bg-rose-500/10 border border-white/[0.04] hover:border-rose-500/30 flex items-center justify-between transition-all"
+                    >
+                      <div>
+                        <span className="text-xs font-bold text-white block">{t.name || t.id}</span>
+                        <span className="text-[10px] font-mono text-slate-400">
+                          {t.phones?.[0] ? `📞 ${t.phones[0]}` : t.id} • {t.crime_count || 1} FIRs
+                        </span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                        {t.risk_score || 85}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Risk Threshold Selector */}
           <div className="flex items-center space-x-1 p-0.5 bg-black/40 border border-white/[0.08] rounded-xl text-xs">
             <span className="text-[10px] text-slate-400 font-mono px-2">Risk:</span>
