@@ -395,26 +395,26 @@ export default function App() {
               edges={rawGraphData.edges}
             />
           )}
-
-          {/* 3. Slide-Over Evidence & Investigation Drawer */}
-          {selectedNode && (
-            <EvidenceDrawer
-              selectedNode={selectedNode}
-              onClose={() => setSelectedNode(null)}
-              onFocusNode={(node) => {
-                setHighlightedNodeIds([node.id]);
-              }}
-              onTraceKingpin={handleTraceKingpin}
-              onOpenFirDoc={(docId) => {
-                setActiveTab('fir');
-              }}
-              onExpandSubgraph={handleExpandSubgraph}
-              allEdges={rawGraphData?.edges || []}
-            />
-          )}
         </main>
         </div>
       </div>
+
+      {/* 3. Slide-Over Evidence & Investigation Drawer */}
+      {selectedNode && (
+        <EvidenceDrawer
+          selectedNode={selectedNode}
+          onClose={() => setSelectedNode(null)}
+          onFocusNode={(node) => {
+            setHighlightedNodeIds([node.id]);
+          }}
+          onTraceKingpin={handleTraceKingpin}
+          onOpenFirDoc={(docId) => {
+            setActiveTab('fir');
+          }}
+          onExpandSubgraph={handleExpandSubgraph}
+          allEdges={rawGraphData?.edges || []}
+        />
+      )}
 
       {/* 4. Ingestion Modal */}
       <IngestModal

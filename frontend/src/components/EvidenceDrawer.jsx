@@ -19,6 +19,14 @@ export default function EvidenceDrawer({
   const [loadingShared, setLoadingShared] = useState(false);
   const [selectedEdgeEvidence, setSelectedEdgeEvidence] = useState(null);
   const [copiedField, setCopiedField] = useState(null);
+  const scrollRef = React.useRef(null);
+
+  // Reset scroll to top when selectedNode changes
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  }, [selectedNode]);
 
   useEffect(() => {
     if (!selectedNode) return;
@@ -46,6 +54,17 @@ export default function EvidenceDrawer({
     fetchNeighbors();
     fetchShared();
   }, [selectedNode]);
+
+  // Keyboard shortcut (ESC) to close drawer
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose?.();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   if (!selectedNode) return null;
 
@@ -100,35 +119,46 @@ export default function EvidenceDrawer({
     : null;
 
   return (
-    <aside className="w-[500px] min-w-[480px] h-full fixed top-0 right-0 z-50 bg-white/95 backdrop-blur-2xl shadow-2xl border-l border-slate-200 text-slate-900 flex flex-col overflow-hidden">
+    <aside className="w-[520px] max-w-[95vw] fixed top-14 bottom-0 right-0 z-50 bg-white shadow-2xl border-l border-slate-300 text-slate-900 flex flex-col overflow-hidden animate-fade-in">
       {/* Top Header Bar */}
-      <div className="px-4 py-3 bg-white border-b border-slate-200/80 flex items-center justify-between flex-shrink-0">
+      <div className="h-14 px-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-rose-600 text-[20px] animate-pulse">
             radiology
           </span>
-          <span className="font-label-sm text-label-sm text-rose-600 font-bold uppercase tracking-widest">
-            TARGET DOSSIER // FORENSIC INSPECT
-          </span>
-          <span className="px-1.5 py-0.2 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-label-sm text-label-sm font-bold flex items-center gap-1">
+          <div className="flex flex-col">
+            <span className="font-label-sm text-label-sm text-rose-600 font-bold uppercase tracking-wider leading-tight">
+              TARGET DOSSIER // FORENSIC
+            </span>
+            <span className="text-[10px] text-slate-500 font-mono">
+              Entity ID: {selectedNode.id}
+            </span>
+          </div>
+          <span className="ml-1 px-1.5 py-0.2 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[9px] font-bold flex items-center gap-1 font-mono">
             <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-ping"></span>
             ACTIVE
           </span>
         </div>
+
+        {/* Prominent Close Button */}
         <button
           onClick={onClose}
-          className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200/80 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-all border border-slate-200/60"
-          title="Close Dossier"
+          className="px-3 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-700 flex items-center gap-1.5 transition-all border border-slate-300 hover:border-rose-300 shadow-xs active:scale-95 group cursor-pointer"
+          title="Close Target Dossier (ESC)"
         >
-          <span className="material-symbols-outlined text-[18px]">close</span>
+          <span className="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-rose-600 group-hover:rotate-90 transition-transform">close</span>
+          <span className="text-xs font-bold">Close</span>
+          <kbd className="hidden sm:inline-block px-1.5 py-0.2 text-[9px] font-mono bg-slate-100 rounded border border-slate-200 text-slate-500">ESC</kbd>
         </button>
       </div>
 
       {/* Scrollable Dossier Content */}
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 no-scrollbar">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 no-scrollbar">
         {/* Suspect Profile Card */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm relative overflow-hidden flex flex-col gap-3.5">
-          <div className="absolute -top-12 -right-12 w-44 h-44 bg-rose-500/5 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm relative flex flex-col flex-shrink-0 min-h-fit gap-3.5">
+          <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+            <div className="absolute -top-12 -right-12 w-44 h-44 bg-rose-500/5 rounded-full blur-3xl"></div>
+          </div>
           <div className="flex items-start gap-3.5 relative z-10">
             {/* Biometric Portrait or Icon Box */}
             <div className="relative w-20 h-20 rounded-xl overflow-hidden ring-2 ring-rose-500 shadow-sm flex-shrink-0 bg-slate-100 flex items-center justify-center">
@@ -250,7 +280,7 @@ export default function EvidenceDrawer({
         </div>
 
         {/* Sticky Tab Navigation Bar */}
-        <div className="sticky top-0 z-20 bg-slate-100/95 backdrop-blur-md p-1 rounded-xl flex items-center justify-between border border-slate-200">
+        <div className="sticky top-0 z-20 bg-slate-100/95 backdrop-blur-md p-1 rounded-xl flex items-center justify-between border border-slate-200 flex-shrink-0">
           <button
             onClick={() => setActiveTab('profile')}
             className={`flex-1 py-1.5 px-2 rounded-lg font-label-sm text-label-sm font-bold transition-all text-center ${
@@ -298,9 +328,9 @@ export default function EvidenceDrawer({
 
         {/* TAB 1: PROFILE TAB */}
         {activeTab === 'profile' && (
-          <div className="flex flex-col gap-3.5">
+          <div className="flex flex-col gap-3.5 flex-shrink-0 min-h-fit">
             {/* Algorithmic Threat Score Meter Card */}
-            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col gap-3">
+            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col flex-shrink-0 min-h-fit gap-3">
               <div className="flex items-center justify-between">
                 <span className="text-slate-500 font-label-sm text-label-sm uppercase font-semibold">
                   Algorithmic Threat Score
@@ -645,7 +675,15 @@ export default function EvidenceDrawer({
       </div>
 
       {/* Bottom Sticky Action Bar */}
-      <div className="p-3.5 bg-white border-t border-slate-200 flex items-center justify-between gap-2 flex-shrink-0">
+      <div className="p-3 bg-white border-t border-slate-200 flex items-center justify-between gap-2 flex-shrink-0">
+        <button 
+          onClick={onClose}
+          className="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-label-sm text-label-sm font-bold transition-all flex items-center justify-center gap-1 shadow-xs border border-slate-300 cursor-pointer"
+          title="Close Drawer (ESC)"
+        >
+          <span className="material-symbols-outlined text-[17px]">close</span>
+          <span>Close</span>
+        </button>
         <button 
           onClick={() => alert(`Real-time CDR interception request broadcasted to Telco BTS for [${selectedNode.name}].`)}
           className="flex-1 py-2.5 px-3 rounded-xl bg-sky-600 text-white font-label-sm text-label-sm font-bold shadow-xs hover:bg-sky-700 transition-all flex items-center justify-center gap-1.5"
