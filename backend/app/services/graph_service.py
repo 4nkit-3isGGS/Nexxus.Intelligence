@@ -123,33 +123,60 @@ def get_graph_stats() -> list[dict]:
         return []
 
 
+LABEL_MAP = {
+    "person": "Person",
+    "phone": "Phone",
+    "vehicle": "Vehicle",
+    "cryptowallet": "CryptoWallet",
+    "crypto_wallet": "CryptoWallet",
+    "crypto": "CryptoWallet",
+    "wallet": "CryptoWallet",
+    "ipaddress": "IPAddress",
+    "ip_address": "IPAddress",
+    "ip": "IPAddress",
+    "imei": "IMEI",
+    "location": "Location",
+    "organization": "Organization",
+    "org": "Organization",
+    "crimeincident": "CrimeIncident",
+    "crime_incident": "CrimeIncident",
+    "fir": "CrimeIncident",
+}
+
+
 def search_entities(
     query: str,
     limit: int = 20,
     entity_type: Optional[str] = None,
 ) -> list[dict]:
-    """Searches entities (Person, Phone, Location, Vehicle, Organization, CryptoWallet, FIR)
-    by name, alias, phone, vehicle plate, crypto address, FIR number, or entity ID.
+    """Searches entities (Person, Phone, Location, Vehicle, Organization, CryptoWallet, IPAddress, IMEI, FIR)
+    by name, alias, phone, vehicle plate, crypto address, IP, IMEI, FIR number, or entity ID.
     
-    Optionally filter by entity_type (e.g. 'Person', 'Phone', 'Vehicle', 'CryptoWallet', 'CrimeIncident').
+    Optionally filter by entity_type (case-insensitive, e.g. 'Person', 'phone', 'vehicle', 'cryptowallet').
     """
     label_filter = ""
     if entity_type and entity_type.lower() not in ("all", "*"):
-        clean_label = "".join(c for c in entity_type if c.isalnum() or c == "_")
-        if clean_label:
-            label_filter = f":{clean_label}"
+        clean = "".join(c for c in entity_type if c.isalnum() or c == "_").lower()
+        normalized_label = LABEL_MAP.get(clean, clean.capitalize())
+        if normalized_label:
+            label_filter = f":{normalized_label}"
 
     cypher = f"""
     MATCH (e{label_filter})
-    WHERE (e.id IS NOT NULL AND toLower(e.id) CONTAINS toLower($query))
-       OR (e.name IS NOT NULL AND toLower(e.name) CONTAINS toLower($query))
-       OR (e.normalized_name IS NOT NULL AND toLower(e.normalized_name) CONTAINS toLower($query))
-       OR (e.number IS NOT NULL AND toLower(e.number) CONTAINS toLower($query))
-       OR (e.registration_number IS NOT NULL AND toLower(e.registration_number) CONTAINS toLower($query))
-       OR (e.address IS NOT NULL AND toLower(e.address) CONTAINS toLower($query))
-       OR (e.fir_number IS NOT NULL AND toLower(e.fir_number) CONTAINS toLower($query))
-       OR (e.imei IS NOT NULL AND toLower(e.imei) CONTAINS toLower($query))
-       OR any(alias IN COALESCE(e.aliases, []) WHERE toLower(alias) CONTAINS toLower($query))
+    WHERE (e.id IS NOT NULL AND toLower(toString(e.id)) CONTAINS toLower($query))
+       OR (e.name IS NOT NULL AND toLower(toString(e.name)) CONTAINS toLower($query))
+       OR (e.normalized_name IS NOT NULL AND toLower(toString(e.normalized_name)) CONTAINS toLower($query))
+       OR (e.number IS NOT NULL AND toLower(toString(e.number)) CONTAINS toLower($query))
+       OR (e.normalized_number IS NOT NULL AND toLower(toString(e.normalized_number)) CONTAINS toLower($query))
+       OR (e.registration_number IS NOT NULL AND toLower(toString(e.registration_number)) CONTAINS toLower($query))
+       OR (e.address IS NOT NULL AND toLower(toString(e.address)) CONTAINS toLower($query))
+       OR (e.city IS NOT NULL AND toLower(toString(e.city)) CONTAINS toLower($query))
+       OR (e.fir_number IS NOT NULL AND toLower(toString(e.fir_number)) CONTAINS toLower($query))
+       OR (e.ip IS NOT NULL AND toLower(toString(e.ip)) CONTAINS toLower($query))
+       OR (e.imei IS NOT NULL AND toLower(toString(e.imei)) CONTAINS toLower($query))
+       OR (e.exchange_tag IS NOT NULL AND toLower(toString(e.exchange_tag)) CONTAINS toLower($query))
+       OR any(alias IN COALESCE(e.aliases, []) WHERE toLower(toString(alias)) CONTAINS toLower($query))
+       OR any(ph IN [(e)-[:OWNS_PHONE|USES_PHONE]->(p:Phone) | p.number] WHERE toLower(toString(ph)) CONTAINS toLower($query))
     OPTIONAL MATCH (e)-[:OWNS_PHONE|USES_PHONE]->(ph:Phone)
     WITH e, labels(e) AS lbls, collect(DISTINCT ph.number) AS phones
     RETURN e {{.*, labels: lbls, phones: phones}} AS person
@@ -169,7 +196,7 @@ def get_evidence(entity_id1: str, entity_id2: str) -> list[dict]:
     cypher = """
     MATCH (a {id: $id1})-[r]-(b {id: $id2})
     RETURN type(r) AS relationship,
-           r.source_doc_id AS source_doc,
+           COALESCE(r.source_doc_id, r.source_doc) AS source_doc,
            r.confidence AS confidence,
            r.timestamp AS timestamp,
            properties(r) AS full_properties
@@ -314,7 +341,6 @@ def get_high_risk_entities(limit: int = 10) -> list[dict]:
     """Retrieves top suspects sorted by risk_score descending with connected phones and crimes."""
     cypher = """
     MATCH (p:Person)
-    WHERE p.risk_score IS NOT NULL
     OPTIONAL MATCH (p)-[:USES_PHONE|OWNS_PHONE]->(ph:Phone)
     OPTIONAL MATCH (p)-[:INVOLVED_IN]->(c:CrimeIncident)
     WITH p, 
@@ -327,7 +353,7 @@ def get_high_risk_entities(limit: int = 10) -> list[dict]:
         crime_incidents: crime_incidents,
         crime_count: size(crime_incidents)
     } AS suspect
-    ORDER BY p.risk_score DESC
+    ORDER BY COALESCE(p.risk_score, 0) DESC, suspect.crime_count DESC
     LIMIT $limit
     """
     try:
