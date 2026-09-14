@@ -55,7 +55,17 @@ export default function GraphCanvas({
     
     simNodesRef.current = nodes.map((node, i) => {
       const existing = existingMap.get(node.id);
-      const clusterCenter = clusterCenters[node.cluster_id] || { x: 0, y: 0 };
+      
+      // Fallback robust cluster mapping if missing
+      let mappedClusterId = node.cluster_id;
+      if (!mappedClusterId || !clusterCenters[mappedClusterId]) {
+        if (node.type === 'Organization') mappedClusterId = 'bridge';
+        else if (node.type === 'Person' && (node.risk_score || 0) > 80) mappedClusterId = 'cluster_a';
+        else if (node.type === 'Account' || node.type === 'Phone') mappedClusterId = 'cluster_b';
+        else mappedClusterId = 'victim';
+      }
+      
+      const clusterCenter = clusterCenters[mappedClusterId] || { x: 0, y: 0 };
       
       const baseRadius = node.type === 'Person' ? 22 : node.type === 'Organization' ? 20 : 17;
       const riskBonus = (node.risk_score || 0) * 0.12;
@@ -129,7 +139,14 @@ export default function GraphCanvas({
       });
     } else if (layoutType === 'cluster') {
       simNodes.forEach((node, idx) => {
-        const center = clusterCenters[node.cluster_id] || { x: 0, y: 0 };
+        let mappedClusterId = node.cluster_id;
+        if (!mappedClusterId || !clusterCenters[mappedClusterId]) {
+          if (node.type === 'Organization') mappedClusterId = 'bridge';
+          else if (node.type === 'Person' && (node.risk_score || 0) > 80) mappedClusterId = 'cluster_a';
+          else if (node.type === 'Account' || node.type === 'Phone') mappedClusterId = 'cluster_b';
+          else mappedClusterId = 'victim';
+        }
+        const center = clusterCenters[mappedClusterId] || { x: 0, y: 0 };
         const angle = (idx * 1.3) % (2 * Math.PI);
         const radius = 60 + (idx % 4) * 25;
         node.x = center.x + Math.cos(angle) * radius;
@@ -155,9 +172,9 @@ export default function GraphCanvas({
     const updatePhysics = () => {
       if (!physicsRunning) return;
       const simNodes = simNodesRef.current;
-      const kRepulsion = 1600;
-      const kSpring = 0.035;
-      const damping = 0.86;
+      const kRepulsion = 5000;
+      const kSpring = 0.04;
+      const damping = 0.82;
 
       // 1. Repulsion between nodes
       for (let i = 0; i < simNodes.length; i++) {
@@ -191,7 +208,7 @@ export default function GraphCanvas({
         const dx = tgt.x - src.x;
         const dy = tgt.y - src.y;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const desiredDist = e.is_bridge ? 150 : e.is_anomaly ? 110 : 130;
+        const desiredDist = e.is_bridge ? 220 : e.is_anomaly ? 160 : 180;
         const displacement = dist - desiredDist;
         const force = displacement * kSpring;
 
@@ -215,8 +232,15 @@ export default function GraphCanvas({
           return;
         }
 
-        const center = clusterCenters[node.cluster_id] || { x: 0, y: 0 };
-        const gravityStrength = 0.008;
+        let mappedClusterId = node.cluster_id;
+        if (!mappedClusterId || !clusterCenters[mappedClusterId]) {
+          if (node.type === 'Organization') mappedClusterId = 'bridge';
+          else if (node.type === 'Person' && (node.risk_score || 0) > 80) mappedClusterId = 'cluster_a';
+          else if (node.type === 'Account' || node.type === 'Phone') mappedClusterId = 'cluster_b';
+          else mappedClusterId = 'victim';
+        }
+        const center = clusterCenters[mappedClusterId] || { x: 0, y: 0 };
+        const gravityStrength = 0.0045;
         node.vx += (center.x - node.x) * gravityStrength;
         node.vy += (center.y - node.y) * gravityStrength;
 
@@ -239,8 +263,11 @@ export default function GraphCanvas({
 
       const { width, height } = canvas;
       
-      // Fill canvas with clean light canvas background
-      ctx.fillStyle = '#f8fafc';
+      // Fill canvas with premium light cyber background
+      const bgGrad = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width);
+      bgGrad.addColorStop(0, '#ffffff');
+      bgGrad.addColorStop(1, '#f8fafc');
+      ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, width, height);
 
       pulseOffsetRef.current = (pulseOffsetRef.current + 0.035) % 100;
@@ -481,20 +508,21 @@ export default function GraphCanvas({
 
         // Clean Modern Light Name Label (100% Legible)
         if (showLabels || isSelected || isHighlighted) {
-          const displayName = node.name.length > 22 ? node.name.substring(0, 20) + '...' : node.name;
+          const safeName = node.name || node.id || 'Unknown';
+          const displayName = safeName.length > 22 ? safeName.substring(0, 20) + '...' : safeName;
           ctx.font = `${node.isKingpin ? 'bold 11px' : '600 10.5px'} Inter, sans-serif`;
           const textMetrics = ctx.measureText(displayName);
           const labelWidth = textMetrics.width + 12;
           const labelHeight = 16;
           const labelY = node.y + node.radius + 6;
 
-          // White pill backdrop with subtle shadow
+          // Light pill backdrop with subtle shadow
           ctx.beginPath();
           ctx.roundRect(node.x - labelWidth / 2, labelY, labelWidth, labelHeight, 6);
           ctx.fillStyle = '#ffffff';
           ctx.fill();
           ctx.strokeStyle = isSelected ? '#0284c7' : 'rgba(203, 213, 225, 0.9)';
-          ctx.lineWidth = 1;
+          ctx.lineWidth = isSelected ? 1.5 : 1;
           ctx.stroke();
 
           // Label Text
@@ -731,10 +759,10 @@ export default function GraphCanvas({
             <span className="font-semibold">Victim / Low</span>
           </div>
           <div className="h-3 w-px bg-slate-200"></div>
-          <div className="flex items-center gap-1 text-amber-800 font-semibold">
+          <div className="flex items-center gap-1 text-amber-700 font-semibold">
             <span className="material-symbols-outlined text-[14px]">payments</span> Financial
           </div>
-          <div className="flex items-center gap-1 text-sky-700 font-semibold">
+          <div className="flex items-center gap-1 text-sky-600 font-semibold">
             <span className="material-symbols-outlined text-[14px]">cell_tower</span> Comms
           </div>
         </div>
@@ -750,7 +778,7 @@ export default function GraphCanvas({
           }}
         >
           <div className="flex items-center justify-between space-x-2 mb-1">
-            <span className="font-bold text-slate-900 text-xs truncate">{hoveredNode.name}</span>
+            <span className="font-bold text-slate-900 text-xs truncate">{hoveredNode.name || hoveredNode.id}</span>
             <span
               className={`px-1.5 py-0.2 rounded text-[10px] font-mono font-bold ${
                 hoveredNode.risk_score >= 85
@@ -760,11 +788,11 @@ export default function GraphCanvas({
                   : 'bg-sky-50 text-sky-800 border border-sky-200'
               }`}
             >
-              Risk: {hoveredNode.risk_score}
+              Risk: {hoveredNode.risk_score || 'N/A'}
             </span>
           </div>
           <p className="text-[11px] text-sky-700 font-semibold mb-1">{hoveredNode.role || hoveredNode.type}</p>
-          <p className="text-[10px] text-slate-600 line-clamp-2">{hoveredNode.summary}</p>
+          <p className="text-[10px] text-slate-600 line-clamp-2">{hoveredNode.summary || 'No summary available.'}</p>
         </div>
       )}
     </div>
