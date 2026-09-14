@@ -152,7 +152,22 @@ def report_agent_node(state: InvestigationState) -> Dict[str, Any]:
         f"*Dossier generated autonomously by Nexxus DB Multi-Agent Task Force on {current_iter} iterations.*",
     ])
 
-    final_text = "\n".join(dossier)
+    deterministic_text = "\n".join(dossier)
+    
+    # Synthesize with Groq LLM if available, falling back safely to deterministic dossier
+    from backend.app.agents.llm import generate_llm_dossier
+    final_text = generate_llm_dossier(
+        subject_id=subject_id,
+        subject_name=subject_name,
+        user_query=user_query,
+        threat_tier=threat_tier,
+        risk_score=risk_score,
+        entities=entities,
+        relationships=relationships,
+        hypotheses=hypotheses,
+        evidence=evidence,
+        fallback_dossier=deterministic_text,
+    )
 
     new_history = list(state.get("tool_history", []))
     new_history.append({
