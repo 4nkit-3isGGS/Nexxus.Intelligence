@@ -562,7 +562,7 @@ export default function GraphCanvas({
   };
 
   return (
-    <div ref={containerRef} className="relative w-full h-full min-h-[620px] bg-[#060810] cyber-grid overflow-hidden select-none">
+    <div ref={containerRef} className="relative w-full h-full min-h-0 bg-[#060810] cyber-grid overflow-hidden select-none">
       <canvas
         ref={canvasRef}
         onMouseDown={handleMouseDown}
@@ -573,18 +573,18 @@ export default function GraphCanvas({
         className="w-full h-full cursor-grab active:cursor-grabbing block"
       />
 
-      {/* Canvas Floating Bottom Controls & Legend Strip (Stitch Deep Obsidian Specification) */}
-      <div className="absolute left-6 bottom-6 z-30 flex flex-col gap-3 pointer-events-auto">
+      {/* Canvas Floating Bottom Controls & Legend Strip */}
+      <div className="absolute left-4 bottom-3 z-30 flex flex-col gap-2 pointer-events-auto">
         {/* Layout Switcher & Navigation Controls */}
-        <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-surface-secondary/90 shadow-2xl backdrop-blur-xl border border-white/[0.08]">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-surface-secondary/90 shadow-2xl backdrop-blur-xl border border-white/[0.08]">
           {/* Topology Engine Switcher */}
-          <div className="flex items-center p-0.5 rounded-xl bg-surface-container-lowest text-label-sm font-label-sm border border-white/[0.04]">
+          <div className="flex items-center p-0.5 rounded-lg bg-surface-container-lowest text-xs font-mono border border-white/[0.04]">
             <button
               onClick={() => {
                 applyLayout('force');
                 onLayoutChange?.('force');
               }}
-              className={`px-3 py-1 rounded-lg transition-all font-bold ${
+              className={`px-2.5 py-0.5 rounded-md transition-all font-bold ${
                 activeLayout === 'force'
                   ? 'bg-primary-container text-on-primary-container shadow-sm'
                   : 'text-on-surface-variant hover:text-on-surface'
@@ -597,7 +597,7 @@ export default function GraphCanvas({
                 applyLayout('cluster');
                 onLayoutChange?.('cluster');
               }}
-              className={`px-3 py-1 rounded-lg transition-all font-bold ${
+              className={`px-2.5 py-0.5 rounded-md transition-all font-bold ${
                 activeLayout === 'cluster'
                   ? 'bg-primary-container text-on-primary-container shadow-sm'
                   : 'text-on-surface-variant hover:text-on-surface'
@@ -610,7 +610,7 @@ export default function GraphCanvas({
                 applyLayout('radial');
                 onLayoutChange?.('radial');
               }}
-              className={`px-3 py-1 rounded-lg transition-all font-bold ${
+              className={`px-2.5 py-0.5 rounded-md transition-all font-bold ${
                 activeLayout === 'radial'
                   ? 'bg-primary-container text-on-primary-container shadow-sm'
                   : 'text-on-surface-variant hover:text-on-surface'
@@ -620,41 +620,41 @@ export default function GraphCanvas({
             </button>
           </div>
 
-          <div className="h-5 w-px bg-surface-container-high mx-1"></div>
+          <div className="h-4 w-px bg-surface-container-high mx-0.5"></div>
 
           {/* Canvas Operations */}
           <div className="flex items-center gap-1">
             <button
               onClick={() => setZoom((z) => Math.min(z * 1.2, 3.0))}
-              className="w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors"
+              className="w-7 h-7 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors"
               title="Zoom In"
             >
-              <span className="material-symbols-outlined text-[18px]">add</span>
+              <span className="material-symbols-outlined text-[16px]">add</span>
             </button>
             <button
               onClick={() => setZoom((z) => Math.max(z * 0.8, 0.4))}
-              className="w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors"
+              className="w-7 h-7 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors"
               title="Zoom Out"
             >
-              <span className="material-symbols-outlined text-[18px]">remove</span>
+              <span className="material-symbols-outlined text-[16px]">remove</span>
             </button>
             <button
               onClick={resetView}
-              className="w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors"
+              className="w-7 h-7 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors"
               title="Reset Canvas Centering"
             >
-              <span className="material-symbols-outlined text-[18px]">filter_center_focus</span>
+              <span className="material-symbols-outlined text-[16px]">filter_center_focus</span>
             </button>
             <button
               onClick={() => setPhysicsRunning(!physicsRunning)}
-              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+              className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${
                 physicsRunning 
                   ? 'bg-surface-container hover:bg-surface-container-high text-primary' 
                   : 'bg-risk-amber/20 text-risk-amber'
               }`}
               title={physicsRunning ? 'Pause Physics' : 'Resume Physics'}
             >
-              <span className="material-symbols-outlined text-[18px]">
+              <span className="material-symbols-outlined text-[16px]">
                 {physicsRunning ? 'pause' : 'play_arrow'}
               </span>
             </button>
@@ -662,29 +662,29 @@ export default function GraphCanvas({
         </div>
 
         {/* Network Legend Overlay */}
-        <div className="p-3 rounded-2xl bg-surface-secondary/90 shadow-2xl backdrop-blur-xl border border-white/[0.08] flex items-center gap-4 text-label-sm font-label-sm">
+        <div className="px-3 py-1.5 rounded-xl bg-surface-secondary/90 shadow-2xl backdrop-blur-xl border border-white/[0.08] flex items-center gap-3 text-[11px] font-mono">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-threat-crimson"></span>
+            <span className="w-2 h-2 rounded-full bg-threat-crimson"></span>
             <span className="text-on-surface">Critical (&gt;85)</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-risk-amber"></span>
+            <span className="w-2 h-2 rounded-full bg-risk-amber"></span>
             <span className="text-on-surface">High (70-84)</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-primary"></span>
+            <span className="w-2 h-2 rounded-full bg-primary"></span>
             <span className="text-on-surface">Moderate (50-69)</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-verified-emerald"></span>
+            <span className="w-2 h-2 rounded-full bg-verified-emerald"></span>
             <span className="text-on-surface">Witness/Victim</span>
           </div>
-          <div className="h-3.5 w-px bg-surface-container-high"></div>
+          <div className="h-3 w-px bg-surface-container-high"></div>
           <div className="flex items-center gap-1 text-risk-amber">
-            <span className="material-symbols-outlined text-[14px]">payments</span> Financial Flow
+            <span className="material-symbols-outlined text-[13px]">payments</span> Financial Flow
           </div>
           <div className="flex items-center gap-1 text-primary">
-            <span className="material-symbols-outlined text-[14px]">cell_tower</span> Comms Edge
+            <span className="material-symbols-outlined text-[13px]">cell_tower</span> Comms Edge
           </div>
         </div>
       </div>

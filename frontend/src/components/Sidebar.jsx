@@ -56,46 +56,46 @@ export default function Sidebar({
   ];
 
   return (
-    <aside className="fixed left-0 top-20 bottom-0 w-64 bg-surface-secondary z-40 flex flex-col justify-between p-space-md shadow-[4px_0_24px_rgba(0,0,0,0.5)] border-r border-white/[0.06]">
-      <div className="flex flex-col gap-space-md">
+    <aside className="fixed left-0 top-16 bottom-0 w-60 bg-surface-secondary z-40 flex flex-col justify-between p-3 shadow-[4px_0_24px_rgba(0,0,0,0.5)] border-r border-white/[0.06] overflow-y-auto no-scrollbar">
+      <div className="flex flex-col gap-2.5">
         {/* Tactical Ops Live Indicator */}
-        <div className="px-2.5 py-1.5 rounded-lg bg-surface-container-lowest flex items-center justify-between border border-white/[0.04]">
-          <span className="font-label-sm text-label-sm uppercase text-on-surface-variant font-bold tracking-wider">
+        <div className="px-2.5 py-1 rounded-lg bg-surface-container-lowest flex items-center justify-between border border-white/[0.04]">
+          <span className="font-mono text-[11px] uppercase text-on-surface-variant font-bold tracking-wider">
             Tactical Ops
           </span>
-          <span className="px-2 py-0.5 rounded-full bg-threat-crimson/20 text-threat-crimson font-label-sm text-label-sm font-bold animate-pulse flex items-center gap-1">
+          <span className="px-2 py-0.2 rounded-full bg-threat-crimson/20 text-threat-crimson font-mono text-[10px] font-bold animate-pulse flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-threat-crimson"></span>
             LIVE RUN
           </span>
         </div>
 
         {/* Tactical Navigation Items */}
-        <nav className="flex flex-col gap-space-xs">
+        <nav className="flex flex-col gap-1">
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-all text-left group ${
+                className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg transition-all text-left group ${
                   isActive
-                    ? 'bg-primary-container text-on-primary font-bold shadow-[0_0_14px_rgba(6,182,212,0.4)]'
+                    ? 'bg-primary-container text-on-primary font-bold shadow-[0_0_12px_rgba(6,182,212,0.4)]'
                     : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
                 }`}
               >
-                <div className="flex items-center gap-space-sm min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
                   <span
-                    className={`material-symbols-outlined text-[20px] transition-transform group-hover:scale-110 ${
+                    className={`material-symbols-outlined text-[19px] transition-transform group-hover:scale-110 ${
                       isActive ? 'text-on-primary' : 'text-primary'
                     }`}
                   >
                     {item.icon}
                   </span>
-                  <span className="font-body-md text-body-md truncate">{item.label}</span>
+                  <span className="text-xs truncate font-medium">{item.label}</span>
                 </div>
                 {item.badge && (
                   <span
-                    className={`font-label-sm text-label-sm px-1.5 py-0.5 rounded font-bold shrink-0 ${
+                    className={`text-[10px] font-mono px-1.5 py-0.2 rounded font-bold shrink-0 ${
                       isActive ? 'bg-black/20 text-white' : item.badgeColor
                     }`}
                   >
@@ -109,8 +109,8 @@ export default function Sidebar({
       </div>
 
       {/* Bottom System Telemetry Card */}
-      <div className="flex flex-col gap-space-sm p-3.5 rounded-xl bg-surface-container-lowest/90 border border-white/[0.06] shadow-inner">
-        <div className="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+      <div className="flex flex-col gap-1.5 p-2.5 rounded-xl bg-surface-container-lowest/90 border border-white/[0.06] shadow-inner mt-2">
+        <div className="flex items-center justify-between text-on-surface-variant font-mono text-[10px]">
           <span className="tracking-wider">SYSTEM TELEMETRY</span>
           <span className="text-verified-emerald font-bold flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-verified-emerald animate-ping"></span>
@@ -118,8 +118,8 @@ export default function Sidebar({
           </span>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <div className="flex justify-between font-label-sm text-label-sm text-on-surface-variant">
+        <div className="flex flex-col gap-0.5">
+          <div className="flex justify-between font-mono text-[10px] text-on-surface-variant">
             <span>Graph Nodes</span>
             <span className="text-on-surface font-semibold">{nodeCount} Live</span>
           </div>
@@ -128,8 +128,8 @@ export default function Sidebar({
           </div>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <div className="flex justify-between font-label-sm text-label-sm text-on-surface-variant">
+        <div className="flex flex-col gap-0.5">
+          <div className="flex justify-between font-mono text-[10px] text-on-surface-variant">
             <span>Inference Unit</span>
             <span className="text-on-surface font-semibold">42ms p99</span>
           </div>
@@ -138,9 +138,9 @@ export default function Sidebar({
           </div>
         </div>
 
-        <div className="pt-2 border-t border-white/[0.04] flex items-center justify-between text-outline font-label-sm text-label-sm">
+        <div className="pt-1.5 border-t border-white/[0.04] flex items-center justify-between text-outline font-mono text-[10px]">
           <span>SHA-256 Chain</span>
-          <span className="text-primary font-mono font-bold tracking-wider">a9f3…e41</span>
+          <span className="text-primary font-bold tracking-wider">a9f3…e41</span>
         </div>
       </div>
     </aside>

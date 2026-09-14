@@ -66,7 +66,7 @@ export default function AgentQueryBar({
   ];
 
   return (
-    <div className="w-full flex flex-col gap-space-lg p-margin lg:p-margin-lg overflow-y-auto no-scrollbar max-h-[calc(100vh-5rem)]">
+    <div className="w-full flex flex-col gap-3 p-4 overflow-y-auto no-scrollbar max-h-[48vh] flex-shrink-0">
       {/* 1. AI COPILOT QUERY COMMAND BAR */}
       <section className="relative rounded-2xl p-space-lg bg-surface-container-lowest/80 backdrop-blur-2xl shadow-xl overflow-hidden border border-white/[0.08]">
         {/* Ambient glowing backdrops */}

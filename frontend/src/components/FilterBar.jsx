@@ -132,19 +132,19 @@ export default function FilterBar({
   }, [timelinePlaying, timelineDates, setTimelineDate]);
 
   return (
-    <section className="relative z-30 w-full px-margin py-space-sm bg-surface-secondary/85 backdrop-blur-xl shadow-lg flex flex-col gap-space-sm border-b border-white/[0.06]">
-      <div className="flex flex-wrap items-center justify-between gap-space-md">
+    <section className="relative z-30 w-full px-4 py-2 bg-surface-secondary/85 backdrop-blur-xl shadow-lg flex flex-col gap-1.5 border-b border-white/[0.06] flex-shrink-0">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         {/* Left: Glassmorphic Omnisearch with Dynamic Suggestion Dropdown */}
-        <div className="relative flex-1 min-w-[280px] max-w-xl" ref={searchContainerRef}>
-          <div className="flex items-center px-3.5 py-2 rounded-xl bg-surface-container-lowest/90 border border-white/[0.06] shadow-inner focus-within:shadow-[0_0_16px_rgba(6,182,212,0.3)] focus-within:border-primary/40 transition-all">
-            <span className="material-symbols-outlined text-primary text-[20px] mr-2">travel_explore</span>
+        <div className="relative flex-1 min-w-[200px] max-w-sm xl:max-w-md" ref={searchContainerRef}>
+          <div className="flex items-center px-3 py-1.5 rounded-xl bg-surface-container-lowest/90 border border-white/[0.06] shadow-inner focus-within:shadow-[0_0_16px_rgba(6,182,212,0.3)] focus-within:border-primary/40 transition-all">
+            <span className="material-symbols-outlined text-primary text-[18px] mr-2">travel_explore</span>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => liveSuggestions.length > 0 && setShowSuggestions(true)}
-              placeholder="Search suspects, burner phones, shell accounts, cloned plates, FIRs..."
-              className="w-full bg-transparent text-on-surface placeholder:text-outline text-body-sm font-body-sm focus:outline-none"
+              placeholder="Search suspects, burner phones, shell accounts..."
+              className="w-full bg-transparent text-on-surface placeholder:text-outline text-xs focus:outline-none"
             />
             {searchQuery && (
               <button 
@@ -154,7 +154,7 @@ export default function FilterBar({
                 ✕
               </button>
             )}
-            <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded bg-surface-container font-label-sm text-label-sm text-outline-variant">
+            <span className="hidden sm:inline-flex items-center px-1.5 py-0.2 rounded bg-surface-container font-mono text-[10px] text-outline-variant">
               ⌘K
             </span>
           </div>
@@ -162,7 +162,7 @@ export default function FilterBar({
           {/* Active Omnisearch Live Match Dropdown */}
           {showSuggestions && liveSuggestions.length > 0 && (
             <div className="absolute left-0 right-0 top-full mt-1.5 p-2 rounded-xl bg-surface-container-low shadow-2xl backdrop-blur-2xl border border-white/[0.08] z-50 flex flex-col gap-1">
-              <div className="flex items-center justify-between px-2.5 py-1 text-on-surface-variant font-label-sm text-label-sm uppercase">
+              <div className="flex items-center justify-between px-2.5 py-1 text-on-surface-variant font-mono text-[10px] uppercase">
                 <span>Verified Matches (Neo4j Cluster 088)</span>
                 <span className="text-verified-emerald font-bold">{liveSuggestions.length} Indexed Hits</span>
               </div>
@@ -175,30 +175,30 @@ export default function FilterBar({
                   }}
                   className="flex items-center justify-between p-2 rounded-lg bg-surface-container hover:bg-surface-container-high cursor-pointer transition-colors group/item"
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-threat-crimson/20 flex items-center justify-center text-threat-crimson flex-shrink-0">
-                      <span className="material-symbols-outlined text-[18px]">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-7 h-7 rounded-lg bg-threat-crimson/20 flex items-center justify-center text-threat-crimson flex-shrink-0">
+                      <span className="material-symbols-outlined text-[16px]">
                         {item.type === 'Person' ? 'person_alert' : item.type === 'Vehicle' ? 'directions_car' : 'dataset'}
                       </span>
                     </div>
                     <div className="flex flex-col min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="font-headline-sm text-body-sm text-on-surface font-bold group-hover/item:text-primary truncate">
+                        <span className="text-xs text-on-surface font-bold group-hover/item:text-primary truncate">
                           {item.name}
                         </span>
-                        <span className="font-label-sm text-label-sm text-risk-amber font-mono">[{item.id}]</span>
+                        <span className="text-[10px] text-risk-amber font-mono">[{item.id}]</span>
                         {item.risk_score >= 85 && (
-                          <span className="px-1.5 rounded bg-threat-crimson/25 text-threat-crimson font-label-sm text-label-sm font-bold">
+                          <span className="px-1 rounded bg-threat-crimson/25 text-threat-crimson text-[9px] font-mono font-bold">
                             CRITICAL
                           </span>
                         )}
                       </div>
-                      <span className="font-label-sm text-label-sm text-on-surface-variant truncate">
+                      <span className="text-[10px] text-on-surface-variant truncate">
                         {item.role || item.type} • Risk {item.risk_score || 'N/A'}
                       </span>
                     </div>
                   </div>
-                  <span className="font-label-sm text-label-sm bg-threat-crimson/20 text-threat-crimson px-2 py-0.5 rounded-full font-bold ml-2 shrink-0">
+                  <span className="text-[10px] font-mono bg-threat-crimson/20 text-threat-crimson px-1.5 py-0.2 rounded-full font-bold ml-2 shrink-0">
                     RISK {item.risk_score || 0}
                   </span>
                 </div>
@@ -208,12 +208,12 @@ export default function FilterBar({
         </div>
 
         {/* Right Tactical Controls Group */}
-        <div className="flex flex-wrap items-center gap-space-sm ml-auto">
+        <div className="flex flex-wrap items-center gap-2 ml-auto">
           {/* Top Threats Dropdown Pill with Pulsing Flame */}
           <div className="relative" ref={highRiskContainerRef}>
             <button
               onClick={() => setShowHighRisk(!showHighRisk)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-threat-crimson/15 text-threat-crimson font-label-md text-label-md font-bold shadow-[0_0_12px_rgba(244,63,94,0.25)] hover:bg-threat-crimson/25 transition-all border border-threat-crimson/30"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-threat-crimson/15 text-threat-crimson text-xs font-bold shadow-[0_0_12px_rgba(244,63,94,0.25)] hover:bg-threat-crimson/25 transition-all border border-threat-crimson/30"
             >
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-threat-crimson opacity-80"></span>
@@ -221,20 +221,20 @@ export default function FilterBar({
               </span>
               <span className="flex items-center gap-1">
                 <span>Top Threats</span>
-                <span className="px-1.5 py-0.2 rounded bg-threat-crimson text-surface-base font-label-sm text-label-sm">
+                <span className="px-1.5 py-0.2 rounded bg-threat-crimson text-surface-base font-mono text-[10px]">
                   {highRiskEntities.length || 6}
                 </span>
               </span>
-              <span className="material-symbols-outlined text-[16px]">expand_more</span>
+              <span className="material-symbols-outlined text-[15px]">expand_more</span>
             </button>
 
             {showHighRisk && (
-              <div className="absolute right-0 top-full mt-1.5 w-72 p-2.5 rounded-xl bg-surface-container-low shadow-2xl backdrop-blur-xl border border-white/[0.08] z-50 flex flex-col gap-2">
-                <div className="flex items-center justify-between text-label-sm font-label-sm text-on-surface-variant border-b border-white/[0.04] pb-1.5">
+              <div className="absolute right-0 top-full mt-1.5 w-72 p-2 rounded-xl bg-surface-container-low shadow-2xl backdrop-blur-xl border border-white/[0.08] z-50 flex flex-col gap-1.5">
+                <div className="flex items-center justify-between text-[11px] font-mono text-on-surface-variant border-b border-white/[0.04] pb-1">
                   <span className="font-semibold uppercase tracking-wider">PRIORITY INTERCEPTION</span>
                   <span className="text-threat-crimson font-bold">SORTED SCORE</span>
                 </div>
-                <div className="flex flex-col gap-1.5 font-label-sm text-label-sm">
+                <div className="flex flex-col gap-1 text-xs">
                   {highRiskEntities.map((suspect, idx) => (
                     <div
                       key={suspect.id || idx}
@@ -242,13 +242,13 @@ export default function FilterBar({
                         onSelectNode?.(suspect);
                         setShowHighRisk(false);
                       }}
-                      className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high cursor-pointer transition-colors"
+                      className="flex items-center justify-between px-2 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high cursor-pointer transition-colors"
                     >
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-outline-variant font-mono">{idx + 1}.</span>
-                        <span className="text-on-surface font-semibold truncate">{suspect.name}</span>
+                        <span className="text-outline-variant font-mono text-[10px]">{idx + 1}.</span>
+                        <span className="text-on-surface font-semibold truncate text-xs">{suspect.name}</span>
                       </div>
-                      <span className="font-bold text-threat-crimson font-mono ml-2 shrink-0">
+                      <span className="font-bold text-threat-crimson font-mono text-xs ml-2 shrink-0">
                         {suspect.risk_score} PTS
                       </span>
                     </div>
@@ -259,7 +259,7 @@ export default function FilterBar({
           </div>
 
           {/* Risk Threshold Segmented Filter */}
-          <div className="flex items-center p-0.5 rounded-xl bg-surface-container-lowest border border-white/[0.06]">
+          <div className="flex items-center p-0.5 rounded-lg bg-surface-container-lowest border border-white/[0.06]">
             {[
               { val: 0, label: 'All' },
               { val: 50, label: '>50' },
@@ -271,10 +271,10 @@ export default function FilterBar({
                 <button
                   key={th.val}
                   onClick={() => setRiskThreshold(th.val)}
-                  className={`px-2.5 py-1 rounded-lg font-label-sm text-label-sm transition-all ${
+                  className={`px-2 py-0.5 rounded-md text-xs transition-all font-mono ${
                     isSelected
                       ? th.val >= 85
-                        ? 'font-bold bg-threat-crimson text-surface-base shadow-[0_0_12px_rgba(244,63,94,0.4)]'
+                        ? 'font-bold bg-threat-crimson text-surface-base shadow-[0_0_10px_rgba(244,63,94,0.4)]'
                         : 'font-bold bg-primary-container text-on-primary-container shadow-sm'
                       : 'text-on-surface-variant hover:text-on-surface'
                   }`}
@@ -289,15 +289,15 @@ export default function FilterBar({
           <div className="relative">
             <button
               onClick={() => setShowTypeFilter(!showTypeFilter)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors border border-white/[0.06]"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container text-on-surface text-xs hover:bg-surface-container-high transition-colors border border-white/[0.06]"
             >
-              <span className="material-symbols-outlined text-primary text-[16px]">category</span>
+              <span className="material-symbols-outlined text-primary text-[15px]">category</span>
               <span>Types {selectedTypes.length}/5</span>
               <span className="material-symbols-outlined text-outline text-[14px]">arrow_drop_down</span>
             </button>
 
             {showTypeFilter && (
-              <div className="absolute right-0 top-full mt-1.5 w-56 p-2 rounded-xl bg-surface-container-low shadow-2xl backdrop-blur-xl border border-white/[0.08] z-50 flex flex-col gap-1 text-label-sm font-label-sm">
+              <div className="absolute right-0 top-full mt-1.5 w-52 p-1.5 rounded-xl bg-surface-container-low shadow-2xl backdrop-blur-xl border border-white/[0.08] z-50 flex flex-col gap-1 text-xs">
                 {entityTypeOptions.map((type) => {
                   const isSelected = selectedTypes.includes(type.id);
                   const count = nodeCountsByType?.[type.id] || 0;
@@ -305,14 +305,14 @@ export default function FilterBar({
                     <button
                       key={type.id}
                       onClick={() => toggleType(type.id)}
-                      className={`flex items-center justify-between px-2 py-1.5 rounded-lg transition-colors text-left ${
+                      className={`flex items-center justify-between px-2 py-1 rounded-lg transition-colors text-left ${
                         isSelected 
                           ? 'bg-surface-container text-primary font-semibold' 
                           : 'text-on-surface-variant hover:bg-surface-container'
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[15px]">{type.icon}</span>
+                        <span className="material-symbols-outlined text-[14px]">{type.icon}</span>
                         <span>{type.label}</span>
                       </div>
                       <span className="font-mono text-[10px] text-outline">({count})</span>
@@ -327,7 +327,7 @@ export default function FilterBar({
           <div className="relative">
             <button
               onClick={() => setShowTimeline(!showTimeline)}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all font-label-sm text-label-sm border ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all text-xs border ${
                 timelineDate || showTimeline
                   ? 'bg-tertiary-container/30 border-tertiary text-tertiary-fixed shadow-[0_0_12px_rgba(47,217,244,0.3)]'
                   : 'bg-surface-container text-tertiary hover:bg-surface-container-high border-white/[0.06]'
@@ -337,41 +337,41 @@ export default function FilterBar({
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-tertiary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-tertiary"></span>
               </span>
-              <span className="material-symbols-outlined text-[16px]">calendar_today</span>
-              <span>{timelineDate || 'Timeline 2024-2026'}</span>
+              <span className="material-symbols-outlined text-[15px]">calendar_today</span>
+              <span className="font-mono">{timelineDate || 'Timeline 2024-2026'}</span>
             </button>
 
             {/* Timeline Flyout Panel */}
             {showTimeline && (
-              <div className="absolute right-0 top-full mt-1.5 w-80 p-3 rounded-xl bg-surface-container-low shadow-2xl backdrop-blur-xl border border-white/[0.08] z-50 flex flex-col gap-2">
-                <div className="flex items-center justify-between border-b border-white/[0.06] pb-2">
-                  <div className="flex items-center gap-1.5 text-tertiary font-label-sm text-label-sm font-bold">
-                    <span className="material-symbols-outlined text-[16px]">history_toggle_drop</span>
+              <div className="absolute right-0 top-full mt-1.5 w-76 p-2.5 rounded-xl bg-surface-container-low shadow-2xl backdrop-blur-xl border border-white/[0.08] z-50 flex flex-col gap-2">
+                <div className="flex items-center justify-between border-b border-white/[0.06] pb-1.5">
+                  <div className="flex items-center gap-1.5 text-tertiary text-xs font-bold">
+                    <span className="material-symbols-outlined text-[15px]">history_toggle_drop</span>
                     <span>March 2026 Crime Timeline</span>
                   </div>
                   <button
                     onClick={() => setTimelinePlaying(!timelinePlaying)}
-                    className="flex items-center gap-1 px-2 py-0.5 rounded bg-primary-container text-on-primary font-label-sm text-label-sm font-bold shadow-sm"
+                    className="flex items-center gap-1 px-2 py-0.5 rounded bg-primary-container text-on-primary text-xs font-bold shadow-sm"
                   >
-                    <span className="material-symbols-outlined text-[14px]">
+                    <span className="material-symbols-outlined text-[13px]">
                       {timelinePlaying ? 'pause' : 'play_arrow'}
                     </span>
                     <span>{timelinePlaying ? 'Pause' : 'Play'}</span>
                   </button>
                 </div>
 
-                <div className="flex flex-col gap-1 max-h-56 overflow-y-auto no-scrollbar">
+                <div className="flex flex-col gap-1 max-h-52 overflow-y-auto no-scrollbar">
                   {timelineDates.map((item) => (
                     <button
                       key={item.date}
                       onClick={() => setTimelineDate(item.date === timelineDate ? null : item.date)}
-                      className={`w-full flex items-center gap-2 p-1.5 rounded text-left font-label-sm text-label-sm transition-colors ${
+                      className={`w-full flex items-center gap-2 p-1.5 rounded text-left text-xs transition-colors ${
                         timelineDate === item.date
                           ? 'bg-primary-container/20 text-primary border border-primary/30 font-bold'
                           : 'text-on-surface-variant hover:bg-surface-container'
                       }`}
                     >
-                      <span className="font-mono text-outline">{item.day} Mar:</span>
+                      <span className="font-mono text-outline text-[11px]">{item.day} Mar:</span>
                       <span className="truncate text-[11px]">{item.event}</span>
                     </button>
                   ))}
@@ -395,15 +395,15 @@ export default function FilterBar({
             className="p-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-outline hover:text-on-surface transition-colors border border-white/[0.06]"
             title="Reset all filters"
           >
-            <span className="material-symbols-outlined text-[18px]">restart_alt</span>
+            <span className="material-symbols-outlined text-[16px]">restart_alt</span>
           </button>
         </div>
       </div>
 
       {/* Entity Cluster Secondary Toolbar */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-0.5 no-scrollbar">
-        <span className="text-on-surface-variant font-label-sm text-label-sm uppercase mr-1 flex items-center gap-1 flex-shrink-0">
-          <span className="material-symbols-outlined text-[14px] text-primary">grain</span>
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 pt-0 no-scrollbar">
+        <span className="text-on-surface-variant text-[11px] font-mono uppercase mr-1 flex items-center gap-1 flex-shrink-0">
+          <span className="material-symbols-outlined text-[13px] text-primary">grain</span>
           CLUSTER FILTERS:
         </span>
         {clusters.map((c) => {
@@ -412,7 +412,7 @@ export default function FilterBar({
             <button
               key={c.id}
               onClick={() => setSelectedCluster(c.id)}
-              className={`px-3 py-1 rounded-full font-label-sm text-label-sm transition-all flex items-center gap-1.5 flex-shrink-0 border ${
+              className={`px-2.5 py-0.5 rounded-full text-xs transition-all flex items-center gap-1 flex-shrink-0 border ${
                 isActive
                   ? 'bg-primary/20 text-primary border-primary/40 shadow-[0_0_10px_rgba(6,182,212,0.3)] font-bold'
                   : 'bg-surface-container text-on-surface-variant hover:text-on-surface border-white/[0.04]'

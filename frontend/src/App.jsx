@@ -274,7 +274,7 @@ export default function App() {
       />
 
       {/* 3. Primary Tactical Workspace Body */}
-      <div className="pl-64 pt-20 flex-1 flex flex-col h-full w-full overflow-hidden relative">
+      <div className="pl-60 pt-16 flex-1 flex flex-col h-full w-full overflow-hidden relative min-h-0">
         {/* Ambient Grid & Spatial Glow Backdrops */}
         <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#4cd7f6_1px,transparent_1px)] [background-size:28px_28px]"></div>
@@ -283,10 +283,10 @@ export default function App() {
           <div className="absolute top-12 right-12 w-[380px] h-[380px] bg-ai-purple/10 rounded-full blur-[100px] pointer-events-none"></div>
         </div>
 
-        <main className="relative z-10 flex-1 flex flex-col overflow-hidden w-full">
+        <main className="relative z-10 flex-1 flex flex-col overflow-hidden w-full min-h-0">
         {/* VIEW 1: INTERACTIVE GRAPH CANVAS */}
         {activeTab === 'graph' && (
-          <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 flex flex-col overflow-hidden min-h-0">
             {/* Filter and Timeline Controls */}
             <FilterBar
               searchQuery={searchQuery}
@@ -311,7 +311,7 @@ export default function App() {
             />
 
             {/* Force Canvas */}
-            <div className="flex-1 relative overflow-hidden">
+            <div className="flex-1 relative overflow-hidden min-h-0">
               <GraphCanvas
                 nodes={filteredNodes}
                 edges={filteredEdges}
@@ -331,7 +331,7 @@ export default function App() {
 
         {/* VIEW 2: AI AGENTIC INVESTIGATION CONSOLE */}
         {activeTab === 'agent' && (
-          <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 flex flex-col overflow-hidden min-h-0">
             <AgentQueryBar
               onRunAgentQuery={handleRunAgentQuery}
               agentResponse={agentResponse}
