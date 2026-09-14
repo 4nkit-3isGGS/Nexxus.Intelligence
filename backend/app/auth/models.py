@@ -36,6 +36,7 @@ ROLE_PERMISSIONS: dict[Role, Set[Permission]] = {
     Role.ADMIN: {
         Permission.VIEW_GRAPH,
         Permission.SEARCH_ENTITY,
+        Permission.INVESTIGATE,
         Permission.VIEW_AUDIT_LOGS,
         Permission.VERIFY_AUDIT_INTEGRITY,
         Permission.MANAGE_USERS,
@@ -57,6 +58,7 @@ ROLE_PERMISSIONS: dict[Role, Set[Permission]] = {
     Role.ANALYST: {
         Permission.VIEW_GRAPH,
         Permission.SEARCH_ENTITY,
+        Permission.INVESTIGATE,
     },
     Role.AUDITOR: {
         Permission.VIEW_AUDIT_LOGS,

@@ -11,10 +11,15 @@ import FirCorpusView from './components/FirCorpusView';
 import LegalAuditVault from './components/LegalAuditVault';
 import EntityResolutionView from './components/EntityResolutionView';
 import IngestModal from './components/IngestModal';
+import HomePage from './components/HomePage';
+import AuthModal from './components/AuthModal';
 import { apiService } from './services/api';
 import { MOCK_GRAPH_DATA, AGENT_QUERY_PRESETS } from './data/mockIntelligenceData';
 
 export default function App() {
+  // Top-level Navigation View Mode: 'home' | 'workspace'
+  const [viewMode, setViewMode] = useState('home');
+
   // Navigation View Tab: 'graph' | 'agent' | 'resolution' | 'financial' | 'cdr' | 'fir' | 'audit'
   const [activeTab, setActiveTab] = useState('graph');
 
@@ -25,8 +30,11 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [showIngestModal, setShowIngestModal] = useState(false);
 
-  // Law Enforcement RBAC Clearance State
-  const [officerRole, setOfficerRole] = useState('LEAD_INVESTIGATOR');
+  // Authentication & Law Enforcement RBAC State
+  const [currentUser, setCurrentUser] = useState(() => apiService.getCurrentUser());
+  const [officerRole, setOfficerRole] = useState(currentUser?.role || 'LEAD_INVESTIGATOR');
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState('login');
 
   // Filter States
   const [searchQuery, setSearchQuery] = useState('');
@@ -75,8 +83,33 @@ export default function App() {
   // Handle RBAC Officer Role Change
   const handleRoleChange = (newRole) => {
     setOfficerRole(newRole);
-    apiService.setOfficerClearance(newRole);
+    const updated = apiService.setOfficerClearance(newRole);
+    setCurrentUser(updated);
     loadData();
+  };
+
+  // Handle Login / Registration Success
+  const handleLoginSuccess = (user) => {
+    setCurrentUser(user);
+    setOfficerRole(user.role);
+    apiService.setOfficerClearance(user.role);
+    setViewMode('workspace');
+    loadData();
+  };
+
+  // Quick 1-Click Role Select from Home Page
+  const handleQuickRoleSelect = async (role) => {
+    const res = await apiService.login({ identifier: role, role });
+    if (res.success) {
+      handleLoginSuccess(res.user);
+    }
+  };
+
+  // Handle Logout
+  const handleLogout = () => {
+    apiService.logout();
+    setCurrentUser(null);
+    setViewMode('home');
   };
 
   // Node Counts by Type
@@ -150,63 +183,110 @@ export default function App() {
   }, [rawGraphData, filteredNodes, timelineDate]);
 
   // Run LangGraph Agent Investigation (POST /api/investigate)
-  const handleRunAgentQuery = async (queryText) => {
+  const handleRunAgentQuery = async (queryText, subjectId = null) => {
     setLoadingQuery(true);
-    const result = await apiService.runInvestigation({ query: queryText });
+    const result = await apiService.runInvestigation({ query: queryText, subjectId });
     if (result?.data) {
       setAgentResponse({
         query: queryText,
         ...result.data,
       });
-
-      // Highlight target path nodes and edges in Canvas
       if (result.data.highlighted_nodes) {
         setHighlightedNodeIds(result.data.highlighted_nodes);
       }
       if (result.data.highlighted_edges) {
         setHighlightedEdgeIds(result.data.highlighted_edges);
       }
+
+      // Merge newly discovered nodes & edges into active canvas graph
+      if (result.data.graph_data?.nodes?.length) {
+        setRawGraphData((prev) => {
+          const existingNodeIds = new Set(prev.nodes.map((n) => n.id));
+          const existingEdgeKeys = new Set(prev.edges.map((e) => `${e.source}->${e.target}:${e.type || e.label || ''}`));
+
+          const newNodes = [...prev.nodes];
+          result.data.graph_data.nodes.forEach((n) => {
+            if (!existingNodeIds.has(n.id)) {
+              newNodes.push(n);
+              existingNodeIds.add(n.id);
+            }
+          });
+
+          const newEdges = [...prev.edges];
+          result.data.graph_data.edges.forEach((e) => {
+            const k = `${e.source}->${e.target}:${e.type || e.label || ''}`;
+            if (!existingEdgeKeys.has(k)) {
+              newEdges.push(e);
+              existingEdgeKeys.add(k);
+            }
+          });
+
+          return { ...prev, nodes: newNodes, edges: newEdges };
+        });
+      }
+    } else if (result?.error) {
+      setAgentResponse({
+        query: queryText,
+        error: result.error,
+        hypotheses: [],
+        tool_history: [],
+      });
     }
     setLoadingQuery(false);
   };
 
-  // Dynamic Shortest Path to Mastermind Kingpin (Debasish Chatterjee P008) via Neo4j API
-  const handleTraceKingpin = async (startNode) => {
-    if (!startNode) return;
-    const kingpinId = 'P008';
-
-    if (startNode.id === kingpinId) {
-      setHighlightedNodeIds([kingpinId]);
-      setActiveTab('graph');
-      return;
-    }
-
-    // Hit Neo4j shortest path endpoint (GET /api/graph/path)
-    const pathResult = await apiService.getShortestPath(startNode.id, kingpinId);
-
-    if (pathResult && pathResult.nodes && pathResult.nodes.length > 0) {
-      const nodeIds = pathResult.nodes.map((n) => n.id);
-      const edgeIds = (pathResult.edges || []).map((e) => e.id);
-      setHighlightedNodeIds(nodeIds);
-      setHighlightedEdgeIds(edgeIds);
-    } else {
-      // Fallback highlighting
-      setHighlightedNodeIds([startNode.id, kingpinId]);
-    }
-
-    setActiveTab('graph');
+  // Cross-app Investigation Trigger
+  const handleTriggerInvestigation = (queryText, subjectId = null) => {
+    setViewMode('workspace');
+    setActiveTab('agent');
+    handleRunAgentQuery(queryText, subjectId);
   };
 
-  // Subgraph expansion handler
-  const handleExpandSubgraph = (subgraph) => {
-    if (!subgraph) return;
-    if (Array.isArray(subgraph.nodes)) {
-      setHighlightedNodeIds(subgraph.nodes.map((n) => n.id));
+
+  // Trace to Kingpin
+  const handleTraceKingpin = async (suspectNode) => {
+    const result = await apiService.traceToKingpin(suspectNode.id);
+    if (result?.data?.path) {
+      setHighlightedNodeIds(result.data.path);
+      const edgeIds = [];
+      for (let i = 0; i < result.data.path.length - 1; i++) {
+        const u = result.data.path[i];
+        const v = result.data.path[i + 1];
+        const edge = rawGraphData.edges.find(
+          (e) => (e.source === u && e.target === v) || (e.source === v && e.target === u)
+        );
+        if (edge) edgeIds.push(edge.id);
+      }
+      setHighlightedEdgeIds(edgeIds);
+    } else {
+      setHighlightedNodeIds([suspectNode.id, 'P008']);
+      setHighlightedEdgeIds(['E008', 'E012']);
     }
-    if (Array.isArray(subgraph.edges)) {
-      setHighlightedEdgeIds(subgraph.edges.map((e) => e.id));
-    }
-    setActiveTab('graph');
+  };
+
+  // Expand Subgraph
+  const handleExpandSubgraph = (subgraphData) => {
+    if (!subgraphData) return;
+    const newNodes = [...rawGraphData.nodes];
+    const newEdges = [...rawGraphData.edges];
+
+    (subgraphData.nodes || []).forEach((n) => {
+      if (!newNodes.some((existing) => existing.id === n.id)) {
+        newNodes.push(n);
+      }
+    });
+
+    (subgraphData.edges || []).forEach((e) => {
+      if (!newEdges.some((existing) => existing.id === e.id)) {
+        newEdges.push(e);
+      }
+    });
+
+    setRawGraphData({
+      ...rawGraphData,
+      nodes: newNodes,
+      edges: newEdges,
+    });
   };
 
   // Reset Filters
@@ -217,28 +297,35 @@ export default function App() {
     setSelectedCluster('ALL');
     setTimelineDate(null);
     setTimelinePlaying(false);
+    setSelectedNode(null);
+    setSelectedEdge(null);
     setHighlightedNodeIds([]);
     setHighlightedEdgeIds([]);
-    setSelectedNode(null);
   };
 
-  // Keyboard Shortcuts Handler
+  // Timeline Auto-Player Effect
+  useEffect(() => {
+    let interval = null;
+    if (timelinePlaying) {
+      const dates = ['2026-03-01', '2026-03-05', '2026-03-10', '2026-03-15', '2026-03-20', '2026-03-24'];
+      let currentIndex = dates.indexOf(timelineDate);
+      if (currentIndex === -1) currentIndex = 0;
+
+      interval = setInterval(() => {
+        currentIndex = (currentIndex + 1) % dates.length;
+        setTimelineDate(dates[currentIndex]);
+      }, 1800);
+    }
+    return () => clearInterval(interval);
+  }, [timelinePlaying, timelineDate]);
+
+  // Global Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        setSelectedNode(null);
-        setHighlightedNodeIds([]);
-        setHighlightedEdgeIds([]);
-      } else if (e.key === '1' && e.altKey) {
-        setActiveTab('graph');
-      } else if (e.key === '2' && e.altKey) {
-        setActiveTab('agent');
-      } else if (e.key === '3' && e.altKey) {
-        setActiveTab('resolution');
-      } else if (e.key === '4' && e.altKey) {
-        setActiveTab('financial');
-      } else if (e.key === '5' && e.altKey) {
-        setActiveTab('cdr');
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        const searchInput = document.getElementById('omnisearch-input');
+        if (searchInput) searchInput.focus();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -246,181 +333,229 @@ export default function App() {
   }, []);
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-surface-base text-on-surface flex flex-col font-body-md selection:bg-primary-container selection:text-on-primary-container relative">
-      {/* 1. Tactical Header */}
-      <Header
-        activeTab={activeTab}
-        backendStatus={backendStatus}
-        refreshData={loadData}
-        caseInfo={rawGraphData?.case_info}
-        kpiStats={{
-          totalNodes: graphStats.total_nodes || rawGraphData?.nodes?.length || 0,
-          totalEdges: graphStats.total_relationships || rawGraphData?.edges?.length || 0,
-        }}
-        pendingReviewCount={3}
-        onOpenIngest={() => setShowIngestModal(true)}
-        officerRole={officerRole}
-        onRoleChange={handleRoleChange}
-      />
-
-      {/* Main App Body Row: Sidebar + Primary Workspace */}
-      <div className="flex-1 flex overflow-hidden w-full relative min-h-0">
-        {/* 2. Tactical Ops Left Sidebar */}
-        <Sidebar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          nodeCount={graphStats.total_nodes || rawGraphData?.nodes?.length || 31}
-          pendingReviewCount={3}
-          backendStatus={backendStatus}
-        />
-
-        {/* 3. Primary Tactical Workspace Body */}
-        <div className="flex-1 flex flex-col h-full w-full overflow-hidden relative min-h-0 min-w-0 bg-[#f8fafc]">
-          {/* Ambient Grid & Spatial Glow Backdrops */}
-          <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-            <div className="absolute inset-0 opacity-40 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] [background-size:28px_28px]"></div>
-            <div className="absolute top-1/4 left-1/3 w-[550px] h-[550px] bg-threat-crimson/5 rounded-full blur-[140px] pointer-events-none animate-pulse"></div>
-            <div className="absolute bottom-1/3 right-1/4 w-[480px] h-[480px] bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
-            <div className="absolute top-12 right-12 w-[380px] h-[380px] bg-ai-purple/5 rounded-full blur-[100px] pointer-events-none"></div>
-          </div>
-
-          <main className="relative z-10 flex-1 flex flex-col overflow-hidden w-full min-h-0 min-w-0">
-          {/* VIEW 1: INTERACTIVE GRAPH CANVAS */}
-          {activeTab === 'graph' && (
-            <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-              {/* Filter and Timeline Controls */}
-              <FilterBar
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                riskThreshold={riskThreshold}
-                setRiskThreshold={setRiskThreshold}
-                selectedTypes={selectedTypes}
-                toggleType={toggleType}
-                selectedCluster={selectedCluster}
-                setSelectedCluster={setSelectedCluster}
-                timelineDate={timelineDate}
-                setTimelineDate={setTimelineDate}
-                timelinePlaying={timelinePlaying}
-                setTimelinePlaying={setTimelinePlaying}
-                nodeCountsByType={nodeCountsByType}
-                resetFilters={resetFilters}
-                onSelectNode={(node) => {
-                  const fullNode = rawGraphData?.nodes?.find((n) => n.id === node.id) || node;
-                  setSelectedNode(fullNode);
-                  setHighlightedNodeIds([fullNode.id]);
-                }}
-              />
-
-              {/* Force Canvas */}
-              <div className="flex-1 relative overflow-hidden min-h-0">
-                <GraphCanvas
-                  nodes={filteredNodes}
-                  edges={filteredEdges}
-                  selectedNode={selectedNode}
-                  onSelectNode={(node) => setSelectedNode(node)}
-                  selectedEdge={selectedEdge}
-                  onSelectEdge={(edge) => setSelectedEdge(edge)}
-                  highlightedNodeIds={highlightedNodeIds}
-                  highlightedEdgeIds={highlightedEdgeIds}
-                  timelineDate={timelineDate}
-                  activeLayout={activeLayout}
-                  onLayoutChange={(layout) => setActiveLayout(layout)}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* VIEW 2: AI AGENTIC INVESTIGATION CONSOLE */}
-          {activeTab === 'agent' && (
-            <AgentQueryBar
-              onRunAgentQuery={handleRunAgentQuery}
-              agentResponse={agentResponse}
-              loadingQuery={loadingQuery}
-              onFocusSubgraph={(nodeIds, edgeIds) => {
-                setHighlightedNodeIds(nodeIds || []);
-                setHighlightedEdgeIds(edgeIds || []);
-                setActiveTab('graph');
-              }}
-            />
-          )}
-
-          {/* VIEW 3: ENTITY RESOLUTION & DUPLICATE REVIEW QUEUE */}
-          {activeTab === 'resolution' && (
-            <EntityResolutionView
-              onFocusEntity={(node) => {
-                setSelectedNode(node);
-                setActiveTab('graph');
-              }}
-              onJumpToGraph={() => setActiveTab('graph')}
-            />
-          )}
-
-          {/* VIEW 4: CIRCULAR MONEY TRAIL & AML FLOW */}
-          {activeTab === 'financial' && (
-            <FinancialFlowView
-              onSelectEntity={(nodeId) => {
-                const found = rawGraphData.nodes.find((n) => n.id === nodeId);
-                if (found) {
-                  setSelectedNode(found);
-                  setActiveTab('graph');
-                }
-              }}
-            />
-          )}
-
-          {/* VIEW 5: CDR TELEMETRY & CALL SPIKE MATRIX */}
-          {activeTab === 'cdr' && (
-            <CdrTelemetryView />
-          )}
-
-          {/* VIEW 6: FIR CORPUS & IN-TEXT NER HIGHLIGHTER */}
-          {activeTab === 'fir' && (
-            <FirCorpusView
-              onSelectEntity={(entityName) => {
-                const found = rawGraphData.nodes.find((n) => n.name.includes(entityName));
-                if (found) {
-                  setSelectedNode(found);
-                  setActiveTab('graph');
-                }
-              }}
-              onJumpToGraph={() => setActiveTab('graph')}
-            />
-          )}
-
-          {/* VIEW 7: BSA SECTION 65B LEGAL AUDIT VAULT */}
-          {activeTab === 'audit' && (
-            <LegalAuditVault
-              caseInfo={rawGraphData.case_info}
-              nodes={rawGraphData.nodes}
-              edges={rawGraphData.edges}
-            />
-          )}
-        </main>
+    <div className="h-screen w-screen overflow-hidden bg-slate-100 text-slate-900 flex flex-col font-sans selection:bg-sky-500/20 selection:text-sky-900 relative">
+      {/* VIEW MODE 1: ATTRACTIVE EXECUTIVE HOMEPAGE */}
+      {viewMode === 'home' && (
+        <div className="flex-1 overflow-y-auto w-full h-full no-scrollbar">
+          <HomePage
+            onLaunchWorkspace={() => setViewMode('workspace')}
+            onOpenAuth={(tab = 'login') => {
+              setAuthModalTab(tab);
+              setShowAuthModal(true);
+            }}
+            currentUser={currentUser}
+            onQuickRoleSelect={handleQuickRoleSelect}
+            onInvestigate={(query, subjectId) => handleTriggerInvestigation(query, subjectId)}
+            stats={{
+              totalNodes: graphStats.total_nodes || rawGraphData?.nodes?.length || 31,
+              totalEdges: graphStats.total_relationships || rawGraphData?.edges?.length || 42,
+              totalAmount: '₹14,85,000'
+            }}
+          />
         </div>
-      </div>
-
-      {/* 3. Slide-Over Evidence & Investigation Drawer */}
-      {selectedNode && (
-        <EvidenceDrawer
-          selectedNode={selectedNode}
-          onClose={() => setSelectedNode(null)}
-          onFocusNode={(node) => {
-            setHighlightedNodeIds([node.id]);
-          }}
-          onTraceKingpin={handleTraceKingpin}
-          onOpenFirDoc={(docId) => {
-            setActiveTab('fir');
-          }}
-          onExpandSubgraph={handleExpandSubgraph}
-          allEdges={rawGraphData?.edges || []}
-        />
       )}
 
-      {/* 4. Ingestion Modal */}
-      <IngestModal
-        isOpen={showIngestModal}
-        onClose={() => setShowIngestModal(false)}
-        onIngestSuccess={loadData}
+      {/* VIEW MODE 2: TACTICAL INVESTIGATION COMMAND CENTER WORKSPACE */}
+      {viewMode === 'workspace' && (
+        <div className="flex-1 flex flex-col h-full w-full overflow-hidden relative">
+          {/* 1. Tactical Header */}
+          <Header
+            activeTab={activeTab}
+            backendStatus={backendStatus}
+            refreshData={loadData}
+            caseInfo={rawGraphData?.case_info}
+            kpiStats={{
+              totalNodes: graphStats.total_nodes || rawGraphData?.nodes?.length || 0,
+              totalEdges: graphStats.total_relationships || rawGraphData?.edges?.length || 0,
+            }}
+            pendingReviewCount={3}
+            onOpenIngest={() => setShowIngestModal(true)}
+            officerRole={officerRole}
+            onRoleChange={handleRoleChange}
+            onGoHome={() => setViewMode('home')}
+            currentUser={currentUser}
+            onOpenAuth={(tab = 'login') => {
+              setAuthModalTab(tab);
+              setShowAuthModal(true);
+            }}
+            onLogout={handleLogout}
+          />
+
+          {/* Main App Body Row: Sidebar + Primary Workspace */}
+          <div className="flex-1 flex overflow-hidden w-full relative min-h-0">
+            {/* 2. Tactical Ops Left Sidebar */}
+            <Sidebar
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              nodeCount={graphStats.total_nodes || rawGraphData?.nodes?.length || 31}
+              pendingReviewCount={3}
+              backendStatus={backendStatus}
+              onGoHome={() => setViewMode('home')}
+            />
+
+            {/* 3. Primary Tactical Workspace Body */}
+            <div className="flex-1 flex flex-col h-full w-full overflow-hidden relative min-h-0 min-w-0 bg-slate-50/70">
+              {/* Ambient Subtle Grid */}
+              <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+                <div className="absolute inset-0 opacity-70 bg-[radial-gradient(rgba(15,23,42,0.06)_1px,transparent_1px)] [background-size:24px_24px]"></div>
+              </div>
+
+              <main className="relative z-10 flex-1 flex flex-col overflow-hidden w-full min-h-0 min-w-0">
+                {/* VIEW 1: INTERACTIVE GRAPH CANVAS */}
+                {activeTab === 'graph' && (
+                  <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+                    {/* Filter and Timeline Controls */}
+                    <FilterBar
+                      searchQuery={searchQuery}
+                      setSearchQuery={setSearchQuery}
+                      riskThreshold={riskThreshold}
+                      setRiskThreshold={setRiskThreshold}
+                      selectedTypes={selectedTypes}
+                      toggleType={toggleType}
+                      selectedCluster={selectedCluster}
+                      setSelectedCluster={setSelectedCluster}
+                      timelineDate={timelineDate}
+                      setTimelineDate={setTimelineDate}
+                      timelinePlaying={timelinePlaying}
+                      setTimelinePlaying={setTimelinePlaying}
+                      nodeCountsByType={nodeCountsByType}
+                      resetFilters={resetFilters}
+                      onSelectNode={(node) => {
+                        const fullNode = rawGraphData?.nodes?.find((n) => n.id === node.id) || node;
+                        setSelectedNode(fullNode);
+                        setHighlightedNodeIds([fullNode.id]);
+                      }}
+                    />
+
+                    {/* Force Canvas */}
+                    <div className="flex-1 relative overflow-hidden min-h-0">
+                      <GraphCanvas
+                        nodes={filteredNodes}
+                        edges={filteredEdges}
+                        selectedNode={selectedNode}
+                        onSelectNode={(node) => setSelectedNode(node)}
+                        selectedEdge={selectedEdge}
+                        onSelectEdge={(edge) => setSelectedEdge(edge)}
+                        highlightedNodeIds={highlightedNodeIds}
+                        highlightedEdgeIds={highlightedEdgeIds}
+                        timelineDate={timelineDate}
+                        activeLayout={activeLayout}
+                        onLayoutChange={(layout) => setActiveLayout(layout)}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* VIEW 2: AI AGENTIC INVESTIGATION CONSOLE */}
+                {activeTab === 'agent' && (
+                  <AgentQueryBar
+                    onRunAgentQuery={handleRunAgentQuery}
+                    agentResponse={agentResponse}
+                    loadingQuery={loadingQuery}
+                    onFocusSubgraph={(nodeIds, edgeIds) => {
+                      setHighlightedNodeIds(nodeIds || []);
+                      setHighlightedEdgeIds(edgeIds || []);
+                      setActiveTab('graph');
+                    }}
+                  />
+                )}
+
+                {/* VIEW 3: ENTITY RESOLUTION & DUPLICATE REVIEW QUEUE */}
+                {activeTab === 'resolution' && (
+                  <EntityResolutionView
+                    onFocusEntity={(node) => {
+                      setSelectedNode(node);
+                      setActiveTab('graph');
+                    }}
+                    onJumpToGraph={() => setActiveTab('graph')}
+                    onInvestigateEntity={(node) => {
+                      handleTriggerInvestigation(`Perform graph entity resolution and investigate network for ${node.name} (${node.id})`, node.id);
+                    }}
+                  />
+                )}
+
+                {/* VIEW 4: CIRCULAR MONEY TRAIL & AML FLOW */}
+                {activeTab === 'financial' && (
+                  <FinancialFlowView
+                    onSelectEntity={(nodeId) => {
+                      const found = rawGraphData.nodes.find((n) => n.id === nodeId);
+                      if (found) {
+                        setSelectedNode(found);
+                        setActiveTab('graph');
+                      }
+                    }}
+                  />
+                )}
+
+                {/* VIEW 5: CDR TELEMETRY & CALL SPIKE MATRIX */}
+                {activeTab === 'cdr' && (
+                  <CdrTelemetryView />
+                )}
+
+                {/* VIEW 6: FIR CORPUS & IN-TEXT NER HIGHLIGHTER */}
+                {activeTab === 'fir' && (
+                  <FirCorpusView
+                    onSelectEntity={(entityName) => {
+                      const found = rawGraphData.nodes.find((n) => n.name.includes(entityName));
+                      if (found) {
+                        setSelectedNode(found);
+                        setActiveTab('graph');
+                      }
+                    }}
+                    onJumpToGraph={() => setActiveTab('graph')}
+                    onInvestigateFir={(fir) => {
+                      handleTriggerInvestigation(`Investigate FIR ${fir.fir_no} (${fir.doc_id}) involving ${fir.accused.join(', ')}`);
+                    }}
+                  />
+                )}
+
+                {/* VIEW 7: BSA SECTION 65B LEGAL AUDIT VAULT */}
+                {activeTab === 'audit' && (
+                  <LegalAuditVault
+                    caseInfo={rawGraphData.case_info}
+                    nodes={rawGraphData.nodes}
+                    edges={rawGraphData.edges}
+                  />
+                )}
+              </main>
+            </div>
+          </div>
+
+          {/* Slide-Over Evidence & Investigation Drawer */}
+          {selectedNode && (
+            <EvidenceDrawer
+              selectedNode={selectedNode}
+              onClose={() => setSelectedNode(null)}
+              onFocusNode={(node) => {
+                setHighlightedNodeIds([node.id]);
+              }}
+              onTraceKingpin={handleTraceKingpin}
+              onOpenFirDoc={(docId) => {
+                setActiveTab('fir');
+              }}
+              onExpandSubgraph={handleExpandSubgraph}
+              onInvestigateNode={(node) => {
+                handleTriggerInvestigation(`Investigate suspect ${node.name} (${node.id}) and map connected syndicate operations`, node.id);
+              }}
+              allEdges={rawGraphData?.edges || []}
+            />
+          )}
+
+          {/* Ingestion Modal */}
+          <IngestModal
+            isOpen={showIngestModal}
+            onClose={() => setShowIngestModal(false)}
+            onIngestSuccess={loadData}
+          />
+        </div>
+      )}
+
+      {/* Global Law Enforcement RBAC Authentication & Registration Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        initialTab={authModalTab}
+        onClose={() => setShowAuthModal(false)}
+        onLoginSuccess={handleLoginSuccess}
       />
     </div>
   );

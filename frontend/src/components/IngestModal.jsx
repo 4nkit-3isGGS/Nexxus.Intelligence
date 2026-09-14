@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import confetti from 'canvas-confetti';
 import { apiService } from '../services/api';
 
 export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
@@ -41,7 +40,6 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
       const res = await apiService.ingestPayload(samplePayload);
       if (res.success) {
         setResult(res.data || res);
-        confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
         if (onIngestSuccess) onIngestSuccess();
       } else {
         setError(res.error || 'Ingestion request failed');
@@ -55,59 +53,61 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl animate-fade-in text-slate-800">
+      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl animate-fade-in text-slate-900">
         {/* Header */}
-        <div className="p-4 bg-slate-50/80 border-b border-slate-200/80 flex items-center justify-between">
-          <div className="flex items-center gap-space-sm">
-            <div className="p-2 rounded-xl bg-sky-50 text-sky-600 border border-sky-200">
+        <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-sky-50 text-sky-700 border border-sky-200 shadow-xs">
               <span className="material-symbols-outlined text-[20px]">cloud_upload</span>
             </div>
             <div>
-              <h3 className="font-headline-sm text-body-sm font-bold text-slate-900">
+              <h3 className="font-display text-sm font-bold text-slate-900">
                 NLP Extraction Pipeline Ingestion
               </h3>
-              <p className="text-[11px] text-slate-500 font-mono">POST /api/graph/ingest</p>
+              <p className="text-[10px] text-sky-700 font-mono">POST /api/graph/ingest</p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors"
+            className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 border border-slate-200 flex items-center justify-center transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">close</span>
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-5 flex flex-col gap-4 text-body-sm">
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex flex-col gap-2">
-            <div className="flex items-center gap-2 text-sky-700 font-bold font-label-sm text-label-sm">
+        <div className="p-5 flex flex-col gap-4 text-xs">
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex flex-col gap-1.5">
+            <div className="flex items-center gap-2 text-sky-700 font-bold">
               <span className="material-symbols-outlined text-[16px]">data_object</span>
               <span>Abhidha's NLP Contract (output_contract.json)</span>
             </div>
-            <p className="text-slate-600 text-[12px] leading-relaxed">
+            <p className="text-slate-600 text-[11px] leading-relaxed">
               Ingests extracted entities (Persons, Phones, Locations, Vehicles, Orgs) and relationships with automatic entity resolution, fuzzy token deduplication, and BSA Section 65B hash validation.
             </p>
           </div>
 
           {/* Stepper Pipeline */}
-          <div className="flex flex-col gap-2 font-label-sm text-label-sm">
-            <span className="text-slate-500 uppercase text-[10px] font-semibold">Extraction Pipeline Stages:</span>
+          <div className="flex flex-col gap-2">
+            <span className="text-slate-500 uppercase text-[10px] font-mono font-bold tracking-wider">
+              Extraction Pipeline Stages:
+            </span>
             <div className="grid grid-cols-2 gap-2">
-              <div className="p-2 rounded-lg bg-white border border-slate-200 shadow-xs flex items-center gap-2 text-[11px] text-slate-700 font-medium">
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs flex items-center gap-2 text-[11px] text-slate-800 font-semibold">
                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                 <span>1. PDF OCR Parsing</span>
               </div>
-              <div className="p-2 rounded-lg bg-white border border-slate-200 shadow-xs flex items-center gap-2 text-[11px] text-slate-700 font-medium">
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs flex items-center gap-2 text-[11px] text-slate-800 font-semibold">
                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                 <span>2. NER Triplet Extraction</span>
               </div>
-              <div className="p-2 rounded-lg bg-white border border-slate-200 shadow-xs flex items-center gap-2 text-[11px] text-slate-700 font-medium">
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs flex items-center gap-2 text-[11px] text-slate-800 font-semibold">
                 <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
                 <span>3. Graph Node Sync</span>
               </div>
-              <div className="p-2 rounded-lg bg-white border border-slate-200 shadow-xs flex items-center gap-2 text-[11px] text-slate-700 font-medium">
-                <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs flex items-center gap-2 text-[11px] text-slate-800 font-semibold">
+                <span className="w-2 h-2 rounded-full bg-purple-600"></span>
                 <span>4. §65B Hash Attestation</span>
               </div>
             </div>
@@ -115,33 +115,33 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
 
           {/* Result / Error Banner */}
           {result && (
-            <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-between text-body-sm">
+            <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-[18px]">task_alt</span>
-                <span className="font-medium">Ingested 10 entities & 5 relationships successfully!</span>
+                <span className="font-semibold text-xs">Ingested 10 entities & 5 relationships successfully!</span>
               </div>
             </div>
           )}
 
           {error && (
-            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2 text-body-sm">
+            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px]">error</span>
-              <span>{error}</span>
+              <span className="font-medium text-xs">{error}</span>
             </div>
           )}
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-label-sm text-label-sm font-medium transition-colors"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors border border-slate-200 cursor-pointer"
             >
               Cancel
             </button>
             <button
               onClick={handleIngestSample}
               disabled={loading}
-              className="px-4 py-2 rounded-lg bg-sky-600 text-white font-label-sm text-label-sm font-bold shadow-sm hover:bg-sky-700 transition-all flex items-center gap-1.5 active:scale-95"
+              className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[16px]">
                 {loading ? 'autorenew' : 'upload'}
