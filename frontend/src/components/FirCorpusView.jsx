@@ -111,7 +111,7 @@ export default function FirCorpusView({ onJumpToGraph, onInvestigateFir }) {
                 <span className="material-symbols-outlined text-[17px] text-sky-200 group-hover:rotate-12 transition-transform">
                   smart_toy
                 </span>
-                <span>Investigate FIR with Swarm (/api/investigate)</span>
+                <span>Investigate FIR with Agent Swarm</span>
               </button>
             )}
 

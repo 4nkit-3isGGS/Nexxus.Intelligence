@@ -273,7 +273,7 @@ export default function EvidenceDrawer({
               <span className="material-symbols-outlined text-[18px] text-sky-200 group-hover:rotate-12 transition-transform">
                 smart_toy
               </span>
-              <span>Launch Multi-Agent Investigation (/api/investigate)</span>
+              <span>Launch Multi-Agent Investigation</span>
               <span className="px-1.5 py-0.5 rounded bg-white/20 text-[10px] font-mono uppercase tracking-wider">
                 LIVE SWARM
               </span>

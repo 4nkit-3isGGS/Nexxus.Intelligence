@@ -138,7 +138,7 @@ export default function AgentQueryBar({
                   : 'bg-sky-50 text-sky-800 border-sky-300'
               }`}>
                 <span className={`w-2 h-2 rounded-full ${isLiveFastAPI ? 'bg-emerald-500 animate-pulse' : 'bg-sky-500'}`}></span>
-                <span>{isLiveFastAPI ? 'POST /api/investigate (LIVE)' : 'AUTONOMOUS MATCHER'}</span>
+                <span>{isLiveFastAPI ? 'AI SWARM ACTIVE' : 'AUTONOMOUS MATCHER'}</span>
               </span>
               <span className="text-slate-300">•</span>
               <span className="text-slate-500">LLM:</span>
@@ -174,7 +174,7 @@ export default function AgentQueryBar({
                 </span>
                 <span>{loadingQuery ? 'Executing Swarm...' : 'Investigate'}</span>
                 <span className="ml-1 px-1.5 py-0.2 rounded text-[9px] bg-sky-700 uppercase tracking-wider text-white font-mono font-bold">
-                  /api/investigate
+                  SWARM
                 </span>
               </button>
             </div>

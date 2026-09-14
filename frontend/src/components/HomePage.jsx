@@ -139,7 +139,7 @@ export default function HomePage({
               className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 flex-shrink-0"
             >
               <span className="material-symbols-outlined text-[17px]">auto_awesome</span>
-              <span>Run /api/investigate</span>
+              <span>Launch Autonomous Investigation</span>
             </button>
           </form>
 
@@ -607,7 +607,7 @@ export default function HomePage({
                 }}
                 className="px-6 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-300 transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Inspect Kingpin Subgraph (/api/investigate)</span>
+                <span>Inspect Kingpin Subgraph</span>
                 <span className="material-symbols-outlined text-[16px] text-sky-600">hub</span>
               </button>
             </div>
