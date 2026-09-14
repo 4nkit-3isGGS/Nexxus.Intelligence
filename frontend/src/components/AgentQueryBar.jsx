@@ -141,6 +141,9 @@ export default function AgentQueryBar({
                 <span>{isLiveFastAPI ? 'POST /api/investigate (LIVE)' : 'AUTONOMOUS MATCHER'}</span>
               </span>
               <span className="text-slate-300">•</span>
+              <span className="text-slate-500">LLM:</span>
+              <span className="text-purple-700 font-bold">OpenAI API</span>
+              <span className="text-slate-300">•</span>
               <span className="text-slate-500">Neo4j Bolt:</span>
               <span className="text-emerald-700 font-bold">ACTIVE</span>
             </div>

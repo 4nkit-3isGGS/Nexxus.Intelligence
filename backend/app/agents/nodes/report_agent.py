@@ -154,7 +154,7 @@ def report_agent_node(state: InvestigationState) -> Dict[str, Any]:
 
     deterministic_text = "\n".join(dossier)
     
-    # Synthesize with Groq LLM if available, falling back safely to deterministic dossier
+    # Synthesize with OpenAI LLM if available, falling back safely to deterministic dossier
     from backend.app.agents.llm import generate_llm_dossier
     final_text = generate_llm_dossier(
         subject_id=subject_id,
