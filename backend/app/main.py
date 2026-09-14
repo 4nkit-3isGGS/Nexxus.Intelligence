@@ -5,13 +5,21 @@ FastAPI entry point. Connects to Neo4j on startup, registers all route modules,
 and exposes the graph ingestion + query API for the team.
 """
 
+import sys
+from pathlib import Path
 from contextlib import asynccontextmanager
+
+# Ensure workspace root is in sys.path so 'backend' package is always resolvable
+WORKSPACE_ROOT = str(Path(__file__).resolve().parent.parent.parent)
+if WORKSPACE_ROOT not in sys.path:
+    sys.path.insert(0, WORKSPACE_ROOT)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.neo4j_driver import db
 from backend.app.api import ingestion_routes, entity_routes, graph_routes, health_routes, investigation_routes, audit_routes
+
 
 
 @asynccontextmanager
