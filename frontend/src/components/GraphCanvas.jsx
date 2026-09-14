@@ -68,18 +68,18 @@ export default function GraphCanvas({
       const initialX = existing?.x ?? (clusterCenter.x + Math.cos(angle) * spread + (Math.random() - 0.5) * 30);
       const initialY = existing?.y ?? (clusterCenter.y + Math.sin(angle) * spread + (Math.random() - 0.5) * 30);
 
-      // Clean Modern Colors
-      let color = '#10b981'; // Emerald Low
-      let glowColor = 'rgba(16, 185, 129, 0.4)';
+      // Clean Tactical Light Colors
+      let color = '#059669'; // Emerald Low
+      let glowColor = 'rgba(5, 150, 105, 0.18)';
       if (node.risk_score >= 85) {
-        color = '#f43f5e'; // Rose Critical
-        glowColor = 'rgba(244, 63, 94, 0.6)';
+        color = '#e11d48'; // Rose Critical
+        glowColor = 'rgba(225, 29, 72, 0.2)';
       } else if (node.risk_score >= 70) {
-        color = '#f59e0b'; // Amber High
-        glowColor = 'rgba(245, 158, 11, 0.5)';
+        color = '#d97706'; // Amber High
+        glowColor = 'rgba(217, 119, 6, 0.18)';
       } else if (node.risk_score >= 40) {
-        color = '#06b6d4'; // Cyan Moderate
-        glowColor = 'rgba(6, 182, 212, 0.4)';
+        color = '#0284c7'; // Sky Moderate
+        glowColor = 'rgba(2, 132, 199, 0.18)';
       }
 
       return {
@@ -292,10 +292,10 @@ export default function GraphCanvas({
         ctx.lineTo(target.x, target.y);
 
         if (edge.is_anomaly || edge.sub_type === 'CALL_SPIKE_ANOMALY') {
-          ctx.strokeStyle = '#f43f5e';
+          ctx.strokeStyle = '#e11d48';
           ctx.lineWidth = isEdgeHighlighted ? 4 : 2.5;
-          ctx.shadowColor = 'rgba(244, 63, 94, 0.7)';
-          ctx.shadowBlur = 10;
+          ctx.shadowColor = 'rgba(225, 29, 72, 0.4)';
+          ctx.shadowBlur = 8;
           ctx.stroke();
 
           // Animated energy pulse
@@ -305,15 +305,15 @@ export default function GraphCanvas({
           ctx.beginPath();
           ctx.arc(px, py, 4, 0, Math.PI * 2);
           ctx.fillStyle = '#ffffff';
-          ctx.shadowColor = '#f43f5e';
-          ctx.shadowBlur = 8;
+          ctx.shadowColor = '#e11d48';
+          ctx.shadowBlur = 6;
           ctx.fill();
 
         } else if (edge.anomaly_type?.includes('CIRCULAR') || edge.is_circular) {
-          ctx.strokeStyle = '#fbbf24';
+          ctx.strokeStyle = '#d97706';
           ctx.lineWidth = isEdgeHighlighted ? 3.5 : 2.2;
-          ctx.shadowColor = 'rgba(245, 158, 11, 0.6)';
-          ctx.shadowBlur = 10;
+          ctx.shadowColor = 'rgba(217, 119, 6, 0.4)';
+          ctx.shadowBlur = 8;
           ctx.stroke();
 
           const progress = (pulseOffsetRef.current * 0.5) % 1;
@@ -321,21 +321,21 @@ export default function GraphCanvas({
           const py = source.y + (target.y - source.y) * progress;
           ctx.beginPath();
           ctx.arc(px, py, 3.5, 0, Math.PI * 2);
-          ctx.fillStyle = '#fef08a';
+          ctx.fillStyle = '#d97706';
           ctx.fill();
 
         } else if (edge.is_bridge) {
-          ctx.strokeStyle = '#a855f7';
+          ctx.strokeStyle = '#7c3aed';
           ctx.lineWidth = isEdgeHighlighted ? 3.5 : 2;
-          ctx.shadowColor = 'rgba(168, 85, 247, 0.5)';
-          ctx.shadowBlur = 8;
+          ctx.shadowColor = 'rgba(124, 58, 237, 0.4)';
+          ctx.shadowBlur = 6;
           ctx.stroke();
         } else {
-          ctx.strokeStyle = isEdgeHighlighted ? '#00f0ff' : 'rgba(255, 255, 255, 0.12)';
+          ctx.strokeStyle = isEdgeHighlighted ? '#0284c7' : 'rgba(100, 116, 139, 0.28)';
           ctx.lineWidth = isEdgeHighlighted ? 2.5 : 1.2;
           if (isEdgeHighlighted) {
-            ctx.shadowColor = '#00f0ff';
-            ctx.shadowBlur = 8;
+            ctx.shadowColor = '#0284c7';
+            ctx.shadowBlur = 6;
           }
           ctx.stroke();
         }
@@ -345,7 +345,7 @@ export default function GraphCanvas({
           const midX = (source.x + target.x) / 2;
           const midY = (source.y + target.y) / 2;
           ctx.font = 'bold 9px JetBrains Mono, monospace';
-          ctx.fillStyle = edge.is_anomaly ? '#fca5a5' : edge.amount ? '#fde047' : '#94a3b8';
+          ctx.fillStyle = edge.is_anomaly ? '#e11d48' : edge.amount ? '#b45309' : '#475569';
           ctx.textAlign = 'center';
           const tag = edge.amount ? `₹${(edge.amount).toLocaleString('en-IN')}` : `${edge.frequency} calls`;
           ctx.fillText(tag, midX, midY - 4);
@@ -368,38 +368,38 @@ export default function GraphCanvas({
           ctx.beginPath();
           const haloRadius = node.radius + (node.isKingpin ? 9 + pulseVal * 2.5 : 6 + pulseVal * 2);
           ctx.arc(node.x, node.y, haloRadius, 0, Math.PI * 2);
-          ctx.fillStyle = node.isKingpin ? 'rgba(168, 85, 247, 0.22)' : node.glowColor;
+          ctx.fillStyle = node.isKingpin ? 'rgba(124, 58, 237, 0.15)' : node.glowColor;
           ctx.fill();
 
           // Outer dashed ring
           ctx.beginPath();
           ctx.arc(node.x, node.y, haloRadius + 3, 0, Math.PI * 2);
-          ctx.strokeStyle = node.isKingpin ? 'rgba(168, 85, 247, 0.6)' : node.color;
+          ctx.strokeStyle = node.isKingpin ? '#7c3aed' : node.color;
           ctx.lineWidth = 1.2;
           ctx.setLineDash([3, 3]);
           ctx.stroke();
           ctx.setLineDash([]);
         }
 
-        // Base Node Circle
+        // Base Node Circle (White with subtle tinted glow)
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-        ctx.fillStyle = '#0a0e1a';
+        ctx.fillStyle = '#ffffff';
         ctx.fill();
 
         // Inner Radial Glow
-        const innerGrad = ctx.createRadialGradient(node.x - 3, node.y - 3, 2, node.x, node.y, node.radius);
-        innerGrad.addColorStop(0, node.color + '55');
-        innerGrad.addColorStop(1, '#0a0e1a');
+        const innerGrad = ctx.createRadialGradient(node.x - 2, node.y - 2, 2, node.x, node.y, node.radius);
+        innerGrad.addColorStop(0, node.color + '22');
+        innerGrad.addColorStop(1, '#ffffff');
         ctx.fillStyle = innerGrad;
         ctx.fill();
 
         // Node Border
-        ctx.lineWidth = isSelected ? 3.2 : node.isKingpin ? 2.8 : 1.8;
-        ctx.strokeStyle = isSelected ? '#ffffff' : node.color;
+        ctx.lineWidth = isSelected ? 3.2 : node.isKingpin ? 2.8 : 2;
+        ctx.strokeStyle = isSelected ? '#0284c7' : node.color;
         if (isSelected || node.isKingpin) {
           ctx.shadowColor = node.color;
-          ctx.shadowBlur = 14;
+          ctx.shadowBlur = 8;
         }
         ctx.stroke();
 
@@ -423,12 +423,12 @@ export default function GraphCanvas({
           ctx.arc(badgeX, badgeY, 8.5, 0, Math.PI * 2);
           ctx.fillStyle = node.color;
           ctx.fill();
-          ctx.strokeStyle = '#060810';
+          ctx.strokeStyle = '#ffffff';
           ctx.lineWidth = 1.5;
           ctx.stroke();
 
           ctx.font = 'bold 8px JetBrains Mono, monospace';
-          ctx.fillStyle = '#060810';
+          ctx.fillStyle = '#ffffff';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillText(`${node.risk_score}`, badgeX, badgeY);
@@ -443,17 +443,20 @@ export default function GraphCanvas({
           const textWidth = ctx.measureText(displayName).width;
 
           // Background pill
-          ctx.fillStyle = 'rgba(6, 8, 16, 0.85)';
-          ctx.fillRect(node.x - textWidth / 2 - 4, textY - 2, textWidth + 8, 16);
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.94)';
+          ctx.fillRect(node.x - textWidth / 2 - 5, textY - 2, textWidth + 10, 16);
+          ctx.strokeStyle = 'rgba(15, 23, 42, 0.1)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(node.x - textWidth / 2 - 5, textY - 2, textWidth + 10, 16);
 
-          ctx.fillStyle = isSelected ? '#38bdf8' : node.isKingpin ? '#e9d5ff' : '#f8fafc';
+          ctx.fillStyle = isSelected ? '#0284c7' : node.isKingpin ? '#6d28d9' : '#0f172a';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'top';
           ctx.fillText(displayName, node.x, textY);
 
           if (node.role && (zoom > 0.9 || isSelected || node.isKingpin)) {
             ctx.font = '9.5px Inter, sans-serif';
-            ctx.fillStyle = node.isKingpin ? '#c084fc' : '#94a3b8';
+            ctx.fillStyle = node.isKingpin ? '#7c3aed' : '#64748b';
             ctx.fillText(node.role, node.x, textY + 16);
           }
         }
@@ -565,7 +568,7 @@ export default function GraphCanvas({
   };
 
   return (
-    <div ref={containerRef} className="relative w-full h-full min-h-0 bg-[#060810] cyber-grid overflow-hidden select-none">
+    <div ref={containerRef} className="relative w-full h-full min-h-0 bg-slate-50 cyber-grid overflow-hidden select-none">
       <canvas
         ref={canvasRef}
         onMouseDown={handleMouseDown}
@@ -579,9 +582,9 @@ export default function GraphCanvas({
       {/* Canvas Floating Bottom Controls & Legend Strip */}
       <div className="absolute left-4 bottom-3 z-30 flex flex-col gap-2 pointer-events-auto">
         {/* Layout Switcher & Navigation Controls */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-surface-secondary/90 shadow-2xl backdrop-blur-xl border border-white/[0.08]">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white/95 shadow-md backdrop-blur-xl border border-slate-200/80">
           {/* Topology Engine Switcher */}
-          <div className="flex items-center p-0.5 rounded-lg bg-surface-container-lowest text-xs font-mono border border-white/[0.04]">
+          <div className="flex items-center p-0.5 rounded-lg bg-slate-100 text-xs font-mono border border-slate-200/60">
             <button
               onClick={() => {
                 applyLayout('force');
@@ -589,7 +592,7 @@ export default function GraphCanvas({
               }}
               className={`px-2.5 py-0.5 rounded-md transition-all font-bold ${
                 activeLayout === 'force'
-                  ? 'bg-primary-container text-on-primary-container shadow-sm'
+                  ? 'bg-primary-container text-white shadow-sm'
                   : 'text-on-surface-variant hover:text-on-surface'
               }`}
             >
@@ -602,7 +605,7 @@ export default function GraphCanvas({
               }}
               className={`px-2.5 py-0.5 rounded-md transition-all font-bold ${
                 activeLayout === 'cluster'
-                  ? 'bg-primary-container text-on-primary-container shadow-sm'
+                  ? 'bg-primary-container text-white shadow-sm'
                   : 'text-on-surface-variant hover:text-on-surface'
               }`}
             >
@@ -615,7 +618,7 @@ export default function GraphCanvas({
               }}
               className={`px-2.5 py-0.5 rounded-md transition-all font-bold ${
                 activeLayout === 'radial'
-                  ? 'bg-primary-container text-on-primary-container shadow-sm'
+                  ? 'bg-primary-container text-white shadow-sm'
                   : 'text-on-surface-variant hover:text-on-surface'
               }`}
             >
@@ -665,7 +668,7 @@ export default function GraphCanvas({
         </div>
 
         {/* Network Legend Overlay */}
-        <div className="px-3 py-1.5 rounded-xl bg-surface-secondary/90 shadow-2xl backdrop-blur-xl border border-white/[0.08] flex items-center gap-3 text-[11px] font-mono">
+        <div className="px-3 py-1.5 rounded-xl bg-white/95 shadow-md backdrop-blur-xl border border-slate-200/80 flex items-center gap-3 text-[11px] font-mono">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-threat-crimson"></span>
             <span className="text-on-surface">Critical (&gt;85)</span>

@@ -125,36 +125,36 @@ export default function EntityResolutionView({ onFocusEntity, onJumpToGraph }) {
   });
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto bg-surface-base text-on-surface p-margin lg:p-margin-lg gap-space-lg no-scrollbar">
+    <div className="flex-1 flex flex-col overflow-y-auto bg-transparent text-slate-900 p-margin lg:p-margin-lg gap-space-lg no-scrollbar">
       {/* Top Banner / Mission Context */}
-      <section className="relative flex flex-col flex-shrink-0 min-h-fit rounded-2xl p-space-lg bg-surface-container-lowest/90 backdrop-blur-2xl shadow-xl border border-white/[0.08]">
+      <section className="relative flex flex-col flex-shrink-0 min-h-fit rounded-2xl p-space-lg bg-white shadow-sm border border-slate-200/80">
         <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
-          <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-risk-amber/10 blur-3xl"></div>
+          <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-amber-500/5 blur-3xl"></div>
         </div>
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
           <div className="flex flex-col gap-space-xs">
             <div className="flex items-center gap-space-sm flex-wrap">
-              <span className="px-2.5 py-0.5 rounded-full bg-risk-amber/15 text-risk-amber font-label-sm text-label-sm uppercase font-bold tracking-wider flex items-center gap-1.5 shadow-sm border border-risk-amber/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-risk-amber animate-ping"></span>
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 font-label-sm text-label-sm uppercase font-bold tracking-wider flex items-center gap-1.5 shadow-xs border border-amber-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
                 IDENTITY DEDUPLICATION & MULE DETECTION
               </span>
-              <span className="text-outline-variant font-label-sm text-label-sm">•</span>
-              <span className="text-verified-emerald font-label-sm text-label-sm font-semibold flex items-center gap-1">
+              <span className="text-slate-300 font-label-sm text-label-sm">•</span>
+              <span className="text-emerald-700 font-label-sm text-label-sm font-semibold flex items-center gap-1">
                 <span className="material-symbols-outlined text-[14px]">verified</span>
                 NEXXUS-INTEL-TRIPLET
               </span>
             </div>
 
             <div className="flex items-baseline gap-space-md mt-1">
-              <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">
+              <h1 className="font-headline-lg text-headline-lg font-bold text-slate-900 tracking-tight">
                 Entity Resolution & Fraud Disambiguation Queue
               </h1>
-              <span className="font-label-md text-label-md text-risk-amber font-mono font-semibold px-2 py-0.5 rounded bg-surface-container-high">
+              <span className="font-label-md text-label-md text-amber-800 font-mono font-semibold px-2 py-0.5 rounded bg-amber-50 border border-amber-200">
                 {queue.length} PENDING AUDITS
               </span>
             </div>
-            <p className="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+            <p className="font-body-md text-body-md text-slate-600 max-w-3xl">
               Cross-source fuzzy entity resolution detecting synthetic mule identities, cloned vehicular tags, and VoIP burner accounts across Kolkata cyber syndicates.
             </p>
           </div>
@@ -162,7 +162,7 @@ export default function EntityResolutionView({ onFocusEntity, onJumpToGraph }) {
           <div className="flex items-center gap-space-sm flex-wrap">
             <button
               onClick={fetchQueue}
-              className="px-3.5 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-space-xs transition-colors border border-white/[0.06]"
+              className="px-3.5 py-2 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-label-md text-label-md flex items-center gap-space-xs transition-colors border border-slate-200 shadow-xs font-medium"
             >
               <span className="material-symbols-outlined text-[18px]">refresh</span>
               <span>Refresh Queue</span>
@@ -173,7 +173,7 @@ export default function EntityResolutionView({ onFocusEntity, onJumpToGraph }) {
                   if (item.match_score >= 90) handleApproveMerge(item);
                 });
               }}
-              className="px-4 py-2 rounded-lg bg-primary text-surface-base font-label-md text-label-md font-bold shadow-[0_0_16px_rgba(6,182,212,0.4)] hover:bg-tertiary-fixed transition-all flex items-center gap-space-xs active:scale-95"
+              className="px-4 py-2 rounded-lg bg-sky-600 text-white font-label-md text-label-md font-bold shadow-xs hover:bg-sky-700 transition-all flex items-center gap-space-xs active:scale-95"
             >
               <span className="material-symbols-outlined text-[18px]">auto_fix_high</span>
               <span>Auto-Merge High Confidence (&gt;90%)</span>
@@ -182,16 +182,16 @@ export default function EntityResolutionView({ onFocusEntity, onJumpToGraph }) {
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-2 pt-4 border-t border-white/[0.04] mt-2">
-          <span className="text-on-surface-variant font-label-sm text-label-sm uppercase">FILTER BY:</span>
+        <div className="flex items-center gap-2 pt-4 border-t border-slate-100 mt-2">
+          <span className="text-slate-500 font-label-sm text-label-sm uppercase font-medium">FILTER BY:</span>
           {['ALL', 'Person', 'Vehicle', 'Account'].map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveFilter(cat)}
-              className={`px-3 py-1 rounded-full font-label-sm text-label-sm transition-all ${
+              className={`px-3 py-1 rounded-full font-label-sm text-label-sm transition-all shadow-xs ${
                 activeFilter === cat
-                  ? 'bg-primary/20 text-primary border border-primary/40 font-bold'
-                  : 'bg-surface-container text-on-surface-variant hover:text-on-surface'
+                  ? 'bg-sky-600 text-white font-bold'
+                  : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200 hover:bg-slate-50'
               }`}
             >
               {cat === 'ALL' ? 'All Entities' : cat === 'Person' ? 'Suspects' : cat === 'Vehicle' ? 'Vehicles' : 'Mule Accounts'}
@@ -204,26 +204,26 @@ export default function EntityResolutionView({ onFocusEntity, onJumpToGraph }) {
       {statusMessage && (
         <div className={`p-3.5 rounded-xl border flex items-center justify-between text-body-sm animate-fade-in ${
           statusMessage.type === 'success' 
-            ? 'bg-verified-emerald/15 border-verified-emerald/30 text-verified-emerald' 
-            : 'bg-primary/15 border-primary/30 text-primary'
+            ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
+            : 'bg-sky-50 border-sky-200 text-sky-800'
         }`}>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="material-symbols-outlined text-[18px]">
               {statusMessage.type === 'success' ? 'task_alt' : 'info'}
             </span>
             <span>{statusMessage.text}</span>
           </div>
-          <button onClick={() => setStatusMessage(null)} className="text-outline hover:text-white">✕</button>
+          <button onClick={() => setStatusMessage(null)} className="text-slate-400 hover:text-slate-700 font-bold">✕</button>
         </div>
       )}
 
       {/* Review Queue Cards */}
       <div className="flex flex-col flex-shrink-0 min-h-fit gap-space-md">
         {filteredQueue.length === 0 ? (
-          <div className="p-8 rounded-2xl bg-surface-container-lowest text-center flex flex-col items-center justify-center border border-white/[0.06]">
-            <span className="material-symbols-outlined text-[48px] text-verified-emerald mb-2">done_all</span>
-            <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">Queue Cleared</h3>
-            <p className="text-on-surface-variant text-body-sm mt-1">All potential duplicate identities disambiguated.</p>
+          <div className="p-8 rounded-2xl bg-white text-center flex flex-col items-center justify-center border border-slate-200 shadow-sm">
+            <span className="material-symbols-outlined text-[48px] text-emerald-600 mb-2">done_all</span>
+            <h3 className="font-headline-sm text-headline-sm font-bold text-slate-900">Queue Cleared</h3>
+            <p className="text-slate-500 text-body-sm mt-1">All potential duplicate identities disambiguated.</p>
           </div>
         ) : (
           filteredQueue.map((item) => {
@@ -243,24 +243,24 @@ export default function EntityResolutionView({ onFocusEntity, onJumpToGraph }) {
             return (
               <div
                 key={item.id || item.entity2_id}
-                className="p-5 rounded-2xl bg-surface-container-low/90 backdrop-blur-xl border border-white/[0.08] shadow-xl flex flex-col flex-shrink-0 min-h-fit gap-4"
+                className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col flex-shrink-0 min-h-fit gap-4"
               >
                 {/* Header Info */}
-                <div className="flex items-center justify-between border-b border-white/[0.04] pb-3">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded bg-risk-amber/20 text-risk-amber font-mono text-[11px] font-bold">
+                    <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-mono text-[11px] font-bold">
                       {item.id || 'REV-001'}
                     </span>
-                    <span className="font-label-sm text-label-sm text-on-surface-variant uppercase">
+                    <span className="font-label-sm text-label-sm text-slate-500 uppercase font-medium">
                       MATCH CONFIDENCE:
                     </span>
-                    <span className="font-mono font-bold text-headline-sm text-primary">
+                    <span className="font-mono font-bold text-headline-sm text-sky-700">
                       {matchScore}%
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] text-outline font-label-sm">RECOMMENDED:</span>
-                    <span className="px-2 py-0.5 rounded bg-verified-emerald/20 text-verified-emerald font-bold font-mono text-[11px]">
+                    <span className="text-[11px] text-slate-400 font-label-sm">RECOMMENDED:</span>
+                    <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold font-mono text-[11px]">
                       {item.recommended_action || (matchScore >= 90 ? 'MERGE CANONICAL' : 'FLAG SUSPECT')}
                     </span>
                   </div>
@@ -269,48 +269,48 @@ export default function EntityResolutionView({ onFocusEntity, onJumpToGraph }) {
                 {/* Side-by-Side Comparison Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {/* Entity 1: Primary Target */}
-                  <div className="p-4 rounded-xl bg-surface-container flex flex-col gap-2 border border-white/[0.04]">
+                  <div className="p-4 rounded-xl bg-slate-50 flex flex-col gap-2 border border-slate-200/70">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-primary font-mono font-bold uppercase">PRIMARY CANONICAL RECORD</span>
-                      <span className="px-2 py-0.5 rounded bg-threat-crimson/20 text-threat-crimson font-mono text-[10px] font-bold">
+                      <span className="text-[10px] text-sky-700 font-mono font-bold uppercase">PRIMARY CANONICAL RECORD</span>
+                      <span className="px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 font-mono text-[10px] font-bold">
                         RISK {entity1Risk}
                       </span>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <h4 className="font-bold text-on-surface text-headline-sm">{item.entity1_name}</h4>
-                      <span className="text-outline font-mono text-xs">[{item.entity1_id}]</span>
+                      <h4 className="font-bold text-slate-900 text-headline-sm">{item.entity1_name}</h4>
+                      <span className="text-slate-400 font-mono text-xs font-medium">[{item.entity1_id}]</span>
                     </div>
-                    <div className="text-[12px] text-on-surface-variant flex flex-col gap-1 mt-1">
-                      <div><span className="text-outline">Phone/Tag:</span> {entity1Phone}</div>
-                      <div><span className="text-outline">Bank/Ref:</span> {entity1Bank}</div>
+                    <div className="text-[12px] text-slate-600 flex flex-col gap-1 mt-1">
+                      <div><span className="text-slate-400 font-medium">Phone/Tag:</span> {entity1Phone}</div>
+                      <div><span className="text-slate-400 font-medium">Bank/Ref:</span> {entity1Bank}</div>
                     </div>
                   </div>
 
                   {/* Entity 2: Candidate Duplicate */}
-                  <div className="p-4 rounded-xl bg-surface-container flex flex-col gap-2 border border-white/[0.04]">
+                  <div className="p-4 rounded-xl bg-slate-50 flex flex-col gap-2 border border-slate-200/70">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-risk-amber font-mono font-bold uppercase">DUPLICATE / SHADOW CANDIDATE</span>
-                      <span className="px-2 py-0.5 rounded bg-threat-crimson/20 text-threat-crimson font-mono text-[10px] font-bold">
+                      <span className="text-[10px] text-amber-700 font-mono font-bold uppercase">DUPLICATE / SHADOW CANDIDATE</span>
+                      <span className="px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 font-mono text-[10px] font-bold">
                         RISK {entity2Risk}
                       </span>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <h4 className="font-bold text-on-surface text-headline-sm">{item.entity2_name}</h4>
-                      <span className="text-outline font-mono text-xs">[{item.entity2_id}]</span>
+                      <h4 className="font-bold text-slate-900 text-headline-sm">{item.entity2_name}</h4>
+                      <span className="text-slate-400 font-mono text-xs font-medium">[{item.entity2_id}]</span>
                     </div>
-                    <div className="text-[12px] text-on-surface-variant flex flex-col gap-1 mt-1">
-                      <div><span className="text-outline">Phone/Tag:</span> {entity2Phone}</div>
-                      <div><span className="text-outline">Bank/Ref:</span> {entity2Bank}</div>
+                    <div className="text-[12px] text-slate-600 flex flex-col gap-1 mt-1">
+                      <div><span className="text-slate-400 font-medium">Phone/Tag:</span> {entity2Phone}</div>
+                      <div><span className="text-slate-400 font-medium">Bank/Ref:</span> {entity2Bank}</div>
                     </div>
                   </div>
                 </div>
 
                 {/* Shared Linkage Tags & Conflicts */}
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/[0.04]">
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-[11px] text-outline font-label-sm mr-1">SHARED SIGNALS:</span>
+                    <span className="text-[11px] text-slate-400 font-label-sm mr-1">SHARED SIGNALS:</span>
                     {sharedSignals.map((feat, idx) => (
-                      <span key={idx} className="px-2 py-0.5 rounded bg-surface-container-high text-primary font-mono text-[10px] font-medium flex items-center gap-1">
+                      <span key={idx} className="px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-100 font-mono text-[10px] font-medium flex items-center gap-1">
                         <span className="material-symbols-outlined text-[12px]">link</span>
                         {feat}
                       </span>
@@ -321,14 +321,14 @@ export default function EntityResolutionView({ onFocusEntity, onJumpToGraph }) {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleDismiss(item)}
-                      className="px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm transition-colors"
+                      className="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-label-sm text-label-sm transition-colors border border-slate-200 shadow-xs font-medium"
                     >
                       Keep Disconnected
                     </button>
                     <button
                       onClick={() => handleApproveMerge(item)}
                       disabled={processingId === item.entity2_id}
-                      className="px-4 py-1.5 rounded-lg bg-primary text-surface-base font-label-sm text-label-sm font-bold shadow-md hover:bg-tertiary-fixed transition-all flex items-center gap-1.5"
+                      className="px-4 py-1.5 rounded-lg bg-sky-600 text-white font-label-sm text-label-sm font-bold shadow-xs hover:bg-sky-700 transition-all flex items-center gap-1.5"
                     >
                       <span className="material-symbols-outlined text-[16px]">merge</span>
                       <span>{processingId === item.entity2_id ? 'Merging...' : 'Approve Merge'}</span>

@@ -75,29 +75,29 @@ export default function LegalAuditVault({ caseInfo }) {
   };
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto w-full p-margin lg:p-margin-lg bg-surface-base text-on-surface gap-space-lg no-scrollbar">
+    <div className="flex-1 flex flex-col overflow-y-auto w-full p-margin lg:p-margin-lg bg-transparent text-slate-900 gap-space-lg no-scrollbar">
       {/* 1. TOP HEADER & COMPLIANCE SEAL */}
-      <section className="relative flex flex-col flex-shrink-0 min-h-fit rounded-2xl p-space-lg bg-surface-container-lowest/90 backdrop-blur-2xl shadow-xl border border-white/[0.08]">
+      <section className="relative flex flex-col flex-shrink-0 min-h-fit rounded-2xl p-space-lg bg-white shadow-sm border border-slate-200/80">
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
           <div className="flex items-start gap-space-md max-w-4xl">
-            <div className="relative flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-xl bg-surface-container shadow-xl border border-verified-emerald/30">
-              <span className="material-symbols-outlined text-verified-emerald text-[28px]">gavel</span>
-              <span className="absolute inset-0 rounded-xl bg-verified-emerald/10 animate-pulse"></span>
+            <div className="relative flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-50 shadow-xs border border-emerald-200">
+              <span className="material-symbols-outlined text-emerald-700 text-[28px]">gavel</span>
+              <span className="absolute inset-0 rounded-xl bg-emerald-500/10 animate-pulse"></span>
             </div>
             <div className="flex flex-col gap-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono uppercase text-verified-emerald font-bold tracking-wider">
+                <span className="text-[10px] font-mono uppercase text-emerald-700 font-bold tracking-wider">
                   LEGAL VAULT // SECTION 65B BSA 2023
                 </span>
-                <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-verified-emerald/20 text-verified-emerald border border-verified-emerald/30">
+                <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                   MATHEMATICALLY UNBREAKABLE
                 </span>
               </div>
-              <h1 className="font-headline-md text-headline-md font-bold text-on-surface tracking-tight">
+              <h1 className="font-headline-md text-headline-md font-bold text-slate-900 tracking-tight">
                 Bharatiya Sakshya Adhiniyam (BSA) 2023 / Section 65B Cryptographic Audit Ledger
               </h1>
-              <p className="font-body-sm text-body-sm text-on-surface-variant max-w-3xl leading-relaxed">
-                Immutable SHA-256 hash-chain <span className="font-label-sm text-label-sm text-primary font-semibold">[H_n = SHA-256(H_prev + payload)]</span> guaranteeing evidentiary admissibility, strict chain of custody, and mathematical non-repudiation in Indian Courts of Law.
+              <p className="font-body-sm text-body-sm text-slate-600 max-w-3xl leading-relaxed">
+                Immutable SHA-256 hash-chain <span className="font-label-sm text-label-sm text-sky-700 font-semibold font-mono">[H_n = SHA-256(H_prev + payload)]</span> guaranteeing evidentiary admissibility, strict chain of custody, and mathematical non-repudiation in Indian Courts of Law.
               </p>
             </div>
           </div>
@@ -107,7 +107,7 @@ export default function LegalAuditVault({ caseInfo }) {
             <button
               onClick={handleVerifyLedger}
               disabled={verifying}
-              className="flex items-center gap-space-xs px-4 py-2 rounded-lg bg-verified-emerald text-surface-base font-label-md text-label-md font-bold shadow-xl hover:bg-emerald-400 transition-all active:scale-95"
+              className="flex items-center gap-space-xs px-4 py-2 rounded-lg bg-emerald-600 text-white font-label-md text-label-md font-bold shadow-xs hover:bg-emerald-700 transition-all active:scale-95"
             >
               <span className="material-symbols-outlined text-[18px]">
                 {verifying ? 'autorenew' : 'verified_user'}
@@ -116,7 +116,7 @@ export default function LegalAuditVault({ caseInfo }) {
             </button>
             <button
               onClick={handlePrintDossier}
-              className="flex items-center gap-space-xs px-3.5 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary font-label-md text-label-md font-medium transition-all shadow-md border border-white/[0.06]"
+              className="flex items-center gap-space-xs px-3.5 py-2 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-label-md text-label-md font-medium transition-all shadow-xs border border-slate-200"
             >
               <span className="material-symbols-outlined text-[18px]">print</span>
               <span>Print Certified Evidence Dossier</span>
@@ -126,59 +126,59 @@ export default function LegalAuditVault({ caseInfo }) {
       </section>
 
       {/* 2. LIVE INTEGRITY VERIFICATION BANNER */}
-      <section className="relative flex flex-col flex-shrink-0 min-h-fit rounded-2xl bg-surface-container-low/90 backdrop-blur-xl p-space-md lg:p-space-lg shadow-xl border border-verified-emerald/30">
+      <section className="relative flex flex-col flex-shrink-0 min-h-fit rounded-2xl bg-white p-space-md lg:p-space-lg shadow-sm border border-emerald-300">
         <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-r from-verified-emerald/5 via-primary/5 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-sky-500/5 to-transparent"></div>
         </div>
         <div className="relative flex flex-col gap-space-md z-10">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
             <div className="flex items-center gap-space-sm">
-              <div className="w-8 h-8 rounded-lg bg-verified-emerald/20 flex items-center justify-center flex-shrink-0 text-verified-emerald">
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0 text-emerald-700 border border-emerald-100">
                 <span className="material-symbols-outlined text-[20px]">security</span>
               </div>
               <div>
                 <div className="flex items-center gap-space-xs">
-                  <span className="font-headline-sm text-headline-sm text-on-surface font-semibold">
+                  <span className="font-headline-sm text-headline-sm text-slate-900 font-semibold">
                     Cryptographic Ledger Integrity Verified
                   </span>
-                  <span className="font-label-sm text-label-sm text-verified-emerald font-bold tracking-wide uppercase">
+                  <span className="font-label-sm text-label-sm text-emerald-700 font-bold tracking-wide uppercase">
                     (Zero Tampering Detected)
                   </span>
                 </div>
-                <span className="font-body-sm text-body-sm text-on-surface-variant">
+                <span className="font-body-sm text-body-sm text-slate-500">
                   Full backward linkage checked • Cryptographic roots mathematically congruent
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-space-xs px-3 py-1.5 rounded-full bg-verified-emerald/15 text-verified-emerald font-label-sm text-label-sm font-semibold flex-shrink-0 shadow-sm border border-verified-emerald/30">
-              <span className="w-2 h-2 rounded-full bg-verified-emerald animate-ping"></span>
+            <div className="flex items-center gap-space-xs px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 font-label-sm text-label-sm font-semibold flex-shrink-0 shadow-xs border border-emerald-200">
+              <span className="w-2 h-2 rounded-full bg-emerald-600 animate-ping"></span>
               <span>{auditLogs.length}/{auditLogs.length} Blocks Verified • Merkle Root Match</span>
             </div>
           </div>
 
-          <p className="font-body-sm text-body-sm text-on-surface-variant max-w-4xl leading-relaxed">
+          <p className="font-body-sm text-body-sm text-slate-600 max-w-4xl leading-relaxed">
             Full hash-chain backward linkage verified from Genesis Block (Block #1) to current Tip Block. No modified timestamps, severed parent hashes, or manipulated investigator payloads detected. Fully compliant with Section 63 & 65B of Bharatiya Sakshya Adhiniyam, 2023.
           </p>
 
           {/* Block telemetry strip */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-sm pt-space-xs">
-            <div className="p-3 rounded-xl bg-surface-container-lowest flex flex-col gap-1 border border-white/[0.04]">
+            <div className="p-3 rounded-xl bg-slate-50 flex flex-col gap-1 border border-slate-200/70">
               <div className="flex items-center justify-between">
-                <span className="font-label-sm text-label-sm text-on-surface-variant uppercase">Current Tip Block</span>
-                <span className="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-primary/20 text-primary font-bold">
+                <span className="font-label-sm text-label-sm text-slate-500 uppercase font-medium">Current Tip Block</span>
+                <span className="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-100 font-bold">
                   BLOCK #{auditLogs.length}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-2 mt-1">
-                <span className="font-label-sm text-label-sm text-primary font-mono truncate" title={String(latestTipHash || '')}>
+                <span className="font-label-sm text-label-sm text-sky-700 font-mono truncate font-semibold" title={String(latestTipHash || '')}>
                   {typeof latestTipHash === 'string' && latestTipHash.length > 18
                     ? `${latestTipHash.slice(0, 10)}...${latestTipHash.slice(-8)}`
                     : (latestTipHash || 'ef2d12...fe39d')}
                 </span>
                 <button
                   onClick={handleCopyTip}
-                  className="text-on-surface-variant hover:text-primary transition-colors flex-shrink-0"
+                  className="text-slate-400 hover:text-sky-700 transition-colors flex-shrink-0"
                   title="Copy Full Tip Hash"
                 >
                   <span className="material-symbols-outlined text-[16px]">
@@ -188,31 +188,31 @@ export default function LegalAuditVault({ caseInfo }) {
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-surface-container-lowest flex flex-col gap-1 border border-white/[0.04]">
-              <span className="font-label-sm text-label-sm text-on-surface-variant uppercase">BSA Certificate Registry</span>
+            <div className="p-3 rounded-xl bg-slate-50 flex flex-col gap-1 border border-slate-200/70">
+              <span className="font-label-sm text-label-sm text-slate-500 uppercase font-medium">BSA Certificate Registry</span>
               <div className="flex items-center gap-1.5 mt-1">
-                <span className="material-symbols-outlined text-verified-emerald text-[16px]">badge</span>
-                <span className="font-label-sm text-label-sm text-on-surface font-mono font-bold tracking-tight">
+                <span className="material-symbols-outlined text-emerald-700 text-[16px]">badge</span>
+                <span className="font-label-sm text-label-sm text-slate-900 font-mono font-bold tracking-tight">
                   BSA-KOL-2026-088-CERT
                 </span>
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-surface-container-lowest flex flex-col gap-1 border border-white/[0.04]">
-              <span className="font-label-sm text-label-sm text-on-surface-variant uppercase">Attestation Timestamp</span>
+            <div className="p-3 rounded-xl bg-slate-50 flex flex-col gap-1 border border-slate-200/70">
+              <span className="font-label-sm text-label-sm text-slate-500 uppercase font-medium">Attestation Timestamp</span>
               <div className="flex items-center gap-1.5 mt-1">
-                <span className="material-symbols-outlined text-primary text-[16px]">schedule</span>
-                <span className="font-label-sm text-label-sm text-on-surface font-mono">
+                <span className="material-symbols-outlined text-sky-700 text-[16px]">schedule</span>
+                <span className="font-label-sm text-label-sm text-slate-900 font-mono font-semibold">
                   2026-03-24 18:45:12 IST
                 </span>
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-surface-container-lowest flex flex-col gap-1 border border-white/[0.04]">
-              <span className="font-label-sm text-label-sm text-on-surface-variant uppercase">Certifying Officer</span>
+            <div className="p-3 rounded-xl bg-slate-50 flex flex-col gap-1 border border-slate-200/70">
+              <span className="font-label-sm text-label-sm text-slate-500 uppercase font-medium">Certifying Officer</span>
               <div className="flex items-center gap-1.5 mt-1 min-w-0">
-                <span className="material-symbols-outlined text-risk-amber text-[16px]">verified</span>
-                <span className="font-label-sm text-label-sm text-on-surface truncate font-medium">
+                <span className="material-symbols-outlined text-amber-600 text-[16px]">verified</span>
+                <span className="font-label-sm text-label-sm text-slate-900 truncate font-semibold">
                   Sub-Insp. B. Banerjee (WB-CID-0941)
                 </span>
               </div>
@@ -225,101 +225,101 @@ export default function LegalAuditVault({ caseInfo }) {
       <section className="flex flex-col flex-shrink-0 min-h-fit gap-space-md">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-space-xs">
-            <span className="material-symbols-outlined text-primary text-[20px]">account_balance</span>
-            <h2 className="font-label-lg text-label-lg text-on-surface font-bold tracking-wide uppercase">
+            <span className="material-symbols-outlined text-sky-700 text-[20px]">account_balance</span>
+            <h2 className="font-label-lg text-label-lg text-slate-900 font-bold tracking-wide uppercase">
               ADMISSIBLE FORENSIC FINDINGS // READY FOR JUDICIAL SUBMISSION
             </h2>
           </div>
-          <span className="font-label-sm text-label-sm text-on-surface-variant">
+          <span className="font-label-sm text-label-sm text-slate-500 font-medium">
             3 Core Submissions Attached to Charge Sheet
           </span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-space-md">
           {/* Finding 1 */}
-          <div className="flex flex-col justify-between rounded-2xl bg-surface-container-low/90 backdrop-blur-xl p-space-md shadow-xl border border-white/[0.06]">
+          <div className="flex flex-col justify-between rounded-2xl bg-white p-space-md shadow-sm border border-slate-200/80">
             <div className="flex flex-col gap-space-sm">
               <div className="flex items-center justify-between gap-space-xs">
-                <span className="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">
+                <span className="font-label-sm text-label-sm text-slate-400 uppercase font-semibold">
                   Ex. P-01 // Topological Link
                 </span>
-                <span className="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-threat-crimson/20 text-threat-crimson">
+                <span className="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
                   MASTERMIND CUT-OUT
                 </span>
               </div>
-              <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">
+              <h3 className="font-headline-sm text-headline-sm font-bold text-slate-900">
                 Debasish Chatterjee (P008) Apex Coordination
               </h3>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">
+              <p className="font-body-sm text-body-sm text-slate-600">
                 Betweenness centrality ratio of 0.942 proves de facto coordination of extortion operatives without direct communication to victims.
               </p>
             </div>
-            <div className="mt-space-md pt-space-xs border-t border-white/[0.04] flex items-center justify-between text-outline font-label-sm text-label-sm">
+            <div className="mt-space-md pt-space-xs border-t border-slate-100 flex items-center justify-between text-slate-500 font-label-sm text-label-sm">
               <span>Section 120B BNS</span>
-              <span className="text-verified-emerald font-bold">Admissible</span>
+              <span className="text-emerald-700 font-bold">Admissible</span>
             </div>
           </div>
 
           {/* Finding 2 */}
-          <div className="flex flex-col justify-between rounded-2xl bg-surface-container-low/90 backdrop-blur-xl p-space-md shadow-xl border border-white/[0.06]">
+          <div className="flex flex-col justify-between rounded-2xl bg-white p-space-md shadow-sm border border-slate-200/80">
             <div className="flex flex-col gap-space-sm">
               <div className="flex items-center justify-between gap-space-xs">
-                <span className="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">
+                <span className="font-label-sm text-label-sm text-slate-400 uppercase font-semibold">
                   Ex. P-02 // Hawala Layering Loop
                 </span>
-                <span className="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-risk-amber/20 text-risk-amber">
+                <span className="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
                   PMLA SEC 3/4
                 </span>
               </div>
-              <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">
+              <h3 className="font-headline-sm text-headline-sm font-bold text-slate-900">
                 ₹500,000 Circular Mule Layering Under 48h
               </h3>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">
+              <p className="font-body-sm text-body-sm text-slate-600">
                 Forensic transaction trace corroborates ₹500,000 circular loop returning to origin entity with 2% syndicate cut.
               </p>
             </div>
-            <div className="mt-space-md pt-space-xs border-t border-white/[0.04] flex items-center justify-between text-outline font-label-sm text-label-sm">
+            <div className="mt-space-md pt-space-xs border-t border-slate-100 flex items-center justify-between text-slate-500 font-label-sm text-label-sm">
               <span>PMLA / Sec 107 BNSS</span>
-              <span className="text-verified-emerald font-bold">Admissible</span>
+              <span className="text-emerald-700 font-bold">Admissible</span>
             </div>
           </div>
 
           {/* Finding 3 */}
-          <div className="flex flex-col justify-between rounded-2xl bg-surface-container-low/90 backdrop-blur-xl p-space-md shadow-xl border border-white/[0.06]">
+          <div className="flex flex-col justify-between rounded-2xl bg-white p-space-md shadow-sm border border-slate-200/80">
             <div className="flex flex-col gap-space-sm">
               <div className="flex items-center justify-between gap-space-xs">
-                <span className="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">
+                <span className="font-label-sm text-label-sm text-slate-400 uppercase font-semibold">
                   Ex. P-03 // Acoustic Intercept
                 </span>
-                <span className="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-primary/20 text-primary">
+                <span className="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200">
                   SEC 66D IT ACT
                 </span>
               </div>
-              <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">
+              <h3 className="font-headline-sm text-headline-sm font-bold text-slate-900">
                 22-Call Extortion Burst & Voice Match
               </h3>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">
+              <p className="font-body-sm text-body-sm text-slate-600">
                 Acoustic voiceprint match (94.2% confidence) of Rajesh K. Sharma demanding extortion payment from victim Manoj Tiwari.
               </p>
             </div>
-            <div className="mt-space-md pt-space-xs border-t border-white/[0.04] flex items-center justify-between text-outline font-label-sm text-label-sm">
+            <div className="mt-space-md pt-space-xs border-t border-slate-100 flex items-center justify-between text-slate-500 font-label-sm text-label-sm">
               <span>Telecomm Intercept #05B</span>
-              <span className="text-verified-emerald font-bold">Admissible</span>
+              <span className="text-emerald-700 font-bold">Admissible</span>
             </div>
           </div>
         </div>
       </section>
 
       {/* 4. APPEND-ONLY CRYPTOGRAPHIC AUDIT LEDGER TABLE */}
-      <section className="p-5 rounded-2xl bg-surface-container-lowest border border-white/[0.08] flex flex-col flex-shrink-0 min-h-fit gap-4 shadow-xl">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.04] pb-3">
+      <section className="p-5 rounded-2xl bg-white border border-slate-200/80 flex flex-col flex-shrink-0 min-h-fit gap-4 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-verified-emerald text-[20px]">enhanced_encryption</span>
-            <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">
+            <span className="material-symbols-outlined text-emerald-700 text-[20px]">enhanced_encryption</span>
+            <h3 className="font-headline-sm text-headline-sm font-bold text-slate-900">
               Append-Only Cryptographic Chain (SHA-256)
             </h3>
           </div>
-          <span className="font-label-sm text-label-sm text-outline font-mono">
+          <span className="font-label-sm text-label-sm text-slate-500 font-mono font-medium">
             Chain Depth: {auditLogs.length} Blocks
           </span>
         </div>
@@ -342,32 +342,32 @@ export default function LegalAuditVault({ caseInfo }) {
             return (
               <div
                 key={log.log_id || log.entry_id || idx}
-                className="p-4 rounded-xl bg-surface-container-low border border-white/[0.04] flex flex-col gap-2 hover:border-primary/30 transition-colors"
+                className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 flex flex-col gap-2 hover:border-sky-300 transition-colors"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2 text-label-sm font-label-sm">
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded bg-primary-container text-on-primary-container font-bold font-mono">
+                    <span className="px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-100 font-bold font-mono">
                       BLOCK #{idx + 1}
                     </span>
-                    <span className="text-on-surface font-semibold">{actionText}</span>
-                    <span className="text-outline">•</span>
-                    <span className="text-on-surface-variant font-mono">{log.timestamp}</span>
+                    <span className="text-slate-900 font-semibold">{actionText}</span>
+                    <span className="text-slate-300">•</span>
+                    <span className="text-slate-500 font-mono">{log.timestamp}</span>
                   </div>
-                  <span className="text-outline font-mono text-[11px]">Investigator: {investigatorText}</span>
+                  <span className="text-slate-500 font-mono text-[11px]">Investigator: {investigatorText}</span>
                 </div>
 
-                <p className="text-body-sm text-on-surface-variant text-[12px] font-mono">
+                <p className="text-body-sm text-slate-700 text-[12px] font-mono">
                   {detailsText}
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2 border-t border-white/[0.04] font-mono text-[10px]">
-                  <div className="truncate text-outline">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2 border-t border-slate-200/60 font-mono text-[10px]">
+                  <div className="truncate text-slate-400">
                     <span>PREV_HASH: </span>
-                    <span className="text-on-surface-variant">{prevHash}</span>
+                    <span className="text-slate-600">{prevHash}</span>
                   </div>
-                  <div className="truncate text-primary">
+                  <div className="truncate text-sky-700 font-medium">
                     <span>ENTRY_HASH: </span>
-                    <span className="text-primary font-bold">{entryHash}</span>
+                    <span className="text-sky-700 font-bold">{entryHash}</span>
                   </div>
                 </div>
               </div>

@@ -100,24 +100,24 @@ export default function EvidenceDrawer({
     : null;
 
   return (
-    <aside className="w-[500px] min-w-[480px] h-full fixed top-0 right-0 z-50 bg-[#070b16]/95 backdrop-blur-2xl shadow-2xl shadow-cyan-950/50 flex flex-col border-l border-primary/30 text-on-surface overflow-hidden">
+    <aside className="w-[500px] min-w-[480px] h-full fixed top-0 right-0 z-50 bg-white/95 backdrop-blur-2xl shadow-2xl border-l border-slate-200 text-slate-900 flex flex-col overflow-hidden">
       {/* Top Header Bar */}
-      <div className="px-4 py-3 bg-surface-container-lowest/90 border-b border-white/10 flex items-center justify-between flex-shrink-0">
+      <div className="px-4 py-3 bg-white border-b border-slate-200/80 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-threat-crimson text-[20px] animate-pulse">
+          <span className="material-symbols-outlined text-rose-600 text-[20px] animate-pulse">
             radiology
           </span>
-          <span className="font-label-sm text-label-sm text-threat-crimson font-bold uppercase tracking-widest">
+          <span className="font-label-sm text-label-sm text-rose-600 font-bold uppercase tracking-widest">
             TARGET DOSSIER // FORENSIC INSPECT
           </span>
-          <span className="px-1.5 py-0.2 rounded-full bg-threat-crimson/20 text-threat-crimson font-label-sm text-label-sm font-bold flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-threat-crimson animate-ping"></span>
+          <span className="px-1.5 py-0.2 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-label-sm text-label-sm font-bold flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-ping"></span>
             ACTIVE
           </span>
         </div>
         <button
           onClick={onClose}
-          className="w-7 h-7 rounded-lg bg-surface-container hover:bg-surface-bright text-outline hover:text-on-surface flex items-center justify-center transition-all hover:shadow-[0_0_10px_rgba(6,182,212,0.3)]"
+          className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200/80 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-all border border-slate-200/60"
           title="Close Dossier"
         >
           <span className="material-symbols-outlined text-[18px]">close</span>
@@ -127,11 +127,11 @@ export default function EvidenceDrawer({
       {/* Scrollable Dossier Content */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 no-scrollbar">
         {/* Suspect Profile Card */}
-        <div className="p-4 rounded-2xl bg-surface-container-lowest/90 border border-white/[0.08] shadow-xl relative overflow-hidden flex flex-col gap-3.5">
-          <div className="absolute -top-12 -right-12 w-44 h-44 bg-threat-crimson/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm relative overflow-hidden flex flex-col gap-3.5">
+          <div className="absolute -top-12 -right-12 w-44 h-44 bg-rose-500/5 rounded-full blur-3xl pointer-events-none"></div>
           <div className="flex items-start gap-3.5 relative z-10">
             {/* Biometric Portrait or Icon Box */}
-            <div className="relative w-20 h-20 rounded-xl overflow-hidden ring-2 ring-threat-crimson shadow-[0_0_24px_rgba(244,63,94,0.4)] flex-shrink-0 bg-surface-container flex items-center justify-center">
+            <div className="relative w-20 h-20 rounded-xl overflow-hidden ring-2 ring-rose-500 shadow-sm flex-shrink-0 bg-slate-100 flex items-center justify-center">
               {portraitUrl ? (
                 <img
                   src={portraitUrl}
@@ -139,12 +139,12 @@ export default function EvidenceDrawer({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="material-symbols-outlined text-[36px] text-primary">
+                <span className="material-symbols-outlined text-[36px] text-sky-700">
                   {selectedNode.type === 'Person' ? 'person' : selectedNode.type === 'Vehicle' ? 'directions_car' : 'apartment'}
                 </span>
               )}
-              <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-threat-crimson ring-2 ring-surface-base animate-pulse"></span>
-              <span className="absolute bottom-0 inset-x-0 bg-threat-crimson text-surface-base text-center font-label-sm text-label-sm font-bold py-0.2 tracking-wider">
+              <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-rose-600 ring-2 ring-white animate-pulse"></span>
+              <span className="absolute bottom-0 inset-x-0 bg-rose-600 text-white text-center font-label-sm text-label-sm font-bold py-0.2 tracking-wider">
                 RISK {selectedNode.risk_score || 0}
               </span>
             </div>
@@ -152,19 +152,19 @@ export default function EvidenceDrawer({
             {/* Suspect Details */}
             <div className="flex flex-col min-w-0 flex-1">
               <div className="flex items-center justify-between gap-1">
-                <h3 className="font-headline-md text-headline-sm text-on-surface font-bold truncate">
+                <h3 className="font-headline-md text-headline-sm text-slate-900 font-bold truncate">
                   {selectedNode.name}
                 </h3>
-                <span className="px-1.5 py-0.5 rounded bg-surface-container font-label-sm text-label-sm text-primary font-mono font-bold">
+                <span className="px-1.5 py-0.5 rounded bg-sky-50 border border-sky-200 font-label-sm text-label-sm text-sky-700 font-mono font-bold">
                   {selectedNode.id}
                 </span>
               </div>
 
               {selectedNode.aliases && selectedNode.aliases.length > 0 && (
-                <div className="flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm mt-0.5 flex-wrap">
+                <div className="flex items-center gap-1.5 text-slate-500 font-label-sm text-label-sm mt-0.5 flex-wrap">
                   <span>Aliases:</span>
                   {selectedNode.aliases.map((alias, idx) => (
-                    <span key={idx} className="px-1.5 py-0.2 rounded bg-surface-container-high text-on-surface font-medium font-mono text-[10px]">
+                    <span key={idx} className="px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-medium font-mono text-[10px] border border-slate-200/60">
                       "{alias}"
                     </span>
                   ))}
@@ -172,27 +172,27 @@ export default function EvidenceDrawer({
               )}
 
               <div className="flex items-center gap-1.5 text-label-sm font-label-sm mt-1">
-                <span className="w-2 h-2 rounded-full bg-threat-crimson animate-ping"></span>
-                <span className="text-threat-crimson font-semibold truncate">
+                <span className="w-2 h-2 rounded-full bg-rose-600 animate-ping"></span>
+                <span className="text-rose-600 font-semibold truncate">
                   {selectedNode.role || `${selectedNode.type} Entity`} // Cluster {selectedNode.cluster_id || 'A'}
                 </span>
               </div>
 
               {selectedNode.phone && (
-                <div className="flex items-center gap-1.5 text-label-sm font-label-sm text-outline mt-1">
-                  <span className="material-symbols-outlined text-[14px] text-primary">phone_iphone</span>
-                  <span className="font-mono text-on-surface select-all">{selectedNode.phone}</span>
+                <div className="flex items-center gap-1.5 text-label-sm font-label-sm text-slate-500 mt-1">
+                  <span className="material-symbols-outlined text-[14px] text-sky-700">phone_iphone</span>
+                  <span className="font-mono text-slate-900 font-medium select-all">{selectedNode.phone}</span>
                   <button 
                     onClick={() => handleCopy(selectedNode.phone, 'phone')}
-                    className="material-symbols-outlined text-[13px] text-outline hover:text-primary transition-colors"
+                    className="material-symbols-outlined text-[13px] text-slate-400 hover:text-sky-700 transition-colors"
                     title="Copy Phone Number"
                   >
                     content_copy
                   </button>
                   {copiedField === 'phone' && (
-                    <span className="text-[10px] text-verified-emerald font-bold">COPIED</span>
+                    <span className="text-[10px] text-emerald-700 font-bold">COPIED</span>
                   )}
-                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-surface-container text-tertiary truncate max-w-[140px]">
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 truncate max-w-[140px] border border-slate-200/60">
                     Airtel WB • Salt Lake
                   </span>
                 </div>
@@ -203,22 +203,22 @@ export default function EvidenceDrawer({
           {/* Badges Strip */}
           <div className="flex flex-wrap items-center gap-1.5 pt-1">
             {isCritical && (
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-threat-crimson/15 text-threat-crimson font-label-sm text-label-sm font-bold shadow-[0_0_10px_rgba(244,63,94,0.3)]">
-                <span className="w-1.5 h-1.5 rounded-full bg-threat-crimson animate-ping"></span>
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-label-sm text-label-sm font-bold shadow-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-ping"></span>
                 CRITICAL THREAT
               </span>
             )}
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-verified-emerald/20 text-verified-emerald font-label-sm text-label-sm font-bold">
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-label-sm text-label-sm font-bold">
               <span className="material-symbols-outlined text-[13px]">verified</span>
               BSA §65B CERTIFIED
             </span>
             {isHigh && (
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-risk-amber/20 text-risk-amber font-label-sm text-label-sm font-bold">
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-label-sm text-label-sm font-bold">
                 <span className="material-symbols-outlined text-[13px]">warning</span>
                 WATCHLIST MATCH
               </span>
             )}
-            <span className="px-2 py-0.5 rounded-full bg-surface-container font-mono text-[10px] text-primary font-bold">
+            <span className="px-2 py-0.5 rounded-full bg-sky-50 border border-sky-200 font-mono text-[10px] text-sky-700 font-bold">
               CYBER CRIME DIR MATCH
             </span>
           </div>
@@ -227,36 +227,36 @@ export default function EvidenceDrawer({
           <div className="grid grid-cols-3 gap-2 pt-1">
             <button
               onClick={onTraceKingpin}
-              className="flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl bg-primary text-surface-base font-label-sm text-label-sm font-bold shadow-[0_0_16px_rgba(6,182,212,0.4)] hover:bg-tertiary-fixed transition-all active:scale-95"
+              className="flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl bg-sky-600 text-white font-label-md text-label-md font-bold shadow-xs hover:bg-sky-700 transition-all active:scale-95"
             >
               <span className="material-symbols-outlined text-[16px] animate-pulse">near_me</span>
               <span className="truncate">Trace Path</span>
             </button>
             <button
               onClick={handleTriggerSubgraph}
-              className="flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl bg-surface-container text-on-surface font-label-sm text-label-sm font-bold hover:bg-surface-container-high transition-colors"
+              className="flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-label-md text-label-md font-bold hover:bg-slate-50 transition-colors shadow-xs"
             >
-              <span className="material-symbols-outlined text-[16px] text-primary">hub</span>
+              <span className="material-symbols-outlined text-[16px] text-sky-700">hub</span>
               <span className="truncate">Expand (Hop 2)</span>
             </button>
             <button
               onClick={handleExportDossier}
-              className="flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl bg-surface-container text-on-surface font-label-sm text-label-sm font-bold hover:bg-surface-container-high transition-colors"
+              className="flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-label-md text-label-md font-bold hover:bg-slate-50 transition-colors shadow-xs"
             >
-              <span className="material-symbols-outlined text-[16px] text-risk-amber">picture_as_pdf</span>
+              <span className="material-symbols-outlined text-[16px] text-amber-600">picture_as_pdf</span>
               <span className="truncate">Court Export</span>
             </button>
           </div>
         </div>
 
         {/* Sticky Tab Navigation Bar */}
-        <div className="sticky top-0 z-20 bg-surface-container-lowest/95 backdrop-blur-md p-1 rounded-xl flex items-center justify-between border border-white/[0.08]">
+        <div className="sticky top-0 z-20 bg-slate-100/95 backdrop-blur-md p-1 rounded-xl flex items-center justify-between border border-slate-200">
           <button
             onClick={() => setActiveTab('profile')}
             className={`flex-1 py-1.5 px-2 rounded-lg font-label-sm text-label-sm font-bold transition-all text-center ${
               activeTab === 'profile'
-                ? 'bg-primary-container text-on-primary shadow-sm'
-                : 'text-on-surface-variant hover:text-on-surface'
+                ? 'bg-white text-sky-700 font-bold shadow-xs border border-slate-200/80'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Profile
@@ -265,12 +265,12 @@ export default function EvidenceDrawer({
             onClick={() => setActiveTab('links')}
             className={`flex-1 py-1.5 px-2 rounded-lg font-label-sm text-label-sm font-medium transition-all text-center flex items-center justify-center gap-1 ${
               activeTab === 'links'
-                ? 'bg-primary-container text-on-primary font-bold shadow-sm'
-                : 'text-on-surface-variant hover:text-on-surface'
+                ? 'bg-white text-sky-700 font-bold shadow-xs border border-slate-200/80'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <span>Links</span>
-            <span className="px-1.5 py-0.2 rounded-full bg-threat-crimson/25 text-threat-crimson text-[9px] font-bold">
+            <span className="px-1.5 py-0.2 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[9px] font-bold">
               {connectedEdges.length || liveNeighbors.length || 3}
             </span>
           </button>
@@ -278,8 +278,8 @@ export default function EvidenceDrawer({
             onClick={() => setActiveTab('locations')}
             className={`flex-1 py-1.5 px-2 rounded-lg font-label-sm text-label-sm font-medium transition-all text-center ${
               activeTab === 'locations'
-                ? 'bg-primary-container text-on-primary font-bold shadow-sm'
-                : 'text-on-surface-variant hover:text-on-surface'
+                ? 'bg-white text-sky-700 font-bold shadow-xs border border-slate-200/80'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Locations
@@ -288,8 +288,8 @@ export default function EvidenceDrawer({
             onClick={() => setActiveTab('evidence')}
             className={`flex-1 py-1.5 px-2 rounded-lg font-label-sm text-label-sm font-medium transition-all text-center ${
               activeTab === 'evidence'
-                ? 'bg-primary-container text-on-primary font-bold shadow-sm'
-                : 'text-on-surface-variant hover:text-on-surface'
+                ? 'bg-white text-sky-700 font-bold shadow-xs border border-slate-200/80'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             BSA §65B
@@ -300,13 +300,13 @@ export default function EvidenceDrawer({
         {activeTab === 'profile' && (
           <div className="flex flex-col gap-3.5">
             {/* Algorithmic Threat Score Meter Card */}
-            <div className="p-3.5 rounded-2xl bg-surface-container-lowest/90 border border-white/[0.08] flex flex-col gap-3">
+            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <span className="text-on-surface-variant font-label-sm text-label-sm uppercase font-semibold">
+                <span className="text-slate-500 font-label-sm text-label-sm uppercase font-semibold">
                   Algorithmic Threat Score
                 </span>
-                <span className="text-threat-crimson font-mono font-bold text-headline-sm">
-                  {selectedNode.risk_score || 91} <span className="text-[12px] text-outline">/ 100</span>
+                <span className="text-rose-600 font-mono font-bold text-headline-sm">
+                  {selectedNode.risk_score || 91} <span className="text-[12px] text-slate-400 font-normal">/ 100</span>
                 </span>
               </div>
 
@@ -315,14 +315,14 @@ export default function EvidenceDrawer({
                 <div className="relative w-16 h-16 flex-shrink-0 flex items-center justify-center">
                   <svg className="w-16 h-16 -rotate-90" viewBox="0 0 36 36">
                     <path
-                      className="text-surface-container-high"
+                      className="text-slate-100"
                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="3.5"
                     />
                     <path
-                      className="text-threat-crimson stroke-current"
+                      className="text-rose-600 stroke-current"
                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                       fill="none"
                       strokeDasharray={`${selectedNode.risk_score || 91}, 100`}
@@ -331,7 +331,7 @@ export default function EvidenceDrawer({
                     />
                   </svg>
                   <div className="absolute flex flex-col items-center justify-center">
-                    <span className="text-[13px] font-bold text-on-surface font-mono">
+                    <span className="text-[13px] font-bold text-slate-900 font-mono">
                       {selectedNode.risk_score || 91}%
                     </span>
                   </div>
@@ -341,41 +341,41 @@ export default function EvidenceDrawer({
                 <div className="flex-1 flex flex-col gap-1.5">
                   <div className="flex flex-col gap-0.5">
                     <div className="flex justify-between text-[11px] font-label-sm">
-                      <span className="text-on-surface-variant">Centrality Influence</span>
-                      <span className="text-threat-crimson font-bold">88%</span>
+                      <span className="text-slate-500">Centrality Influence</span>
+                      <span className="text-rose-600 font-bold">88%</span>
                     </div>
-                    <div className="w-full bg-surface-container-high h-1 rounded-full overflow-hidden">
-                      <div className="bg-threat-crimson h-full w-[88%]"></div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-0.5">
-                    <div className="flex justify-between text-[11px] font-label-sm">
-                      <span className="text-on-surface-variant">Cross-Case Links (FIR 101 & 103)</span>
-                      <span className="text-threat-crimson font-bold">94%</span>
-                    </div>
-                    <div className="w-full bg-surface-container-high h-1 rounded-full overflow-hidden">
-                      <div className="bg-threat-crimson h-full w-[94%]"></div>
+                    <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
+                      <div className="bg-rose-500 h-full w-[88%]"></div>
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-0.5">
                     <div className="flex justify-between text-[11px] font-label-sm">
-                      <span className="text-on-surface-variant">Extortion Call Spikes</span>
-                      <span className="text-risk-amber font-bold">92% (22/day)</span>
+                      <span className="text-slate-500">Cross-Case Links (FIR 101 & 103)</span>
+                      <span className="text-rose-600 font-bold">94%</span>
                     </div>
-                    <div className="w-full bg-surface-container-high h-1 rounded-full overflow-hidden">
-                      <div className="bg-risk-amber h-full w-[92%]"></div>
+                    <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
+                      <div className="bg-rose-500 h-full w-[94%]"></div>
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-0.5">
                     <div className="flex justify-between text-[11px] font-label-sm">
-                      <span className="text-on-surface-variant">Financial Layering Anomalies</span>
-                      <span className="text-ai-purple-light font-bold">82%</span>
+                      <span className="text-slate-500">Extortion Call Spikes</span>
+                      <span className="text-amber-700 font-bold">92% (22/day)</span>
                     </div>
-                    <div className="w-full bg-surface-container-high h-1 rounded-full overflow-hidden">
-                      <div className="bg-ai-purple h-full w-[82%]"></div>
+                    <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
+                      <div className="bg-amber-500 h-full w-[92%]"></div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-0.5">
+                    <div className="flex justify-between text-[11px] font-label-sm">
+                      <span className="text-slate-500">Financial Layering Anomalies</span>
+                      <span className="text-purple-700 font-bold">82%</span>
+                    </div>
+                    <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
+                      <div className="bg-purple-500 h-full w-[82%]"></div>
                     </div>
                   </div>
                 </div>
@@ -383,90 +383,90 @@ export default function EvidenceDrawer({
             </div>
 
             {/* Known Identifiers & Blind Index Table */}
-            <div className="p-3.5 rounded-2xl bg-surface-container-lowest/90 border border-white/[0.08] flex flex-col gap-2.5">
+            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col gap-2.5">
               <div className="flex items-center justify-between">
-                <span className="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">
+                <span className="font-label-sm text-label-sm text-slate-500 uppercase font-semibold">
                   Known Identifiers & Unmasked PII
                 </span>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-primary/10 text-primary font-bold font-mono border border-primary/20">
+                <span className="text-[10px] px-2 py-0.5 rounded bg-sky-50 text-sky-700 font-bold font-mono border border-sky-100">
                   LEAD ACCESS TIER
                 </span>
               </div>
 
               <div className="grid grid-cols-1 gap-2 font-label-sm text-label-sm">
-                <div className="p-2 rounded-xl bg-surface-container flex items-center justify-between">
+                <div className="p-2 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between">
                   <div className="flex flex-col">
-                    <span className="text-outline text-[10px]">FULL NAME</span>
-                    <span className="text-on-surface font-semibold">{selectedNode.name}</span>
+                    <span className="text-slate-400 text-[10px] font-medium">FULL NAME</span>
+                    <span className="text-slate-900 font-semibold">{selectedNode.name}</span>
                   </div>
                   <button 
                     onClick={() => handleCopy(selectedNode.name, 'name')}
-                    className="material-symbols-outlined text-[15px] text-outline hover:text-primary transition-colors"
+                    className="material-symbols-outlined text-[15px] text-slate-400 hover:text-sky-700 transition-colors"
                   >
                     content_copy
                   </button>
                 </div>
 
-                <div className="p-2 rounded-xl bg-surface-container flex items-center justify-between">
+                <div className="p-2 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between">
                   <div className="flex flex-col">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-outline text-[10px]">AADHAAR / TAX BLIND INDEX</span>
-                      <span className="px-1 py-0.2 rounded bg-verified-emerald/20 text-verified-emerald text-[9px] font-mono font-bold">
+                      <span className="text-slate-400 text-[10px] font-medium">AADHAAR / TAX BLIND INDEX</span>
+                      <span className="px-1 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-mono font-bold">
                         SHA-256 VALIDATED
                       </span>
                     </div>
-                    <span className="text-on-surface font-mono font-medium">4892-1204-5829</span>
-                    <span className="text-[9px] text-outline font-mono">Hash: a89fb73d...32de</span>
+                    <span className="text-slate-900 font-mono font-medium">4892-1204-5829</span>
+                    <span className="text-[9px] text-slate-400 font-mono">Hash: a89fb73d...32de</span>
                   </div>
                   <button 
                     onClick={() => handleCopy('4892-1204-5829', 'aadhaar')}
-                    className="material-symbols-outlined text-[15px] text-outline hover:text-primary transition-colors"
+                    className="material-symbols-outlined text-[15px] text-slate-400 hover:text-sky-700 transition-colors"
                   >
                     content_copy
                   </button>
                 </div>
 
-                <div className="p-2 rounded-xl bg-surface-container flex items-center justify-between">
+                <div className="p-2 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between">
                   <div className="flex flex-col">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-outline text-[10px]">PRIMARY SUSPECT MULE BANK</span>
-                      <span className="px-1 py-0.2 rounded bg-threat-crimson/20 text-threat-crimson text-[9px] font-bold">
+                      <span className="text-slate-400 text-[10px] font-medium">PRIMARY SUSPECT MULE BANK</span>
+                      <span className="px-1 py-0.2 rounded bg-rose-50 text-rose-700 border border-rose-200 text-[9px] font-bold">
                         LAYER 1 MULE
                       </span>
                     </div>
-                    <span className="text-on-surface font-mono font-medium">
+                    <span className="text-slate-900 font-mono font-medium">
                       {selectedNode.account || 'Kolkata Comm. Bank #30123456789'}
                     </span>
                   </div>
-                  <span className="material-symbols-outlined text-[15px] text-outline">account_balance</span>
+                  <span className="material-symbols-outlined text-[15px] text-slate-400">account_balance</span>
                 </div>
 
-                <div className="p-2 rounded-xl bg-surface-container flex items-center justify-between">
+                <div className="p-2 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between">
                   <div className="flex flex-col">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-outline text-[10px]">ESCORT VEHICLE PLATE</span>
-                      <span className="px-1 py-0.2 rounded bg-risk-amber/20 text-risk-amber text-[9px] font-bold">
+                      <span className="text-slate-400 text-[10px] font-medium">ESCORT VEHICLE PLATE</span>
+                      <span className="px-1 py-0.2 rounded bg-amber-50 text-amber-800 border border-amber-200 text-[9px] font-bold">
                         CLONED TAG ALERT
                       </span>
                     </div>
-                    <span className="text-on-surface font-mono font-bold">
+                    <span className="text-slate-900 font-mono font-bold">
                       {selectedNode.vehicle || 'WB01AB1234 (Toyota Fortuner)'}
                     </span>
-                    <span className="text-[9px] text-threat-crimson">Fastag Mismatch: Salt Lake Sector V Toll</span>
+                    <span className="text-[9px] text-rose-600 font-medium">Fastag Mismatch: Salt Lake Sector V Toll</span>
                   </div>
-                  <span className="material-symbols-outlined text-[15px] text-risk-amber">directions_car</span>
+                  <span className="material-symbols-outlined text-[15px] text-amber-600">directions_car</span>
                 </div>
 
-                <div className="p-2 rounded-xl bg-surface-container flex items-center justify-between">
+                <div className="p-2 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between">
                   <div className="flex flex-col">
-                    <span className="text-outline text-[10px]">LAST KNOWN CELL TOWER</span>
+                    <span className="text-slate-400 text-[10px] font-medium">LAST KNOWN CELL TOWER</span>
                     <div className="flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-verified-emerald animate-ping"></span>
-                      <span className="text-on-surface font-medium">Salt Lake Sector V, Bidhannagar</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-ping"></span>
+                      <span className="text-slate-900 font-semibold">Salt Lake Sector V, Bidhannagar</span>
                     </div>
-                    <span className="text-[9px] text-verified-emerald font-mono">Ping recorded 14m ago (BTS ID: #KOL-SL-04)</span>
+                    <span className="text-[9px] text-emerald-700 font-mono font-medium">Ping recorded 14m ago (BTS ID: #KOL-SL-04)</span>
                   </div>
-                  <span className="material-symbols-outlined text-[16px] text-primary">cell_tower</span>
+                  <span className="material-symbols-outlined text-[16px] text-sky-700">cell_tower</span>
                 </div>
               </div>
             </div>
@@ -476,9 +476,9 @@ export default function EvidenceDrawer({
         {/* TAB 2: DIRECT LINKS TAB */}
         {activeTab === 'links' && (
           <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm uppercase font-semibold">
+            <div className="flex items-center justify-between text-slate-500 font-label-sm text-label-sm uppercase font-semibold">
               <span>Direct Intelligence Links</span>
-              <span className="text-primary font-bold">
+              <span className="text-sky-700 font-bold">
                 {connectedEdges.length || liveNeighbors.length || 3} Graph Connections
               </span>
             </div>
@@ -489,28 +489,28 @@ export default function EvidenceDrawer({
               return (
                 <div 
                   key={edge.id || `${edge.source}-${edge.target}`}
-                  className="p-3 rounded-2xl bg-surface-container-lowest border-l-2 border-primary border border-white/[0.04] flex flex-col gap-1.5 hover:bg-surface-container transition-colors cursor-pointer"
+                  className="p-3 rounded-2xl bg-slate-50 border-l-2 border-sky-600 border border-slate-200 hover:bg-sky-50/50 transition-colors cursor-pointer"
                   onClick={() => handleInspectEvidence(otherId)}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-primary text-[16px]">
+                      <span className="material-symbols-outlined text-sky-700 text-[16px]">
                         {isOutgoing ? 'call_made' : 'call_received'}
                       </span>
-                      <span className="font-headline-sm text-body-sm text-on-surface font-bold">
+                      <span className="font-headline-sm text-body-sm text-slate-900 font-bold">
                         {edge.target_name || otherId}
                       </span>
                     </div>
-                    <span className="px-2 py-0.5 rounded bg-primary/20 text-primary font-label-sm text-label-sm font-bold">
+                    <span className="px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-100 font-label-sm text-label-sm font-bold">
                       {Math.round((edge.confidence || 0.95) * 100)}% Conf.
                     </span>
                   </div>
-                  <div className="flex items-center justify-between font-label-sm text-label-sm text-outline">
-                    <span className="text-primary font-mono font-bold">Edge: {edge.type}</span>
+                  <div className="flex items-center justify-between font-label-sm text-label-sm text-slate-500">
+                    <span className="text-sky-700 font-mono font-bold">Edge: {edge.type}</span>
                     <span>{edge.amount ? `₹${(edge.amount).toLocaleString('en-IN')}` : edge.calls ? `${edge.calls} Calls` : 'Verified Link'}</span>
                   </div>
                   {edge.details && (
-                    <p className="text-body-sm text-on-surface-variant text-[11px] leading-tight">
+                    <p className="text-body-sm text-slate-600 text-[11px] leading-tight">
                       {edge.details}
                     </p>
                   )}
@@ -520,15 +520,15 @@ export default function EvidenceDrawer({
 
             {/* Selected edge evidence inspection popup */}
             {selectedEdgeEvidence && (
-              <div className="p-3 rounded-xl bg-surface-container-high border border-primary/40 mt-2 flex flex-col gap-1.5 animate-fade-in">
-                <div className="flex items-center justify-between font-label-sm text-label-sm text-primary font-bold">
+              <div className="p-3 rounded-xl bg-slate-100 border border-sky-300 mt-2 flex flex-col gap-1.5 animate-fade-in">
+                <div className="flex items-center justify-between font-label-sm text-label-sm text-sky-700 font-bold">
                   <span>FORENSIC PROVENANCE EVIDENCE</span>
-                  <button onClick={() => setSelectedEdgeEvidence(null)} className="text-outline hover:text-white">✕</button>
+                  <button onClick={() => setSelectedEdgeEvidence(null)} className="text-slate-400 hover:text-slate-700">✕</button>
                 </div>
-                <p className="text-[11px] text-on-surface">
+                <p className="text-[11px] text-slate-700">
                   Source: {selectedEdgeEvidence.source_doc || 'CDR Telemetry / Bank Ingestion'}
                 </p>
-                <div className="font-mono text-[9px] text-outline truncate select-all">
+                <div className="font-mono text-[9px] text-slate-500 truncate select-all">
                   Hash: {selectedEdgeEvidence.sha256 || '7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069'}
                 </div>
               </div>
@@ -539,42 +539,42 @@ export default function EvidenceDrawer({
         {/* TAB 3: LOCATIONS TAB */}
         {activeTab === 'locations' && (
           <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm uppercase font-semibold">
+            <div className="flex items-center justify-between text-slate-500 font-label-sm text-label-sm uppercase font-semibold">
               <span>Cell Towers & Co-Locations</span>
-              <span className="text-verified-emerald font-bold">GPS Triangulated</span>
+              <span className="text-emerald-700 font-bold">GPS Triangulated</span>
             </div>
 
-            <div className="p-3 rounded-2xl bg-surface-container-lowest border border-white/[0.06] flex flex-col gap-2">
+            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[18px]">cell_tower</span>
-                  <span className="font-headline-sm text-body-sm text-on-surface font-bold">Sector V Bidhannagar</span>
+                  <span className="material-symbols-outlined text-sky-700 text-[18px]">cell_tower</span>
+                  <span className="font-headline-sm text-body-sm text-slate-900 font-bold">Sector V Bidhannagar</span>
                 </div>
-                <span className="px-1.5 py-0.5 rounded bg-primary/20 text-primary font-mono text-[10px]">#KOL-SL-04</span>
+                <span className="px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-100 font-mono text-[10px] font-semibold">#KOL-SL-04</span>
               </div>
-              <p className="text-[11px] text-on-surface-variant">
+              <p className="text-[11px] text-slate-600">
                 Primary extortion coordination tower. 18 outgoing calls logged within 2 hours.
               </p>
-              <div className="flex items-center justify-between text-[10px] font-label-sm text-outline border-t border-white/5 pt-1">
+              <div className="flex items-center justify-between text-[10px] font-label-sm text-slate-400 border-t border-slate-200/60 pt-1">
                 <span>Lat: 22.5804° N, Lon: 88.4378° E</span>
-                <span className="text-verified-emerald font-bold">Signal: Strong (Airtel)</span>
+                <span className="text-emerald-700 font-bold">Signal: Strong (Airtel)</span>
               </div>
             </div>
 
-            <div className="p-3 rounded-2xl bg-surface-container-lowest border border-white/[0.06] flex flex-col gap-2">
+            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-risk-amber text-[18px]">store</span>
-                  <span className="font-headline-sm text-body-sm text-on-surface font-bold">Salt Lake Tea Stall</span>
+                  <span className="material-symbols-outlined text-amber-600 text-[18px]">store</span>
+                  <span className="font-headline-sm text-body-sm text-slate-900 font-bold">Salt Lake Tea Stall</span>
                 </div>
-                <span className="px-1.5 py-0.5 rounded bg-risk-amber/20 text-risk-amber font-mono text-[10px]">CO-LOCATED</span>
+                <span className="px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-mono text-[10px] font-bold">CO-LOCATED</span>
               </div>
-              <p className="text-[11px] text-on-surface-variant">
+              <p className="text-[11px] text-slate-600">
                 Physical meeting site shared with Sunita Das and Debasish Chatterjee.
               </p>
-              <div className="flex items-center justify-between text-[10px] font-label-sm text-outline border-t border-white/5 pt-1">
+              <div className="flex items-center justify-between text-[10px] font-label-sm text-slate-400 border-t border-slate-200/60 pt-1">
                 <span>Observed: 2026-03-10 18:45 IST</span>
-                <span className="text-risk-amber font-bold">Informant Verified</span>
+                <span className="text-amber-800 font-bold">Informant Verified</span>
               </div>
             </div>
           </div>
@@ -583,60 +583,60 @@ export default function EvidenceDrawer({
         {/* TAB 4: BSA §65B EVIDENCE TAB */}
         {activeTab === 'evidence' && (
           <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm uppercase font-semibold">
+            <div className="flex items-center justify-between text-slate-500 font-label-sm text-label-sm uppercase font-semibold">
               <span>Court-Admissible Dossier Items</span>
-              <span className="text-verified-emerald font-bold flex items-center gap-1">
+              <span className="text-emerald-700 font-bold flex items-center gap-1">
                 <span className="material-symbols-outlined text-[14px]">verified</span>
                 BSA §65B
               </span>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-surface-container-lowest border border-white/[0.08] flex flex-col gap-2">
+            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-threat-crimson text-[16px]">gavel</span>
-                  <span className="font-headline-sm text-body-sm text-on-surface font-bold">FIR 101/24</span>
+                  <span className="material-symbols-outlined text-rose-600 text-[16px]">gavel</span>
+                  <span className="font-headline-sm text-body-sm text-slate-900 font-bold">FIR 101/24</span>
                 </div>
-                <span className="px-1.5 py-0.2 rounded bg-threat-crimson/20 text-threat-crimson font-label-sm text-label-sm font-bold">
+                <span className="px-1.5 py-0.2 rounded bg-rose-50 text-rose-700 border border-rose-200 font-label-sm text-label-sm font-bold">
                   Sec 384/386/120B BNS
                 </span>
               </div>
-              <p className="text-[11px] text-on-surface-variant leading-relaxed">
+              <p className="text-[11px] text-slate-600 leading-relaxed">
                 Suspect demanded ₹50 Lakh extortion via VOIP call spoofing victim's family. Location matched CDR tower #KOL-SL-04.
               </p>
-              <div className="flex items-center justify-between text-[10px] font-label-sm text-outline border-t border-white/5 pt-1.5">
+              <div className="flex items-center justify-between text-[10px] font-label-sm text-slate-400 border-t border-slate-200/60 pt-1.5">
                 <span>IO: Sub-Insp. B. Banerjee</span>
                 <span>Bidhannagar Cyber PS</span>
               </div>
-              <div className="p-1.5 rounded bg-surface-container font-mono text-[9px] text-primary truncate select-all flex items-center justify-between">
+              <div className="p-1.5 rounded bg-white border border-slate-200 font-mono text-[9px] text-sky-700 truncate select-all flex items-center justify-between">
                 <span>sha256:7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069</span>
                 <button 
                   onClick={() => handleCopy('7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069', 'fir101')}
-                  className="material-symbols-outlined text-[13px] text-outline hover:text-primary transition-colors ml-1"
+                  className="material-symbols-outlined text-[13px] text-slate-400 hover:text-sky-700 transition-colors ml-1"
                 >
                   content_copy
                 </button>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-surface-container-lowest border border-white/[0.08] flex flex-col gap-2">
+            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-primary text-[16px]">shield_alert</span>
-                  <span className="font-headline-sm text-body-sm text-on-surface font-bold">FIR 103/24</span>
+                  <span className="material-symbols-outlined text-sky-700 text-[16px]">shield_alert</span>
+                  <span className="font-headline-sm text-body-sm text-slate-900 font-bold">FIR 103/24</span>
                 </div>
-                <span className="px-1.5 py-0.2 rounded bg-primary/20 text-primary font-label-sm text-label-sm font-bold">
+                <span className="px-1.5 py-0.2 rounded bg-sky-50 text-sky-700 border border-sky-200 font-label-sm text-label-sm font-bold">
                   Sec 419/420/66D IT Act
                 </span>
               </div>
-              <p className="text-[11px] text-on-surface-variant leading-relaxed">
+              <p className="text-[11px] text-slate-600 leading-relaxed">
                 Operation of fake loan app recovery cell extorting citizens using morphed media contacts.
               </p>
-              <div className="flex items-center justify-between text-[10px] font-label-sm text-outline border-t border-white/5 pt-1.5">
+              <div className="flex items-center justify-between text-[10px] font-label-sm text-slate-400 border-t border-slate-200/60 pt-1.5">
                 <span>Kolkata Cyber Crime PS</span>
-                <span className="text-verified-emerald font-bold">Hash Certified</span>
+                <span className="text-emerald-700 font-bold">Hash Certified</span>
               </div>
-              <div className="p-1.5 rounded bg-surface-container font-mono text-[9px] text-outline truncate select-all">
+              <div className="p-1.5 rounded bg-white border border-slate-200 font-mono text-[9px] text-slate-500 truncate select-all">
                 sha256:3a1e948c267bca90432f8910e19ac9001b...d431
               </div>
             </div>
@@ -645,19 +645,19 @@ export default function EvidenceDrawer({
       </div>
 
       {/* Bottom Sticky Action Bar */}
-      <div className="p-3.5 bg-surface-container-lowest/90 border-t border-white/10 flex items-center justify-between gap-2 flex-shrink-0">
+      <div className="p-3.5 bg-white border-t border-slate-200 flex items-center justify-between gap-2 flex-shrink-0">
         <button 
           onClick={() => alert(`Real-time CDR interception request broadcasted to Telco BTS for [${selectedNode.name}].`)}
-          className="flex-1 py-2.5 px-3 rounded-xl bg-primary text-surface-base font-label-sm text-label-sm font-bold shadow-[0_0_14px_rgba(6,182,212,0.4)] hover:bg-tertiary-fixed transition-all flex items-center justify-center gap-1.5"
+          className="flex-1 py-2.5 px-3 rounded-xl bg-sky-600 text-white font-label-sm text-label-sm font-bold shadow-xs hover:bg-sky-700 transition-all flex items-center justify-center gap-1.5"
         >
           <span className="material-symbols-outlined text-[17px]">cell_tower</span>
           <span>Live CDR Intercept</span>
         </button>
         <button 
           onClick={handleExportDossier}
-          className="py-2.5 px-3 rounded-xl bg-surface-container hover:bg-surface-bright text-on-surface font-label-sm text-label-sm font-bold transition-all flex items-center justify-center gap-1"
+          className="py-2.5 px-3 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-label-sm text-label-sm font-bold transition-all flex items-center justify-center gap-1 shadow-xs"
         >
-          <span className="material-symbols-outlined text-risk-amber text-[17px]">description</span>
+          <span className="material-symbols-outlined text-amber-600 text-[17px]">description</span>
           <span>Charge Sheet</span>
         </button>
       </div>

@@ -56,15 +56,15 @@ export default function Sidebar({
   ];
 
   return (
-    <aside className="w-60 h-full flex-shrink-0 bg-surface-secondary z-30 flex flex-col justify-between p-3 shadow-[4px_0_24px_rgba(0,0,0,0.5)] border-r border-white/[0.06] overflow-y-auto no-scrollbar">
+    <aside className="w-60 h-full flex-shrink-0 bg-white z-30 flex flex-col justify-between p-3 shadow-sm border-r border-slate-200/80 overflow-y-auto no-scrollbar">
       <div className="flex flex-col gap-2.5">
         {/* Tactical Ops Live Indicator */}
-        <div className="px-2.5 py-1 rounded-lg bg-surface-container-lowest flex items-center justify-between border border-white/[0.04]">
-          <span className="font-mono text-[11px] uppercase text-on-surface-variant font-bold tracking-wider">
+        <div className="px-2.5 py-1 rounded-lg bg-slate-50 flex items-center justify-between border border-slate-200">
+          <span className="font-mono text-[11px] uppercase text-slate-600 font-bold tracking-wider">
             Tactical Ops
           </span>
-          <span className="px-2 py-0.2 rounded-full bg-threat-crimson/20 text-threat-crimson font-mono text-[10px] font-bold animate-pulse flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-threat-crimson"></span>
+          <span className="px-2 py-0.2 rounded-full bg-rose-50 text-rose-600 border border-rose-200 font-mono text-[10px] font-bold animate-pulse flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
             LIVE RUN
           </span>
         </div>
@@ -79,14 +79,14 @@ export default function Sidebar({
                 onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg transition-all text-left group ${
                   isActive
-                    ? 'bg-primary-container text-on-primary font-bold shadow-[0_0_12px_rgba(6,182,212,0.4)]'
-                    : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                    ? 'bg-sky-50 text-sky-700 font-bold border-l-2 border-sky-600 shadow-sm'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <span
                     className={`material-symbols-outlined text-[19px] transition-transform group-hover:scale-110 ${
-                      isActive ? 'text-on-primary' : 'text-primary'
+                      isActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
                     }`}
                   >
                     {item.icon}
@@ -96,7 +96,7 @@ export default function Sidebar({
                 {item.badge && (
                   <span
                     className={`text-[10px] font-mono px-1.5 py-0.2 rounded font-bold shrink-0 ${
-                      isActive ? 'bg-black/20 text-white' : item.badgeColor
+                      isActive ? 'bg-sky-200/60 text-sky-800' : item.badgeColor
                     }`}
                   >
                     {item.badge}
@@ -109,36 +109,36 @@ export default function Sidebar({
       </div>
 
       {/* Bottom System Telemetry Card */}
-      <div className="flex flex-col gap-1.5 p-2.5 rounded-xl bg-surface-container-lowest/90 border border-white/[0.06] shadow-inner mt-2">
-        <div className="flex items-center justify-between text-on-surface-variant font-mono text-[10px]">
+      <div className="flex flex-col gap-1.5 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 shadow-inner mt-2">
+        <div className="flex items-center justify-between text-slate-500 font-mono text-[10px]">
           <span className="tracking-wider">SYSTEM TELEMETRY</span>
-          <span className="text-verified-emerald font-bold flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-verified-emerald animate-ping"></span>
+          <span className="text-emerald-600 font-bold flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-ping"></span>
             NOMINAL
           </span>
         </div>
 
         <div className="flex flex-col gap-0.5">
-          <div className="flex justify-between font-mono text-[10px] text-on-surface-variant">
+          <div className="flex justify-between font-mono text-[10px] text-slate-500">
             <span>Graph Nodes</span>
-            <span className="text-on-surface font-semibold">{nodeCount} Live</span>
+            <span className="text-slate-800 font-semibold">{nodeCount} Live</span>
           </div>
-          <div className="w-full bg-surface-container-high h-1 rounded-full overflow-hidden">
-            <div className="bg-primary h-full w-[72%] shadow-[0_0_8px_rgba(6,182,212,0.5)]"></div>
+          <div className="w-full bg-slate-200 h-1 rounded-full overflow-hidden">
+            <div className="bg-primary h-full w-[72%] shadow-[0_0_8px_rgba(2,132,199,0.4)]"></div>
           </div>
         </div>
 
         <div className="flex flex-col gap-0.5">
-          <div className="flex justify-between font-mono text-[10px] text-on-surface-variant">
+          <div className="flex justify-between font-mono text-[10px] text-slate-500">
             <span>Inference Unit</span>
-            <span className="text-on-surface font-semibold">42ms p99</span>
+            <span className="text-slate-800 font-semibold">42ms p99</span>
           </div>
-          <div className="w-full bg-surface-container-high h-1 rounded-full overflow-hidden">
-            <div className="bg-ai-purple h-full w-[44%] shadow-[0_0_8px_rgba(139,92,246,0.5)]"></div>
+          <div className="w-full bg-slate-200 h-1 rounded-full overflow-hidden">
+            <div className="bg-ai-purple h-full w-[44%] shadow-[0_0_8px_rgba(124,58,237,0.4)]"></div>
           </div>
         </div>
 
-        <div className="pt-1.5 border-t border-white/[0.04] flex items-center justify-between text-outline font-mono text-[10px]">
+        <div className="pt-1.5 border-t border-slate-200 flex items-center justify-between text-slate-400 font-mono text-[10px]">
           <span>SHA-256 Chain</span>
           <span className="text-primary font-bold tracking-wider">a9f3…e41</span>
         </div>
