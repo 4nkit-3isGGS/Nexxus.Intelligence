@@ -250,7 +250,6 @@ export default function App() {
       {/* 1. Tactical Header */}
       <Header
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
         backendStatus={backendStatus}
         refreshData={loadData}
         caseInfo={rawGraphData?.case_info}

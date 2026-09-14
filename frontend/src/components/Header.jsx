@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 
 export default function Header({ 
   activeTab, 
-  setActiveTab, 
   backendStatus, 
   refreshData, 
   caseInfo, 
@@ -14,15 +13,17 @@ export default function Header({
 }) {
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
 
-  const tabs = [
-    { id: 'graph', label: 'Graph', count: kpiStats?.totalNodes || 31 },
-    { id: 'agent', label: 'AI Swarm', badge: 'AI', badgeColor: 'bg-ai-purple/25 text-ai-purple-light shadow-[0_0_8px_rgba(139,92,246,0.3)]' },
-    { id: 'resolution', label: 'Mule Det.', badge: `${pendingReviewCount}`, badgeColor: 'bg-risk-amber/20 text-risk-amber' },
-    { id: 'financial', label: 'Money Trail' },
-    { id: 'cdr', label: 'Call Matrix' },
-    { id: 'fir', label: 'FIR Corpus' },
-    { id: 'audit', label: 'Legal Vault' },
-  ];
+  const tabMetadata = {
+    graph: { label: 'Knowledge Graph', icon: 'hub', badge: `${kpiStats?.totalNodes || 31} Nodes`, badgeColor: 'bg-sky-100 text-sky-700' },
+    agent: { label: 'Autonomous Agent Swarm', icon: 'psychology', badge: 'RUNNING', badgeColor: 'bg-purple-100 text-purple-700' },
+    resolution: { label: 'Mule Detection & Disambiguation', icon: 'fingerprint', badge: `${pendingReviewCount} Pending`, badgeColor: 'bg-amber-100 text-amber-800' },
+    financial: { label: 'Layering & Hawala Forensic Ledger', icon: 'account_balance' },
+    cdr: { label: 'CDR Geo Tower & Call Matrix', icon: 'phone_in_talk' },
+    fir: { label: 'FIR Evidence Corpus', icon: 'policy' },
+    audit: { label: 'BSA §65B Cryptographic Audit Vault', icon: 'gavel', badge: 'Tamper-Proof', badgeColor: 'bg-emerald-100 text-emerald-800' },
+  };
+
+  const activeTabMeta = tabMetadata[activeTab] || tabMetadata.graph;
 
   const roleLabels = {
     LEAD_INVESTIGATOR: { short: 'LEAD', sub: 'Unmasked PII' },
@@ -68,39 +69,21 @@ export default function Header({
           </div>
         </div>
 
-        {/* Center: Top Segmented Navigation Tabs */}
-        <nav className="hidden xl:flex items-center gap-0.5 bg-slate-100/90 p-0.5 rounded-xl shadow-inner border border-slate-200/80 flex-shrink-0">
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all text-left whitespace-nowrap text-xs flex-shrink-0 ${
-                  isActive
-                    ? 'bg-primary-container text-white font-semibold shadow-sm'
-                    : 'text-slate-600 hover:bg-white hover:text-slate-900'
-                }`}
-              >
-                <span>{tab.label}</span>
-                {tab.count !== undefined && (
-                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-primary/15 text-primary'
-                  }`}>
-                    {tab.count}
-                  </span>
-                )}
-                {tab.badge && (
-                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold ${
-                    isActive ? 'bg-white/20 text-white' : tab.badgeColor
-                  }`}>
-                    {tab.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
+        {/* Center: Active View Breadcrumb Context (Sidebar handles all navigation) */}
+        <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-xl bg-slate-50 border border-slate-200/80 text-xs font-mono text-slate-600">
+          <span className="material-symbols-outlined text-sky-600 text-[16px]">
+            {activeTabMeta.icon}
+          </span>
+          <span className="text-slate-400">/</span>
+          <span className="font-semibold text-slate-800 tracking-tight">
+            {activeTabMeta.label}
+          </span>
+          {activeTabMeta.badge && (
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${activeTabMeta.badgeColor}`}>
+              {activeTabMeta.badge}
+            </span>
+          )}
+        </div>
 
         {/* Right Tactical Telemetry & RBAC Tier */}
         <div className="flex items-center gap-2 flex-shrink-0">
