@@ -264,74 +264,75 @@ export default function App() {
         onRoleChange={handleRoleChange}
       />
 
-      {/* 2. Tactical Ops Left Sidebar */}
-      <Sidebar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        nodeCount={graphStats.total_nodes || rawGraphData?.nodes?.length || 31}
-        pendingReviewCount={3}
-        backendStatus={backendStatus}
-      />
+      {/* Main App Body Row: Sidebar + Primary Workspace */}
+      <div className="flex-1 flex overflow-hidden w-full relative min-h-0">
+        {/* 2. Tactical Ops Left Sidebar */}
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          nodeCount={graphStats.total_nodes || rawGraphData?.nodes?.length || 31}
+          pendingReviewCount={3}
+          backendStatus={backendStatus}
+        />
 
-      {/* 3. Primary Tactical Workspace Body */}
-      <div className="pl-60 pt-16 flex-1 flex flex-col h-full w-full overflow-hidden relative min-h-0">
-        {/* Ambient Grid & Spatial Glow Backdrops */}
-        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#4cd7f6_1px,transparent_1px)] [background-size:28px_28px]"></div>
-          <div className="absolute top-1/4 left-1/3 w-[550px] h-[550px] bg-threat-crimson/10 rounded-full blur-[140px] pointer-events-none animate-pulse"></div>
-          <div className="absolute bottom-1/3 right-1/4 w-[480px] h-[480px] bg-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
-          <div className="absolute top-12 right-12 w-[380px] h-[380px] bg-ai-purple/10 rounded-full blur-[100px] pointer-events-none"></div>
-        </div>
-
-        <main className="relative z-10 flex-1 flex flex-col overflow-hidden w-full min-h-0">
-        {/* VIEW 1: INTERACTIVE GRAPH CANVAS */}
-        {activeTab === 'graph' && (
-          <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-            {/* Filter and Timeline Controls */}
-            <FilterBar
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              riskThreshold={riskThreshold}
-              setRiskThreshold={setRiskThreshold}
-              selectedTypes={selectedTypes}
-              toggleType={toggleType}
-              selectedCluster={selectedCluster}
-              setSelectedCluster={setSelectedCluster}
-              timelineDate={timelineDate}
-              setTimelineDate={setTimelineDate}
-              timelinePlaying={timelinePlaying}
-              setTimelinePlaying={setTimelinePlaying}
-              nodeCountsByType={nodeCountsByType}
-              resetFilters={resetFilters}
-              onSelectNode={(node) => {
-                const fullNode = rawGraphData?.nodes?.find((n) => n.id === node.id) || node;
-                setSelectedNode(fullNode);
-                setHighlightedNodeIds([fullNode.id]);
-              }}
-            />
-
-            {/* Force Canvas */}
-            <div className="flex-1 relative overflow-hidden min-h-0">
-              <GraphCanvas
-                nodes={filteredNodes}
-                edges={filteredEdges}
-                selectedNode={selectedNode}
-                onSelectNode={(node) => setSelectedNode(node)}
-                selectedEdge={selectedEdge}
-                onSelectEdge={(edge) => setSelectedEdge(edge)}
-                highlightedNodeIds={highlightedNodeIds}
-                highlightedEdgeIds={highlightedEdgeIds}
-                timelineDate={timelineDate}
-                activeLayout={activeLayout}
-                onLayoutChange={(layout) => setActiveLayout(layout)}
-              />
-            </div>
+        {/* 3. Primary Tactical Workspace Body */}
+        <div className="flex-1 flex flex-col h-full w-full overflow-hidden relative min-h-0 min-w-0">
+          {/* Ambient Grid & Spatial Glow Backdrops */}
+          <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#4cd7f6_1px,transparent_1px)] [background-size:28px_28px]"></div>
+            <div className="absolute top-1/4 left-1/3 w-[550px] h-[550px] bg-threat-crimson/10 rounded-full blur-[140px] pointer-events-none animate-pulse"></div>
+            <div className="absolute bottom-1/3 right-1/4 w-[480px] h-[480px] bg-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
+            <div className="absolute top-12 right-12 w-[380px] h-[380px] bg-ai-purple/10 rounded-full blur-[100px] pointer-events-none"></div>
           </div>
-        )}
 
-        {/* VIEW 2: AI AGENTIC INVESTIGATION CONSOLE */}
-        {activeTab === 'agent' && (
-          <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+          <main className="relative z-10 flex-1 flex flex-col overflow-hidden w-full min-h-0 min-w-0">
+          {/* VIEW 1: INTERACTIVE GRAPH CANVAS */}
+          {activeTab === 'graph' && (
+            <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+              {/* Filter and Timeline Controls */}
+              <FilterBar
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                riskThreshold={riskThreshold}
+                setRiskThreshold={setRiskThreshold}
+                selectedTypes={selectedTypes}
+                toggleType={toggleType}
+                selectedCluster={selectedCluster}
+                setSelectedCluster={setSelectedCluster}
+                timelineDate={timelineDate}
+                setTimelineDate={setTimelineDate}
+                timelinePlaying={timelinePlaying}
+                setTimelinePlaying={setTimelinePlaying}
+                nodeCountsByType={nodeCountsByType}
+                resetFilters={resetFilters}
+                onSelectNode={(node) => {
+                  const fullNode = rawGraphData?.nodes?.find((n) => n.id === node.id) || node;
+                  setSelectedNode(fullNode);
+                  setHighlightedNodeIds([fullNode.id]);
+                }}
+              />
+
+              {/* Force Canvas */}
+              <div className="flex-1 relative overflow-hidden min-h-0">
+                <GraphCanvas
+                  nodes={filteredNodes}
+                  edges={filteredEdges}
+                  selectedNode={selectedNode}
+                  onSelectNode={(node) => setSelectedNode(node)}
+                  selectedEdge={selectedEdge}
+                  onSelectEdge={(edge) => setSelectedEdge(edge)}
+                  highlightedNodeIds={highlightedNodeIds}
+                  highlightedEdgeIds={highlightedEdgeIds}
+                  timelineDate={timelineDate}
+                  activeLayout={activeLayout}
+                  onLayoutChange={(layout) => setActiveLayout(layout)}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* VIEW 2: AI AGENTIC INVESTIGATION CONSOLE */}
+          {activeTab === 'agent' && (
             <AgentQueryBar
               onRunAgentQuery={handleRunAgentQuery}
               agentResponse={agentResponse}
@@ -342,91 +343,78 @@ export default function App() {
                 setActiveTab('graph');
               }}
             />
+          )}
 
-            {/* Split Preview Graph Canvas */}
-            <div className="flex-1 relative">
-              <GraphCanvas
-                nodes={filteredNodes}
-                edges={filteredEdges}
-                selectedNode={selectedNode}
-                onSelectNode={(node) => setSelectedNode(node)}
-                highlightedNodeIds={agentResponse?.highlighted_nodes || highlightedNodeIds}
-                highlightedEdgeIds={agentResponse?.highlighted_edges || highlightedEdgeIds}
-                activeLayout="force"
-              />
-            </div>
-          </div>
-        )}
-
-        {/* VIEW 3: ENTITY RESOLUTION & DUPLICATE REVIEW QUEUE */}
-        {activeTab === 'resolution' && (
-          <EntityResolutionView
-            onFocusEntity={(node) => {
-              setSelectedNode(node);
-              setActiveTab('graph');
-            }}
-            onJumpToGraph={() => setActiveTab('graph')}
-          />
-        )}
-
-        {/* VIEW 4: CIRCULAR MONEY TRAIL & AML FLOW */}
-        {activeTab === 'financial' && (
-          <FinancialFlowView
-            onSelectEntity={(nodeId) => {
-              const found = rawGraphData.nodes.find((n) => n.id === nodeId);
-              if (found) {
-                setSelectedNode(found);
+          {/* VIEW 3: ENTITY RESOLUTION & DUPLICATE REVIEW QUEUE */}
+          {activeTab === 'resolution' && (
+            <EntityResolutionView
+              onFocusEntity={(node) => {
+                setSelectedNode(node);
                 setActiveTab('graph');
-              }
-            }}
-          />
-        )}
+              }}
+              onJumpToGraph={() => setActiveTab('graph')}
+            />
+          )}
 
-        {/* VIEW 5: CDR TELEMETRY & CALL SPIKE MATRIX */}
-        {activeTab === 'cdr' && (
-          <CdrTelemetryView />
-        )}
+          {/* VIEW 4: CIRCULAR MONEY TRAIL & AML FLOW */}
+          {activeTab === 'financial' && (
+            <FinancialFlowView
+              onSelectEntity={(nodeId) => {
+                const found = rawGraphData.nodes.find((n) => n.id === nodeId);
+                if (found) {
+                  setSelectedNode(found);
+                  setActiveTab('graph');
+                }
+              }}
+            />
+          )}
 
-        {/* VIEW 6: FIR CORPUS & IN-TEXT NER HIGHLIGHTER */}
-        {activeTab === 'fir' && (
-          <FirCorpusView
-            onSelectEntity={(entityName) => {
-              const found = rawGraphData.nodes.find((n) => n.name.includes(entityName));
-              if (found) {
-                setSelectedNode(found);
-                setActiveTab('graph');
-              }
-            }}
-            onJumpToGraph={() => setActiveTab('graph')}
-          />
-        )}
+          {/* VIEW 5: CDR TELEMETRY & CALL SPIKE MATRIX */}
+          {activeTab === 'cdr' && (
+            <CdrTelemetryView />
+          )}
 
-        {/* VIEW 7: BSA SECTION 65B LEGAL AUDIT VAULT */}
-        {activeTab === 'audit' && (
-          <LegalAuditVault
-            caseInfo={rawGraphData.case_info}
-            nodes={rawGraphData.nodes}
-            edges={rawGraphData.edges}
-          />
-        )}
+          {/* VIEW 6: FIR CORPUS & IN-TEXT NER HIGHLIGHTER */}
+          {activeTab === 'fir' && (
+            <FirCorpusView
+              onSelectEntity={(entityName) => {
+                const found = rawGraphData.nodes.find((n) => n.name.includes(entityName));
+                if (found) {
+                  setSelectedNode(found);
+                  setActiveTab('graph');
+                }
+              }}
+              onJumpToGraph={() => setActiveTab('graph')}
+            />
+          )}
 
-        {/* 3. Slide-Over Evidence & Investigation Drawer */}
-        {selectedNode && (
-          <EvidenceDrawer
-            selectedNode={selectedNode}
-            onClose={() => setSelectedNode(null)}
-            onFocusNode={(node) => {
-              setHighlightedNodeIds([node.id]);
-            }}
-            onTraceKingpin={handleTraceKingpin}
-            onOpenFirDoc={(docId) => {
-              setActiveTab('fir');
-            }}
-            onExpandSubgraph={handleExpandSubgraph}
-            allEdges={rawGraphData?.edges || []}
-          />
-        )}
-      </main>
+          {/* VIEW 7: BSA SECTION 65B LEGAL AUDIT VAULT */}
+          {activeTab === 'audit' && (
+            <LegalAuditVault
+              caseInfo={rawGraphData.case_info}
+              nodes={rawGraphData.nodes}
+              edges={rawGraphData.edges}
+            />
+          )}
+
+          {/* 3. Slide-Over Evidence & Investigation Drawer */}
+          {selectedNode && (
+            <EvidenceDrawer
+              selectedNode={selectedNode}
+              onClose={() => setSelectedNode(null)}
+              onFocusNode={(node) => {
+                setHighlightedNodeIds([node.id]);
+              }}
+              onTraceKingpin={handleTraceKingpin}
+              onOpenFirDoc={(docId) => {
+                setActiveTab('fir');
+              }}
+              onExpandSubgraph={handleExpandSubgraph}
+              allEdges={rawGraphData?.edges || []}
+            />
+          )}
+        </main>
+        </div>
       </div>
 
       {/* 4. Ingestion Modal */}

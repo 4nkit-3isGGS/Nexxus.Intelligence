@@ -36,9 +36,11 @@ export default function CdrTelemetryView() {
   return (
     <div className="flex-1 flex flex-col overflow-y-auto bg-surface-base text-on-surface p-margin lg:p-margin-lg gap-space-lg no-scrollbar">
       {/* TOP CONTEXT PANEL / BREADCRUMB & METADATA BANNER */}
-      <section className="bg-card-glass backdrop-blur-xl rounded-2xl p-space-lg shadow-xl relative overflow-hidden border border-white/[0.08]">
-        <div className="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-primary/5 pointer-events-none blur-3xl"></div>
-        <div className="absolute right-1/3 -bottom-20 w-64 h-64 rounded-full bg-threat-crimson/5 pointer-events-none blur-3xl"></div>
+      <section className="bg-card-glass backdrop-blur-xl rounded-2xl p-space-lg shadow-xl relative flex flex-col flex-shrink-0 min-h-fit border border-white/[0.08]">
+        <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+          <div className="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-primary/5 blur-3xl"></div>
+          <div className="absolute right-1/3 -bottom-20 w-64 h-64 rounded-full bg-threat-crimson/5 blur-3xl"></div>
+        </div>
 
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-lg relative z-10">
           <div className="flex flex-col gap-space-xs">
@@ -99,7 +101,7 @@ export default function CdrTelemetryView() {
       </section>
 
       {/* SECTION 2: 4-CARD TELECOMM INTEL OVERVIEW */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-gutter-lg">
+      <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-gutter-lg flex-shrink-0 min-h-fit">
         {/* Card 1: Total Calls Analyzed */}
         <div className="bg-card-glass backdrop-blur-xl rounded-2xl p-space-md shadow-md flex flex-col justify-between relative overflow-hidden border border-white/[0.06]">
           <div className="flex items-start justify-between">
@@ -195,7 +197,7 @@ export default function CdrTelemetryView() {
       </section>
 
       {/* SECTION 3: WIRETAP AUDIO SIMULATION & WAVEFORM */}
-      <section className="p-5 rounded-2xl bg-surface-container-lowest border border-white/[0.08] flex flex-col gap-3 shadow-xl">
+      <section className="p-5 rounded-2xl bg-surface-container-lowest border border-white/[0.08] flex flex-col flex-shrink-0 min-h-fit gap-3 shadow-xl">
         <div className="flex items-center justify-between border-b border-white/[0.04] pb-2">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-threat-crimson text-[20px]">graphic_eq</span>
@@ -252,7 +254,7 @@ export default function CdrTelemetryView() {
       </section>
 
       {/* SECTION 4: CDR CALL LOG MATRIX TABLE */}
-      <section className="p-5 rounded-2xl bg-surface-container-lowest border border-white/[0.08] flex flex-col gap-3 shadow-xl">
+      <section className="p-5 rounded-2xl bg-surface-container-lowest border border-white/[0.08] flex flex-col flex-shrink-0 min-h-fit gap-3 shadow-xl">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.04] pb-3">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary text-[20px]">call</span>

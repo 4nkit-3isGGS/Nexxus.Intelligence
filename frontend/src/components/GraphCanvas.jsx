@@ -100,7 +100,9 @@ export default function GraphCanvas({
   useEffect(() => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
-      setPan({ x: rect.width / 2, y: rect.height / 2 });
+      const fitZoom = rect.height < 600 ? 0.75 : rect.height < 750 ? 0.85 : 1;
+      setPan({ x: rect.width / 2, y: rect.height / 2 - 30 });
+      setZoom(fitZoom);
     }
   }, []);
 
@@ -556,8 +558,9 @@ export default function GraphCanvas({
   const resetView = () => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
-      setPan({ x: rect.width / 2, y: rect.height / 2 });
-      setZoom(1);
+      const fitZoom = rect.height < 600 ? 0.75 : rect.height < 750 ? 0.85 : 1;
+      setPan({ x: rect.width / 2, y: rect.height / 2 - 30 });
+      setZoom(fitZoom);
     }
   };
 

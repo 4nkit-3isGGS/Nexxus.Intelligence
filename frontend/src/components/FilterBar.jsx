@@ -338,7 +338,7 @@ export default function FilterBar({
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-tertiary"></span>
               </span>
               <span className="material-symbols-outlined text-[15px]">calendar_today</span>
-              <span className="font-mono">{timelineDate || 'Timeline 2024-2026'}</span>
+              <span className="font-mono">{timelineDate || 'Timeline'}</span>
             </button>
 
             {/* Timeline Flyout Panel */}

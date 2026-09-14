@@ -66,12 +66,14 @@ export default function AgentQueryBar({
   ];
 
   return (
-    <div className="w-full flex flex-col gap-3 p-4 overflow-y-auto no-scrollbar max-h-[48vh] flex-shrink-0">
+    <div className="flex-1 flex flex-col overflow-y-auto w-full h-full p-4 lg:p-6 gap-4 no-scrollbar">
       {/* 1. AI COPILOT QUERY COMMAND BAR */}
-      <section className="relative rounded-2xl p-space-lg bg-surface-container-lowest/80 backdrop-blur-2xl shadow-xl overflow-hidden border border-white/[0.08]">
+      <section className="relative flex flex-col flex-shrink-0 min-h-fit rounded-2xl p-space-lg bg-surface-container-lowest/80 backdrop-blur-2xl shadow-xl border border-white/[0.08]">
         {/* Ambient glowing backdrops */}
-        <div className="absolute -top-24 -right-20 w-96 h-96 rounded-full bg-ai-purple/10 blur-3xl pointer-events-none"></div>
-        <div className="absolute -bottom-24 -left-20 w-96 h-96 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+        <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+          <div className="absolute -top-24 -right-20 w-96 h-96 rounded-full bg-ai-purple/10 blur-3xl"></div>
+          <div className="absolute -bottom-24 -left-20 w-96 h-96 rounded-full bg-primary/10 blur-3xl"></div>
+        </div>
 
         <div className="relative z-10 flex flex-col space-y-space-md">
           {/* Title & Live Status */}
@@ -173,7 +175,7 @@ export default function AgentQueryBar({
       </section>
 
       {/* 2. EXECUTIVE THREAT SCORECARD (4 Grid HUD Metric Cards) */}
-      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-gutter-lg">
+      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-gutter-lg flex-shrink-0 min-h-fit">
         {/* Card 1: Threat Classification */}
         <div className="relative p-space-md rounded-2xl bg-surface-container-low/90 backdrop-blur-xl shadow-lg flex flex-col justify-between overflow-hidden border border-white/[0.06]">
           <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-threat-crimson/10 blur-xl"></div>
@@ -290,7 +292,7 @@ export default function AgentQueryBar({
       </section>
 
       {/* 3. EVALUATED HYPOTHESES ENGINE PANEL */}
-      <section className="flex flex-col space-y-space-md">
+      <section className="flex flex-col flex-shrink-0 min-h-fit space-y-space-md">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-space-sm">
             <div className="w-1.5 h-5 bg-risk-amber rounded-full"></div>
@@ -375,7 +377,7 @@ export default function AgentQueryBar({
       </section>
 
       {/* 4. MULTI-AGENT REASONING PIPELINE & COURT DOSSIER */}
-      <section className="rounded-2xl p-space-lg bg-surface-container-lowest/90 backdrop-blur-xl shadow-xl flex flex-col space-y-space-md border border-white/[0.08]">
+      <section className="rounded-2xl p-space-lg bg-surface-container-lowest/90 backdrop-blur-xl shadow-xl flex flex-col flex-shrink-0 min-h-fit space-y-space-md border border-white/[0.08]">
         <div className="flex flex-wrap items-center justify-between gap-space-sm">
           <div className="flex items-center space-x-space-sm">
             <span className="material-symbols-outlined text-ai-purple text-[20px]">timeline</span>

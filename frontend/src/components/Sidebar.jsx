@@ -56,7 +56,7 @@ export default function Sidebar({
   ];
 
   return (
-    <aside className="fixed left-0 top-16 bottom-0 w-60 bg-surface-secondary z-40 flex flex-col justify-between p-3 shadow-[4px_0_24px_rgba(0,0,0,0.5)] border-r border-white/[0.06] overflow-y-auto no-scrollbar">
+    <aside className="w-60 h-full flex-shrink-0 bg-surface-secondary z-30 flex flex-col justify-between p-3 shadow-[4px_0_24px_rgba(0,0,0,0.5)] border-r border-white/[0.06] overflow-y-auto no-scrollbar">
       <div className="flex flex-col gap-2.5">
         {/* Tactical Ops Live Indicator */}
         <div className="px-2.5 py-1 rounded-lg bg-surface-container-lowest flex items-center justify-between border border-white/[0.04]">

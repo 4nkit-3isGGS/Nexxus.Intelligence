@@ -77,7 +77,7 @@ export default function LegalAuditVault({ caseInfo }) {
   return (
     <div className="flex-1 flex flex-col overflow-y-auto w-full p-margin lg:p-margin-lg bg-surface-base text-on-surface gap-space-lg no-scrollbar">
       {/* 1. TOP HEADER & COMPLIANCE SEAL */}
-      <section className="relative rounded-2xl p-space-lg bg-surface-container-lowest/90 backdrop-blur-2xl shadow-xl overflow-hidden border border-white/[0.08]">
+      <section className="relative flex flex-col flex-shrink-0 min-h-fit rounded-2xl p-space-lg bg-surface-container-lowest/90 backdrop-blur-2xl shadow-xl border border-white/[0.08]">
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
           <div className="flex items-start gap-space-md max-w-4xl">
             <div className="relative flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-xl bg-surface-container shadow-xl border border-verified-emerald/30">
@@ -126,8 +126,10 @@ export default function LegalAuditVault({ caseInfo }) {
       </section>
 
       {/* 2. LIVE INTEGRITY VERIFICATION BANNER */}
-      <section className="relative overflow-hidden rounded-2xl bg-surface-container-low/90 backdrop-blur-xl p-space-md lg:p-space-lg shadow-xl border border-verified-emerald/30">
-        <div className="absolute inset-0 bg-gradient-to-r from-verified-emerald/5 via-primary/5 to-transparent pointer-events-none"></div>
+      <section className="relative flex flex-col flex-shrink-0 min-h-fit rounded-2xl bg-surface-container-low/90 backdrop-blur-xl p-space-md lg:p-space-lg shadow-xl border border-verified-emerald/30">
+        <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-r from-verified-emerald/5 via-primary/5 to-transparent"></div>
+        </div>
         <div className="relative flex flex-col gap-space-md z-10">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
             <div className="flex items-center gap-space-sm">
@@ -220,7 +222,7 @@ export default function LegalAuditVault({ caseInfo }) {
       </section>
 
       {/* 3. SUMMARY COURT FINDINGS (3 Admissible Evidence Pillars) */}
-      <section className="flex flex-col gap-space-md">
+      <section className="flex flex-col flex-shrink-0 min-h-fit gap-space-md">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-space-xs">
             <span className="material-symbols-outlined text-primary text-[20px]">account_balance</span>
@@ -309,7 +311,7 @@ export default function LegalAuditVault({ caseInfo }) {
       </section>
 
       {/* 4. APPEND-ONLY CRYPTOGRAPHIC AUDIT LEDGER TABLE */}
-      <section className="p-5 rounded-2xl bg-surface-container-lowest border border-white/[0.08] flex flex-col gap-4 shadow-xl">
+      <section className="p-5 rounded-2xl bg-surface-container-lowest border border-white/[0.08] flex flex-col flex-shrink-0 min-h-fit gap-4 shadow-xl">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.04] pb-3">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-verified-emerald text-[20px]">enhanced_encryption</span>
