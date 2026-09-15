@@ -9,7 +9,9 @@ export default function EvidenceDrawer({
   onOpenFirDoc,
   onExpandSubgraph,
   onInvestigateNode,
-  allEdges = []
+  allEdges = [],
+  officerRole = 'LEAD_INVESTIGATOR',
+  currentUser
 }) {
   const [activeTab, setActiveTab] = useState('profile');
   const [liveNeighbors, setLiveNeighbors] = useState([]);
@@ -96,6 +98,32 @@ export default function EvidenceDrawer({
 
   const isCritical = (selectedNode.risk_score || 0) >= 85;
   const isHigh = (selectedNode.risk_score || 0) >= 70;
+
+  // Law Enforcement RBAC PII Clearance & Redaction Logic
+  const isLead = officerRole === 'LEAD_INVESTIGATOR' || officerRole === 'ADMIN';
+  const isInvestigator = officerRole === 'INVESTIGATOR';
+  const isAnalyst = officerRole === 'ANALYST';
+  const isAuditor = officerRole === 'AUDITOR';
+
+  // Dynamic PII Redaction matching Bharat Sakshya Adhiniyam standards
+  const rawPhone = selectedNode.phone || '9832145678';
+  const displayPhone = (isLead || isInvestigator)
+    ? rawPhone
+    : `+91-XXXXX-XX${rawPhone.slice(-3)}`;
+
+  const rawAadhaar = '4892-1204-5829';
+  const displayAadhaar = isLead ? rawAadhaar : 'XXXX-XXXX-5829';
+
+  const rawAccount = selectedNode.account || '30123456789';
+  const displayAccount = isLead ? rawAccount : `*******${rawAccount.slice(-4)}`;
+
+  const clearanceBadge = isLead
+    ? { label: 'TIER 1 // UNMASKED PII', style: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
+    : isInvestigator
+    ? { label: 'TIER 2 // MASKED AADHAAR', style: 'bg-sky-50 text-sky-700 border-sky-200' }
+    : isAnalyst
+    ? { label: 'TIER 2 // FULLY MASKED PII', style: 'bg-amber-50 text-amber-800 border-amber-200' }
+    : { label: 'TIER 3 // READ-ONLY AUDIT', style: 'bg-purple-50 text-purple-800 border-purple-200' };
 
   // Biometric fallback avatar images
   const portraitUrl = selectedNode.id === 'P003' 
@@ -196,14 +224,20 @@ export default function EvidenceDrawer({
               {selectedNode.phone && (
                 <div className="flex items-center gap-1.5 text-xs text-slate-600 mt-1">
                   <span className="material-symbols-outlined text-[15px] text-sky-600">phone_iphone</span>
-                  <span className="font-mono text-slate-900 font-bold select-all">{selectedNode.phone}</span>
-                  <button 
-                    onClick={() => handleCopy(selectedNode.phone, 'phone')}
-                    className="material-symbols-outlined text-[14px] text-slate-400 hover:text-sky-600 transition-colors cursor-pointer"
-                    title="Copy Phone Number"
-                  >
-                    content_copy
-                  </button>
+                  <span className="font-mono text-slate-900 font-bold select-all">{displayPhone}</span>
+                  {(isLead || isInvestigator) ? (
+                    <button 
+                      onClick={() => handleCopy(displayPhone, 'phone')}
+                      className="material-symbols-outlined text-[14px] text-slate-400 hover:text-sky-600 transition-colors cursor-pointer"
+                      title="Copy Phone Number"
+                    >
+                      content_copy
+                    </button>
+                  ) : (
+                    <span className="text-[9px] text-amber-700 font-mono font-bold px-1 rounded bg-amber-50 border border-amber-200">
+                      MASKED
+                    </span>
+                  )}
                   {copiedField === 'phone' && (
                     <span className="text-[10px] text-emerald-600 font-bold">COPIED</span>
                   )}
@@ -265,19 +299,26 @@ export default function EvidenceDrawer({
 
           {/* Autonomous Multi-Agent Investigation Trigger */}
           {onInvestigateNode && (
-            <button
-              onClick={() => onInvestigateNode(selectedNode)}
-              className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer group"
-              title="Launch autonomous 7-agent LangGraph supervisor investigation on this entity"
-            >
-              <span className="material-symbols-outlined text-[18px] text-sky-200 group-hover:rotate-12 transition-transform">
-                smart_toy
-              </span>
-              <span>Launch Multi-Agent Investigation</span>
-              <span className="px-1.5 py-0.5 rounded bg-white/20 text-[10px] font-mono uppercase tracking-wider">
-                LIVE SWARM
-              </span>
-            </button>
+            isAuditor ? (
+              <div className="w-full py-2.5 px-3 rounded-xl bg-slate-100 border border-slate-200 text-slate-500 text-xs font-semibold flex items-center justify-center gap-2">
+                <span className="material-symbols-outlined text-[17px] text-slate-400">lock</span>
+                <span>Auditor Role: Read-Only Compliance (Investigation Restricted)</span>
+              </div>
+            ) : (
+              <button
+                onClick={() => onInvestigateNode(selectedNode)}
+                className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer group"
+                title="Launch autonomous 7-agent LangGraph supervisor investigation on this entity"
+              >
+                <span className="material-symbols-outlined text-[18px] text-sky-200 group-hover:rotate-12 transition-transform">
+                  smart_toy
+                </span>
+                <span>Launch Multi-Agent Investigation</span>
+                <span className="px-1.5 py-0.5 rounded bg-white/20 text-[10px] font-mono uppercase tracking-wider">
+                  LIVE SWARM
+                </span>
+              </button>
+            )
           )}
         </div>
 
@@ -418,10 +459,10 @@ export default function EvidenceDrawer({
             <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col gap-2.5">
               <div className="flex items-center justify-between">
                 <span className="text-slate-700 text-xs font-mono uppercase font-semibold">
-                  Known Identifiers & Unmasked PII
+                  Known Identifiers & PII Protection
                 </span>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-sky-50 text-sky-700 font-bold font-mono border border-sky-200">
-                  LEAD ACCESS TIER
+                <span className={`text-[10px] px-2 py-0.5 rounded font-bold font-mono border ${clearanceBadge.style}`}>
+                  {clearanceBadge.label}
                 </span>
               </div>
 
@@ -444,18 +485,20 @@ export default function EvidenceDrawer({
                     <div className="flex items-center gap-1.5">
                       <span className="text-slate-500 text-[10px] font-mono font-medium">AADHAAR / TAX BLIND INDEX</span>
                       <span className="px-1 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-mono font-bold">
-                        SHA-256 VALIDATED
+                        {isLead ? 'UNMASKED' : 'MASKED'}
                       </span>
                     </div>
-                    <span className="text-slate-900 font-mono font-bold">4892-1204-5829</span>
+                    <span className="text-slate-900 font-mono font-bold">{displayAadhaar}</span>
                     <span className="text-[9px] text-slate-500 font-mono">Hash: a89fb73d...32de</span>
                   </div>
-                  <button 
-                    onClick={() => handleCopy('4892-1204-5829', 'aadhaar')}
-                    className="material-symbols-outlined text-[15px] text-slate-400 hover:text-sky-600 transition-colors cursor-pointer"
-                  >
-                    content_copy
-                  </button>
+                  {isLead && (
+                    <button 
+                      onClick={() => handleCopy(displayAadhaar, 'aadhaar')}
+                      className="material-symbols-outlined text-[15px] text-slate-400 hover:text-sky-600 transition-colors cursor-pointer"
+                    >
+                      content_copy
+                    </button>
+                  )}
                 </div>
 
                 <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
@@ -467,7 +510,7 @@ export default function EvidenceDrawer({
                       </span>
                     </div>
                     <span className="text-slate-900 font-mono font-bold">
-                      {selectedNode.account || 'Kolkata Comm. Bank #30123456789'}
+                      Kolkata Comm. Bank #{displayAccount}
                     </span>
                   </div>
                   <span className="material-symbols-outlined text-[16px] text-slate-500">account_balance</span>

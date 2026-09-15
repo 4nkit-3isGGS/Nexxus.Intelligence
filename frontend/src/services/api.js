@@ -760,11 +760,29 @@ export const apiService = {
         body: JSON.stringify({ target_id: targetId, duplicate_id: duplicateId }),
         signal: AbortSignal.timeout(3000)
       });
+      if (res.status === 403) {
+        const errJson = await res.json().catch(() => ({}));
+        return {
+          success: false,
+          source: 'RBAC_DENIED',
+          error: errJson.detail || "Operational Clearance Denied: Only Tier 1 Lead Investigators can approve entity merges.",
+          message: errJson.detail || "Operational Clearance Denied: Current role lacks 'MERGE_ENTITIES' permission."
+        };
+      }
       if (res.ok) {
         return await res.json();
       }
     } catch (e) {
       console.info('Live merge fallback to autonomous resolution simulation.', e.message);
+    }
+
+    if (currentOfficerSession.role !== 'LEAD_INVESTIGATOR' && currentOfficerSession.role !== 'ADMIN') {
+      return {
+        success: false,
+        source: 'RBAC_DENIED',
+        error: `Clearance Denied: Role '${currentOfficerSession.role}' cannot execute entity merges. Tier 1 LEAD_INVESTIGATOR clearance required.`,
+        message: `Clearance Denied: Role '${currentOfficerSession.role}' cannot execute entity merges. Tier 1 LEAD_INVESTIGATOR clearance required.`
+      };
     }
 
     return {
@@ -873,6 +891,16 @@ export const apiService = {
       }
     } catch (e) {
       console.info('Live LangGraph investigation unreachable, using autonomous matcher fallback.', e.message);
+    }
+
+    // RBAC check: AUDITOR cannot run investigations
+    if (currentOfficerSession.role === 'AUDITOR') {
+      return {
+        source: 'RBAC_DENIED',
+        isLive: false,
+        error: "Operational Clearance Denied: Current role 'AUDITOR' is read-only and lacks 'INVESTIGATE' permission under Bharatiya Sakshya Adhiniyam guidelines.",
+        data: null
+      };
     }
 
     // Dynamic mock intelligence fallback
@@ -984,12 +1012,32 @@ export const apiService = {
         headers: getOfficerHeaders(),
         signal: AbortSignal.timeout(2500)
       });
+      if (res.status === 403) {
+        const errJson = await res.json().catch(() => ({}));
+        return {
+          source: 'RBAC_DENIED',
+          isLive: false,
+          error: errJson.detail || "Access Denied: Current role lacks 'VIEW_AUDIT_LOGS' permission. Access restricted to AUDITOR, LEAD_INVESTIGATOR, and ADMIN.",
+          data: null
+        };
+      }
       if (res.ok) {
         const liveLogs = await res.json();
         return { source: 'LIVE_FASTAPI', isLive: true, data: liveLogs };
       }
     } catch (e) {
       console.info('Live audit ledger unreachable, falling back to local cryptographic ledger.', e.message);
+    }
+
+    // RBAC check in local mode
+    const role = currentOfficerSession.role;
+    if (role === 'INVESTIGATOR' || role === 'ANALYST') {
+      return {
+        source: 'RBAC_DENIED',
+        isLive: false,
+        error: `Access Denied: Role '${role}' lacks 'VIEW_AUDIT_LOGS' permission. Cryptographic audit ledgers are restricted to AUDITOR, LEAD_INVESTIGATOR, and ADMIN.`,
+        data: null
+      };
     }
 
     return {
@@ -1013,12 +1061,33 @@ export const apiService = {
         headers: { 'Content-Type': 'application/json', ...getOfficerHeaders() },
         signal: AbortSignal.timeout(3000)
       });
+      if (res.status === 403) {
+        const errJson = await res.json().catch(() => ({}));
+        return {
+          isLive: false,
+          verified: false,
+          source: 'RBAC_DENIED',
+          error: errJson.detail || "Access Denied: Current role lacks 'VERIFY_AUDIT_INTEGRITY' permission.",
+          message: errJson.detail || "Access Denied: Current role lacks 'VERIFY_AUDIT_INTEGRITY' permission."
+        };
+      }
       if (res.ok) {
         const result = await res.json();
         return { isLive: true, ...result };
       }
     } catch (e) {
       console.info('Live audit verification fallback engaged.', e.message);
+    }
+
+    const role = currentOfficerSession.role;
+    if (role === 'INVESTIGATOR' || role === 'ANALYST') {
+      return {
+        isLive: false,
+        verified: false,
+        source: 'RBAC_DENIED',
+        error: `Access Denied: Role '${role}' lacks 'VERIFY_AUDIT_INTEGRITY' permission.`,
+        message: `Access Denied: Role '${role}' lacks 'VERIFY_AUDIT_INTEGRITY' permission.`
+      };
     }
 
     return {

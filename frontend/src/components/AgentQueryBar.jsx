@@ -5,7 +5,10 @@ export default function AgentQueryBar({
   onRunAgentQuery,
   agentResponse,
   loadingQuery,
-  onFocusSubgraph
+  onFocusSubgraph,
+  officerRole = 'LEAD_INVESTIGATOR',
+  currentUser,
+  onRoleChange
 }) {
   const [inputQuery, setInputQuery] = useState(
     'Investigate Rahul Sharma & Debasish Chatterjee connection: trace foreign crypto/hawala cash-out gateway and mule hierarchy'
@@ -150,6 +153,26 @@ export default function AgentQueryBar({
           </div>
 
           {/* Main Input Bar Form */}
+          {officerRole === 'AUDITOR' && (
+            <div className="p-3 rounded-xl bg-purple-50 border border-purple-200 text-purple-900 text-xs flex flex-wrap items-center justify-between gap-2 shadow-xs">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-purple-700 text-[18px]">gavel</span>
+                <span className="font-semibold">
+                  Judicial Auditor Clearance (Tier 3): Read-only electronic evidence compliance mode. Active multi-agent graph traversal is restricted.
+                </span>
+              </div>
+              {onRoleChange && (
+                <button
+                  type="button"
+                  onClick={() => onRoleChange('LEAD_INVESTIGATOR')}
+                  className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-[11px] transition-colors cursor-pointer"
+                >
+                  Switch to Lead Investigator
+                </button>
+              )}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row items-stretch gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-300 shadow-inner focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-500/20 transition-all">
             <div className="flex-1 flex items-center px-3 py-1 gap-2.5">
               <span className="material-symbols-outlined text-sky-600 text-[22px] flex-shrink-0">
@@ -159,22 +182,25 @@ export default function AgentQueryBar({
                 type="text"
                 value={inputQuery}
                 onChange={(e) => setInputQuery(e.target.value)}
-                placeholder="Ask AI Investigator (e.g. 'Investigate Rahul Sharma P001' or 'Trace Debasish Chatterjee hawala loop')..."
-                className="w-full bg-transparent border-none outline-none text-xs text-slate-900 placeholder:text-slate-400 font-medium"
+                placeholder={officerRole === 'AUDITOR' ? "Auditor Role: Read-only compliance mode active..." : "Ask AI Investigator (e.g. 'Investigate Rahul Sharma P001' or 'Trace Debasish Chatterjee hawala loop')..."}
+                disabled={officerRole === 'AUDITOR'}
+                className="w-full bg-transparent border-none outline-none text-xs text-slate-900 placeholder:text-slate-400 font-medium disabled:opacity-60"
               />
             </div>
             <div className="flex items-center gap-1.5 flex-shrink-0 px-1">
               <button
                 type="submit"
-                disabled={loadingQuery || !inputQuery.trim()}
+                disabled={loadingQuery || !inputQuery.trim() || officerRole === 'AUDITOR'}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-xs transition-all disabled:opacity-50 cursor-pointer active:scale-95"
               >
                 <span className="material-symbols-outlined text-[17px]">
-                  auto_awesome
+                  {officerRole === 'AUDITOR' ? 'lock' : 'auto_awesome'}
                 </span>
-                <span>{loadingQuery ? 'Executing Swarm...' : 'Investigate'}</span>
+                <span>
+                  {loadingQuery ? 'Executing Swarm...' : officerRole === 'AUDITOR' ? 'Auditor Restricted' : 'Investigate'}
+                </span>
                 <span className="ml-1 px-1.5 py-0.2 rounded text-[9px] bg-sky-700 uppercase tracking-wider text-white font-mono font-bold">
-                  SWARM
+                  {officerRole === 'AUDITOR' ? 'READ-ONLY' : 'SWARM'}
                 </span>
               </button>
             </div>

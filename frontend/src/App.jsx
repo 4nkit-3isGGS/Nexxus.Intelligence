@@ -452,6 +452,9 @@ export default function App() {
                     onRunAgentQuery={handleRunAgentQuery}
                     agentResponse={agentResponse}
                     loadingQuery={loadingQuery}
+                    officerRole={officerRole}
+                    currentUser={currentUser}
+                    onRoleChange={handleRoleChange}
                     onFocusSubgraph={(nodeIds, edgeIds) => {
                       setHighlightedNodeIds(nodeIds || []);
                       setHighlightedEdgeIds(edgeIds || []);
@@ -463,6 +466,9 @@ export default function App() {
                 {/* VIEW 3: ENTITY RESOLUTION & DUPLICATE REVIEW QUEUE */}
                 {activeTab === 'resolution' && (
                   <EntityResolutionView
+                    officerRole={officerRole}
+                    currentUser={currentUser}
+                    onRoleChange={handleRoleChange}
                     onFocusEntity={(node) => {
                       setSelectedNode(node);
                       setActiveTab('graph');
@@ -515,6 +521,9 @@ export default function App() {
                     caseInfo={rawGraphData.case_info}
                     nodes={rawGraphData.nodes}
                     edges={rawGraphData.edges}
+                    officerRole={officerRole}
+                    currentUser={currentUser}
+                    onRoleChange={handleRoleChange}
                   />
                 )}
               </main>
@@ -525,6 +534,8 @@ export default function App() {
           {selectedNode && (
             <EvidenceDrawer
               selectedNode={selectedNode}
+              officerRole={officerRole}
+              currentUser={currentUser}
               onClose={() => setSelectedNode(null)}
               onFocusNode={(node) => {
                 setHighlightedNodeIds([node.id]);

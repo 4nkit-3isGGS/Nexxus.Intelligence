@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
 
-export default function EntityResolutionView({ onFocusEntity, onJumpToGraph, onInvestigateEntity }) {
+export default function EntityResolutionView({ 
+  onFocusEntity, 
+  onJumpToGraph, 
+  onInvestigateEntity,
+  officerRole = 'LEAD_INVESTIGATOR',
+  currentUser,
+  onRoleChange
+}) {
   const [queue, setQueue] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState(null);
   const [statusMessage, setStatusMessage] = useState(null);
   const [activeFilter, setActiveFilter] = useState('ALL');
+
+  const isLead = officerRole === 'LEAD_INVESTIGATOR' || officerRole === 'ADMIN';
 
   // Load Review Queue from live backend or fallback
   const fetchQueue = async () => {
@@ -84,17 +93,34 @@ export default function EntityResolutionView({ onFocusEntity, onJumpToGraph, onI
 
   // Handle Merge Approval
   const handleApproveMerge = async (item) => {
+    if (!isLead) {
+      setStatusMessage({
+        type: 'error',
+        text: `Clearance Denied: Merging canonical entities requires Tier-1 LEAD_INVESTIGATOR clearance. Active role is '${officerRole}'. Switch to Lead Investigator (DSP B. Banerjee) to approve merges.`
+      });
+      setTimeout(() => {
+        setStatusMessage(null);
+      }, 5000);
+      return;
+    }
+
     setProcessingId(item.entity2_id);
     const res = await apiService.mergeEntities(item.entity1_id, item.entity2_id);
 
-    setStatusMessage({
-      type: 'success',
-      text: res.message || `Canonical identity merged: ${item.entity2_name || item.entity2_id} -> ${item.entity1_name || item.entity1_id}`
-    });
+    if (res.success) {
+      setStatusMessage({
+        type: 'success',
+        text: res.message || `Canonical identity merged: ${item.entity2_name || item.entity2_id} -> ${item.entity1_name || item.entity1_id}`
+      });
+      setQueue((prev) => prev.filter((q) => q.entity2_id !== item.entity2_id));
+    } else {
+      setStatusMessage({
+        type: 'error',
+        text: res.message || res.error || "Operational Clearance Denied: Only Tier 1 Lead Investigators can approve entity merges."
+      });
+    }
 
-    setQueue((prev) => prev.filter((q) => q.entity2_id !== item.entity2_id));
     setProcessingId(null);
-
     setTimeout(() => {
       setStatusMessage(null);
     }, 4500);
@@ -327,10 +353,23 @@ export default function EntityResolutionView({ onFocusEntity, onJumpToGraph, onI
                     <button
                       onClick={() => handleApproveMerge(item)}
                       disabled={processingId === item.entity2_id}
-                      className="px-4 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-50"
+                      className={`px-4 py-1.5 rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-50 ${
+                        isLead 
+                          ? 'bg-sky-600 hover:bg-sky-700 text-white' 
+                          : 'bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300'
+                      }`}
+                      title={isLead ? "Approve and execute canonical merge" : "Requires Tier 1 Lead Investigator clearance"}
                     >
-                      <span className="material-symbols-outlined text-[15px]">merge</span>
-                      <span>{processingId === item.entity2_id ? 'Merging...' : 'Approve Merge'}</span>
+                      <span className="material-symbols-outlined text-[15px]">
+                        {isLead ? 'merge' : 'lock'}
+                      </span>
+                      <span>
+                        {processingId === item.entity2_id 
+                          ? 'Merging...' 
+                          : isLead 
+                          ? 'Approve Merge' 
+                          : 'Requires Lead Clearance'}
+                      </span>
                     </button>
                   </div>
                 </div>

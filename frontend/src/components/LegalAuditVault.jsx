@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { apiService, MOCK_AUDIT_LOGS } from '../services/api';
 
-export default function LegalAuditVault({ caseInfo }) {
+export default function LegalAuditVault({ 
+  caseInfo, 
+  officerRole = 'LEAD_INVESTIGATOR', 
+  currentUser, 
+  onRoleChange 
+}) {
   const [auditLogs, setAuditLogs] = useState(MOCK_AUDIT_LOGS);
   const [loadingLogs, setLoadingLogs] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [rbacError, setRbacError] = useState(null);
   const [verificationResult, setVerificationResult] = useState({
     verified: true,
     total_blocks: 5,
@@ -15,12 +21,21 @@ export default function LegalAuditVault({ caseInfo }) {
   );
   const [copiedHash, setCopiedHash] = useState(false);
 
+  const isRestrictedRole = officerRole === 'INVESTIGATOR' || officerRole === 'ANALYST';
+
   // Fetch real audit logs from GET /api/audit/logs
   const fetchAuditLogs = async () => {
+    if (isRestrictedRole) {
+      setRbacError(`Access Denied: Officer role '${officerRole}' lacks 'VIEW_AUDIT_LOGS' clearance. Access to the immutable cryptographic ledger is restricted to AUDITOR, LEAD_INVESTIGATOR, and ADMIN.`);
+      return;
+    }
+    setRbacError(null);
     setLoadingLogs(true);
     try {
       const res = await apiService.getAuditLogs({ limit: 50 });
-      if (res?.data?.entries) {
+      if (res?.error) {
+        setRbacError(res.error);
+      } else if (res?.data?.entries) {
         setAuditLogs(res.data.entries);
         setLatestTipHash(res.data.latest_hash || latestTipHash);
       }
@@ -33,7 +48,7 @@ export default function LegalAuditVault({ caseInfo }) {
 
   useEffect(() => {
     fetchAuditLogs();
-  }, []);
+  }, [officerRole]);
 
   // Trigger live cryptographic verification via POST /api/audit/verify
   const handleVerifyLedger = async () => {
@@ -63,6 +78,37 @@ export default function LegalAuditVault({ caseInfo }) {
 
   return (
     <div className="flex-1 flex flex-col overflow-y-auto w-full p-4 lg:p-6 bg-transparent text-slate-900 gap-5 no-scrollbar">
+      {/* RBAC Access Denied Banner */}
+      {rbacError && (
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-rose-600 text-[24px] flex-shrink-0">lock</span>
+            <div className="flex flex-col">
+              <span className="font-bold text-slate-900">{rbacError}</span>
+              <span className="text-slate-600 text-[11px] mt-0.5">
+                Current Role: <span className="font-mono font-bold text-rose-700">{officerRole}</span>. Audit ledger inspection requires <span className="font-bold">AUDITOR</span> or <span className="font-bold">LEAD_INVESTIGATOR</span> clearance.
+              </span>
+            </div>
+          </div>
+          {onRoleChange && (
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                onClick={() => onRoleChange('AUDITOR')}
+                className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+              >
+                Switch to Auditor (Adv. M. Mukherjee)
+              </button>
+              <button
+                onClick={() => onRoleChange('LEAD_INVESTIGATOR')}
+                className="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+              >
+                Switch to Lead (DSP B. Banerjee)
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* 1. TOP HEADER & COMPLIANCE SEAL */}
       <section className="relative flex flex-col flex-shrink-0 min-h-fit rounded-2xl p-5 bg-white border border-slate-200 shadow-xs">
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
