@@ -152,25 +152,25 @@ export default function EntityResolutionView({
             <div className="flex items-center gap-2 flex-wrap">
               <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 text-[10px] font-mono uppercase font-bold tracking-wider flex items-center gap-1.5 border border-amber-200">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                DEDUPLICATION & MULE DETECTION
+                DUPLICATE & FAKE IDENTITY CHECK
               </span>
               <span className="text-slate-300">•</span>
               <span className="text-emerald-700 text-xs font-mono font-bold flex items-center gap-1">
                 <span className="material-symbols-outlined text-[14px]">verified</span>
-                NEXXUS-INTEL-TRIPLET
+                SMART IDENTITY MATCHER
               </span>
             </div>
 
             <div className="flex items-baseline gap-3 mt-1">
               <h1 className="font-display text-xl font-bold text-slate-900 tracking-tight">
-                Entity Resolution & Fraud Disambiguation Queue
+                Duplicate Suspect & Identity Review
               </h1>
               <span className="text-xs font-mono font-bold text-amber-800 px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200">
                 {queue.length} PENDING REVIEW
               </span>
             </div>
             <p className="text-xs text-slate-600 max-w-3xl leading-relaxed font-normal">
-              Cross-source fuzzy entity resolution detecting synthetic mule identities, cloned vehicular tags, and VoIP burner accounts across Kolkata cyber syndicates.
+              Automatically detects duplicate suspects, fake bank accounts, and cloned vehicles across case records. Review and merge profiles to keep your case accurate.
             </p>
           </div>
 
@@ -191,7 +191,7 @@ export default function EntityResolutionView({
               className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
             >
               <span className="material-symbols-outlined text-[16px]">auto_fix_high</span>
-              <span>Auto-Merge High Match (&gt;90%)</span>
+              <span>Merge Clear Matches (&gt;90%)</span>
             </button>
           </div>
         </div>

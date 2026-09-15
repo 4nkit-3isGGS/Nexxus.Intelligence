@@ -34,20 +34,20 @@ export default function FinancialFlowView({ onSelectEntity }) {
           <div className="flex items-center gap-2 flex-wrap">
             <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 text-[10px] font-mono uppercase font-bold tracking-wider flex items-center gap-1.5 border border-amber-200">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-              PMLA SEC 3/4 FINANCIAL CRIME VECTOR
+              MONEY LAUNDERING INVESTIGATION
             </span>
             <span className="text-slate-300">•</span>
             <span className="text-emerald-700 text-xs font-mono font-bold flex items-center gap-1">
               <span className="material-symbols-outlined text-[14px]">lock</span>
-              FIU-IND TACTICAL FEED ONLINE
+              FINANCIAL INTELLIGENCE ACTIVE
             </span>
           </div>
           <div className="flex items-baseline gap-3 mt-1">
             <h1 className="font-display text-xl font-bold text-slate-900 tracking-tight">
-              Money Trail & Hawala Forensic Ledger
+              Money Trail & Suspicious Bank Transfers
             </h1>
             <span className="text-xs font-mono font-bold text-amber-800 px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200">
-              ₹14,85,000 INR AGGREGATE
+              TOTAL TRACKED: ₹14,85,000
             </span>
           </div>
         </div>
@@ -61,7 +61,7 @@ export default function FinancialFlowView({ onSelectEntity }) {
             <span className="material-symbols-outlined text-[16px]">
               {simulating ? 'autorenew' : 'play_circle'}
             </span>
-            <span>{simulating ? 'Simulating Flow...' : 'Run Flow Simulation'}</span>
+            <span>{simulating ? 'Simulating Movement...' : 'Simulate Money Movement'}</span>
           </button>
           <button
             onClick={handleFreezeAccounts}
@@ -72,7 +72,7 @@ export default function FinancialFlowView({ onSelectEntity }) {
             }`}
           >
             <span className="material-symbols-outlined text-[16px]">gavel</span>
-            <span>{frozen ? 'Sec 107 Orders Active' : 'Sec 107 BNSS Freeze (3 Mules)'}</span>
+            <span>{frozen ? 'Freeze Orders Active' : 'Freeze Mule Accounts (Sec 107 BNSS)'}</span>
           </button>
         </div>
       </div>

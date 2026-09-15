@@ -126,9 +126,9 @@ export default function AgentQueryBar({
               </div>
               <div>
                 <h2 className="font-display text-base tracking-tight text-slate-900 flex items-center gap-2 font-bold">
-                  Autonomous Swarm Investigation Copilot
+                  AI Investigation Assistant
                   <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 text-[10px] border border-purple-200 font-mono font-bold">
-                    LangGraph 7-Agent Swarm
+                    Multi-Agent Intelligence
                   </span>
                 </h2>
               </div>
@@ -141,14 +141,14 @@ export default function AgentQueryBar({
                   : 'bg-sky-50 text-sky-800 border-sky-300'
               }`}>
                 <span className={`w-2 h-2 rounded-full ${isLiveFastAPI ? 'bg-emerald-500 animate-pulse' : 'bg-sky-500'}`}></span>
-                <span>{isLiveFastAPI ? 'AI SWARM ACTIVE' : 'AUTONOMOUS MATCHER'}</span>
+                <span>{isLiveFastAPI ? 'AI ONLINE' : 'READY'}</span>
               </span>
               <span className="text-slate-300">•</span>
-              <span className="text-slate-500">LLM:</span>
+              <span className="text-slate-500">Model:</span>
               <span className="text-purple-700 font-bold">OpenAI API</span>
               <span className="text-slate-300">•</span>
-              <span className="text-slate-500">Neo4j Bolt:</span>
-              <span className="text-emerald-700 font-bold">ACTIVE</span>
+              <span className="text-slate-500">Database:</span>
+              <span className="text-emerald-700 font-bold">Connected</span>
             </div>
           </div>
 
@@ -158,7 +158,7 @@ export default function AgentQueryBar({
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-purple-700 text-[18px]">gavel</span>
                 <span className="font-semibold">
-                  Judicial Auditor Clearance (Tier 3): Read-only electronic evidence compliance mode. Active multi-agent graph traversal is restricted.
+                  Judicial Auditor Mode (Read-Only): You can review verified evidence and audit records. Active investigations are handled by investigators.
                 </span>
               </div>
               {onRoleChange && (
@@ -197,10 +197,10 @@ export default function AgentQueryBar({
                   {officerRole === 'AUDITOR' ? 'lock' : 'auto_awesome'}
                 </span>
                 <span>
-                  {loadingQuery ? 'Executing Swarm...' : officerRole === 'AUDITOR' ? 'Auditor Restricted' : 'Investigate'}
+                  {loadingQuery ? 'Analyzing Case...' : officerRole === 'AUDITOR' ? 'Auditor Restricted' : 'Investigate'}
                 </span>
                 <span className="ml-1 px-1.5 py-0.2 rounded text-[9px] bg-sky-700 uppercase tracking-wider text-white font-mono font-bold">
-                  {officerRole === 'AUDITOR' ? 'READ-ONLY' : 'SWARM'}
+                  {officerRole === 'AUDITOR' ? 'READ-ONLY' : 'AI'}
                 </span>
               </button>
             </div>
@@ -209,7 +209,7 @@ export default function AgentQueryBar({
           {/* Preset Scenario Quick Chips */}
           <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
             <span className="text-[10px] text-slate-500 font-mono uppercase font-bold tracking-wider mr-1">
-              QUICK PRESETS:
+              EXAMPLE QUESTIONS:
             </span>
             <button
               onClick={() => handleSelectPreset('Investigate Rahul Sharma P001 and map his co-conspirators and front entities')}
@@ -458,7 +458,7 @@ export default function AgentQueryBar({
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-purple-600 text-[20px]">timeline</span>
             <h3 className="font-display text-sm font-bold text-slate-900 tracking-tight">
-              LangGraph Multi-Agent Execution Stream
+              AI Investigation Steps & Findings
             </h3>
           </div>
           <div className="flex items-center gap-2">
@@ -466,7 +466,7 @@ export default function AgentQueryBar({
               onClick={() => setShowSteps(!showSteps)}
               className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs transition-colors flex items-center gap-1 border border-slate-200 font-semibold cursor-pointer shadow-xs"
             >
-              <span>{showSteps ? 'Collapse Pipeline' : `View ${agentExecutionSteps.length}-Agent Steps`}</span>
+              <span>{showSteps ? 'Collapse Steps' : `View ${agentExecutionSteps.length} Investigation Steps`}</span>
               <span className="material-symbols-outlined text-[15px]">
                 {showSteps ? 'expand_less' : 'expand_more'}
               </span>
@@ -476,7 +476,7 @@ export default function AgentQueryBar({
               className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs transition-colors flex items-center gap-1 border border-amber-200 font-semibold cursor-pointer shadow-xs"
             >
               <span className="material-symbols-outlined text-[15px] text-amber-600">gavel</span>
-              <span>Court Dossier ({dossierContent.length} chars)</span>
+              <span>Evidence Summary</span>
             </button>
             {onFocusSubgraph && (
               <button
@@ -484,7 +484,7 @@ export default function AgentQueryBar({
                 className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1 cursor-pointer active:scale-95"
               >
                 <span className="material-symbols-outlined text-[15px]">hub</span>
-                <span>Focus Subgraph on Canvas</span>
+                <span>Highlight on Graph</span>
               </button>
             )}
           </div>
@@ -514,10 +514,10 @@ export default function AgentQueryBar({
             <div className="flex items-center justify-between border-b border-slate-200 pb-2">
               <span className="font-bold uppercase tracking-wider text-[11px] font-mono text-emerald-700 flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[15px]">verified</span>
-                Charge Sheet Ready Annexure (BSA 2023 / Section 65B Electronic Evidence)
+                Court-Ready Evidence Summary (BSA Section 65B Certified)
               </span>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-slate-500 text-[10px]">SHA-256 Verified Ledger</span>
+                <span className="font-mono text-slate-500 text-[10px]">Verified Hash Ledger</span>
                 <button
                   onClick={handleCopyDossier}
                   className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 font-mono text-[11px] border border-slate-200 font-semibold flex items-center gap-1 cursor-pointer"
@@ -525,7 +525,7 @@ export default function AgentQueryBar({
                   <span className="material-symbols-outlined text-[14px]">
                     {copiedDossier ? 'check' : 'content_copy'}
                   </span>
-                  <span>{copiedDossier ? 'Copied!' : 'Copy Dossier'}</span>
+                  <span>{copiedDossier ? 'Copied!' : 'Copy Summary'}</span>
                 </button>
               </div>
             </div>

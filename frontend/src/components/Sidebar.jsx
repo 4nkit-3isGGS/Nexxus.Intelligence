@@ -18,39 +18,39 @@ export default function Sidebar({
     },
     {
       id: 'agent',
-      label: 'Agent Swarm',
+      label: 'AI Investigation Team',
       icon: 'psychology',
       badge: 'ACTIVE',
       badgeColor: 'bg-purple-50 text-purple-700 border border-purple-200'
     },
     {
       id: 'resolution',
-      label: 'Mule Detection',
+      label: 'Duplicate Suspects',
       icon: 'fingerprint',
       badge: pendingReviewCount,
       badgeColor: 'bg-amber-50 text-amber-800 border border-amber-200'
     },
     {
       id: 'financial',
-      label: 'Layering & Hawala',
+      label: 'Money Trail & Hawala',
       icon: 'account_balance',
       badge: null
     },
     {
       id: 'cdr',
-      label: 'CDR Geo Tower',
+      label: 'Call Records & Towers',
       icon: 'phone_in_talk',
       badge: null
     },
     {
       id: 'fir',
-      label: 'FIR Evidence Vault',
+      label: 'FIR Case Documents',
       icon: 'policy',
       badge: null
     },
     {
       id: 'audit',
-      label: 'BSA Legal Audit',
+      label: 'Legal Audit Vault',
       icon: 'gavel',
       badge: '§65B',
       badgeColor: 'bg-emerald-50 text-emerald-700 border border-emerald-200'
@@ -65,10 +65,10 @@ export default function Sidebar({
           <div className="px-3 py-1.5 rounded-xl bg-slate-50 flex items-center justify-between border border-slate-200 shadow-xs">
             <span className="font-mono text-[10px] uppercase text-slate-500 font-bold tracking-wider flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
-              Tactical Operations
+              Investigation Ops
             </span>
-            <span className="px-2 py-0.2 rounded-full bg-red-50 text-red-700 border border-red-200 font-mono text-[9px] font-bold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
+            <span className="px-2 py-0.2 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono text-[9px] font-bold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
               LIVE
             </span>
           </div>
@@ -126,25 +126,25 @@ export default function Sidebar({
       {/* Bottom Telemetry Card */}
       <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 shadow-xs flex flex-col gap-2">
         <div className="flex items-center justify-between text-[11px] font-mono">
-          <span className="text-slate-500 font-bold uppercase">System Telemetry</span>
-          <span className="text-emerald-700 font-bold">NOMINAL</span>
+          <span className="text-slate-500 font-bold uppercase">System Status</span>
+          <span className="text-emerald-700 font-bold">ONLINE & HEALTHY</span>
         </div>
         <div className="flex items-center justify-between text-xs text-slate-700 font-mono">
-          <span>Active Knowledge Nodes</span>
+          <span>Active Evidence Items</span>
           <span className="text-slate-900 font-bold">{nodeCount} Live</span>
         </div>
         <div className="flex flex-col gap-1">
           <div className="flex justify-between text-[11px] text-slate-500 font-mono">
-            <span>Inference Latency</span>
-            <span className="text-sky-700 font-semibold">42ms p99</span>
+            <span>Response Speed</span>
+            <span className="text-sky-700 font-semibold">Fast (42ms)</span>
           </div>
           <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
             <div className="bg-sky-600 h-full w-2/3"></div>
           </div>
         </div>
         <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-500 font-mono">
-          <span>SHA-256 Tip Block</span>
-          <span className="text-sky-700 font-bold select-all">a9f3…e41</span>
+          <span>Evidence Hash Check</span>
+          <span className="text-sky-700 font-bold select-all">Verified</span>
         </div>
       </div>
     </aside>

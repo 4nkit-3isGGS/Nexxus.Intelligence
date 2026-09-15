@@ -119,7 +119,7 @@ export default function HomePage({
 
           {/* Subtitle */}
           <p className="mt-5 text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed font-normal">
-            Autonomous multi-agent investigation swarms, cross-source entity deduplication, Hawala money-trail reconstruction, and court-admissible electronic evidence attestation under Section 65B.
+            Connects criminal networks, tracks suspicious money trails, identifies duplicate suspect identities, and generates court-ready digital evidence under Indian law.
           </p>
 
           {/* Interactive Quick AI Investigation Bar */}
@@ -130,7 +130,7 @@ export default function HomePage({
                 type="text"
                 value={heroQuery}
                 onChange={(e) => setHeroQuery(e.target.value)}
-                placeholder="Ask AI Swarm (e.g. 'Investigate Rahul Sharma P001' or 'Trace Hawala Loop')..."
+                placeholder="Search or ask AI (e.g. 'Investigate Rahul Sharma' or 'Trace money trail')..."
                 className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 font-medium"
               />
             </div>
@@ -139,7 +139,7 @@ export default function HomePage({
               className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 flex-shrink-0"
             >
               <span className="material-symbols-outlined text-[17px]">auto_awesome</span>
-              <span>Launch Autonomous Investigation</span>
+              <span>Start Investigation</span>
             </button>
           </form>
 

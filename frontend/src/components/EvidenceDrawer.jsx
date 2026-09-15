@@ -144,7 +144,7 @@ export default function EvidenceDrawer({
           </span>
           <div className="flex flex-col">
             <span className="font-display text-[12px] text-slate-900 font-bold uppercase tracking-wider leading-tight">
-              TARGET DOSSIER // FORENSIC PROFILE
+              TARGET PROFILE & EVIDENCE
             </span>
             <span className="text-[10px] text-slate-500 font-mono">
               Entity ID: <span className="font-bold text-sky-600">{selectedNode.id}</span>
@@ -286,14 +286,14 @@ export default function EvidenceDrawer({
               className="flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-sky-700 text-xs font-bold transition-colors shadow-xs cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px] text-sky-600">hub</span>
-              <span className="truncate">Expand (Hop 2)</span>
+              <span className="truncate">Expand Network</span>
             </button>
             <button
               onClick={handleExportDossier}
               className="flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-amber-800 text-xs font-bold transition-colors shadow-xs cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px] text-amber-600">picture_as_pdf</span>
-              <span className="truncate">Court Dossier</span>
+              <span className="truncate">Evidence Report</span>
             </button>
           </div>
 
@@ -308,14 +308,14 @@ export default function EvidenceDrawer({
               <button
                 onClick={() => onInvestigateNode(selectedNode)}
                 className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer group"
-                title="Launch autonomous 7-agent LangGraph supervisor investigation on this entity"
+                title="Launch AI investigation on this suspect"
               >
                 <span className="material-symbols-outlined text-[18px] text-sky-200 group-hover:rotate-12 transition-transform">
                   smart_toy
                 </span>
-                <span>Launch Multi-Agent Investigation</span>
+                <span>Run AI Investigation</span>
                 <span className="px-1.5 py-0.5 rounded bg-white/20 text-[10px] font-mono uppercase tracking-wider">
-                  LIVE SWARM
+                  AI ASSISTANT
                 </span>
               </button>
             )

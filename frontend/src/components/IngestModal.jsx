@@ -62,9 +62,9 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
             </div>
             <div>
               <h3 className="font-display text-sm font-bold text-slate-900">
-                NLP Extraction Pipeline Ingestion
+                Import Case Evidence & Files
               </h3>
-              <p className="text-[10px] text-sky-700 font-mono">POST /api/graph/ingest</p>
+              <p className="text-[10px] text-slate-500 font-medium">Automatic Case Document Parser</p>
             </div>
           </div>
 
@@ -81,34 +81,34 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex flex-col gap-1.5">
             <div className="flex items-center gap-2 text-sky-700 font-bold">
               <span className="material-symbols-outlined text-[16px]">data_object</span>
-              <span>Abhidha's NLP Contract (output_contract.json)</span>
+              <span>Smart Evidence Document Scanner</span>
             </div>
             <p className="text-slate-600 text-[11px] leading-relaxed">
-              Ingests extracted entities (Persons, Phones, Locations, Vehicles, Orgs) and relationships with automatic entity resolution, fuzzy token deduplication, and BSA Section 65B hash validation.
+              Automatically extracts people, phone numbers, locations, vehicles, and organizations from case files. It links suspect relationships, merges duplicate profiles, and secures evidence for court under BSA Section 65B.
             </p>
           </div>
 
           {/* Stepper Pipeline */}
           <div className="flex flex-col gap-2">
             <span className="text-slate-500 uppercase text-[10px] font-mono font-bold tracking-wider">
-              Extraction Pipeline Stages:
+              How case files are processed:
             </span>
             <div className="grid grid-cols-2 gap-2">
               <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs flex items-center gap-2 text-[11px] text-slate-800 font-semibold">
                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span>1. PDF OCR Parsing</span>
+                <span>1. Scan & Read Files</span>
               </div>
               <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs flex items-center gap-2 text-[11px] text-slate-800 font-semibold">
                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span>2. NER Triplet Extraction</span>
+                <span>2. Extract Suspects & Links</span>
               </div>
               <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs flex items-center gap-2 text-[11px] text-slate-800 font-semibold">
                 <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
-                <span>3. Graph Node Sync</span>
+                <span>3. Build Crime Network</span>
               </div>
               <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs flex items-center gap-2 text-[11px] text-slate-800 font-semibold">
                 <span className="w-2 h-2 rounded-full bg-purple-600"></span>
-                <span>4. §65B Hash Attestation</span>
+                <span>4. Court Evidence Check</span>
               </div>
             </div>
           </div>
@@ -118,7 +118,7 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
             <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-[18px]">task_alt</span>
-                <span className="font-semibold text-xs">Ingested 10 entities & 5 relationships successfully!</span>
+                <span className="font-semibold text-xs">Successfully added 10 evidence items and 5 suspect connections!</span>
               </div>
             </div>
           )}
@@ -146,7 +146,7 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
               <span className="material-symbols-outlined text-[16px]">
                 {loading ? 'autorenew' : 'upload'}
               </span>
-              <span>{loading ? 'Ingesting...' : 'Ingest Sample Payload'}</span>
+              <span>{loading ? 'Importing Evidence...' : 'Import Case Evidence'}</span>
             </button>
           </div>
         </div>

@@ -17,14 +17,14 @@ export default function FirCorpusView({ onJumpToGraph, onInvestigateFir }) {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-mono uppercase text-sky-700 font-bold tracking-wider">
-                EVIDENCE VAULT // POLICE RECORD CORPUS
+                POLICE RECORDS // FIRST INFORMATION REPORTS
               </span>
               <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                OCR NORMALIZED
+                DIGITIZED TEXT
               </span>
             </div>
             <h2 className="font-display text-xl font-bold text-slate-900 tracking-tight mt-0.5">
-              FIR Corpus & Electronic Case Records
+              FIR Case Documents & Police Records
             </h2>
           </div>
         </div>
@@ -74,7 +74,7 @@ export default function FirCorpusView({ onJumpToGraph, onInvestigateFir }) {
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-700 border-b border-slate-100 pb-2.5">
               <span className="material-symbols-outlined text-[17px]">auto_awesome</span>
-              <span>Extracted Incident Triplet Details</span>
+              <span>Key Details Extracted by AI</span>
             </div>
 
             <div className="flex flex-col gap-3">
@@ -95,7 +95,7 @@ export default function FirCorpusView({ onJumpToGraph, onInvestigateFir }) {
               </div>
 
               <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 font-mono block font-bold uppercase tracking-wider">INCIDENT FORENSIC SUMMARY</span>
+                <span className="text-[10px] text-slate-500 font-mono block font-bold uppercase tracking-wider">CASE INCIDENT SUMMARY</span>
                 <p className="text-slate-700 text-xs leading-relaxed font-normal">{currentFir.summary}</p>
               </div>
             </div>

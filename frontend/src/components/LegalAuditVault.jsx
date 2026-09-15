@@ -119,17 +119,17 @@ export default function LegalAuditVault({
             <div className="flex flex-col gap-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-mono uppercase text-emerald-700 font-bold tracking-wider">
-                  LEGAL VAULT // SECTION 65B BSA 2023
+                  COURT EVIDENCE VAULT // BSA SECTION 65B
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                  MATHEMATICALLY UNBREAKABLE
+                  TAMPER-PROOF RECORD
                 </span>
               </div>
               <h1 className="font-display text-xl font-bold text-slate-900 tracking-tight">
-                Bharatiya Sakshya Adhiniyam (BSA) 2023 / Section 65B Cryptographic Audit Ledger
+                Electronic Evidence Audit Log (BSA Section 65B Compliant)
               </h1>
               <p className="text-xs text-slate-600 max-w-3xl leading-relaxed font-normal">
-                Immutable SHA-256 hash-chain <span className="text-sky-700 font-semibold font-mono">[H_n = SHA-256(H_prev + payload)]</span> guaranteeing evidentiary admissibility, strict chain of custody, and mathematical non-repudiation in Indian Courts of Law.
+                Tamper-proof digital log protecting case history and evidence records. Proves in court that no files or evidence have been altered since collection.
               </p>
             </div>
           </div>
@@ -144,14 +144,14 @@ export default function LegalAuditVault({
               <span className="material-symbols-outlined text-[16px]">
                 {verifying ? 'autorenew' : 'verified_user'}
               </span>
-              <span>{verifying ? 'Verifying Hashes...' : 'Verify Hash-Chain (BSA §65B)'}</span>
+              <span>{verifying ? 'Verifying Records...' : 'Verify Evidence Chain (BSA §65B)'}</span>
             </button>
             <button
               onClick={handlePrintDossier}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-all border border-slate-200 cursor-pointer active:scale-95 shadow-xs"
             >
               <span className="material-symbols-outlined text-[16px]">print</span>
-              <span>Print Certified Evidence Dossier</span>
+              <span>Print Evidence Report</span>
             </button>
           </div>
         </div>
@@ -168,26 +168,26 @@ export default function LegalAuditVault({
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-display text-base text-slate-900 font-bold">
-                    Cryptographic Ledger Integrity Verified
+                    Evidence Integrity Verified
                   </span>
                   <span className="text-[10px] font-mono text-emerald-800 font-bold tracking-wide uppercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                     Zero Tampering Detected
                   </span>
                 </div>
                 <span className="text-xs text-slate-500">
-                  Full backward linkage checked • Cryptographic roots mathematically congruent
+                  All records verified from start to finish • No alterations found
                 </span>
               </div>
             </div>
 
             <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 text-xs font-mono font-semibold flex-shrink-0 border border-emerald-200">
               <span className="w-2 h-2 rounded-full bg-emerald-600 animate-ping"></span>
-              <span>{auditLogs.length}/{auditLogs.length} Blocks Verified • Merkle Root Match</span>
+              <span>{auditLogs.length}/{auditLogs.length} Records Verified • Chain Intact</span>
             </div>
           </div>
 
           <p className="text-xs text-slate-600 max-w-4xl leading-relaxed font-normal">
-            Full hash-chain backward linkage verified from Genesis Block (Block #1) to current Tip Block. No modified timestamps, severed parent hashes, or manipulated investigator payloads detected. Fully compliant with Section 63 & 65B of Bharatiya Sakshya Adhiniyam, 2023.
+            All audit records have been verified from the very first entry to the latest update. No altered dates, modified records, or missing entries were detected. Fully compliant with electronic evidence rules under BSA 2023 Section 65B.
           </p>
 
           {/* Block telemetry strip */}

@@ -20,12 +20,12 @@ export default function Header({
 
   const tabMetadata = {
     graph: { label: 'Knowledge Graph', icon: 'hub', badge: `${kpiStats?.totalNodes || 31} Nodes`, badgeColor: 'bg-sky-50 text-sky-700 border border-sky-200' },
-    agent: { label: 'Autonomous Agent Swarm', icon: 'psychology', badge: 'ACTIVE PIPELINE', badgeColor: 'bg-purple-50 text-purple-700 border border-purple-200' },
-    resolution: { label: 'Mule Detection & Disambiguation', icon: 'fingerprint', badge: `${pendingReviewCount} Pending`, badgeColor: 'bg-amber-50 text-amber-800 border border-amber-200' },
-    financial: { label: 'Layering & Hawala Forensic Ledger', icon: 'account_balance' },
-    cdr: { label: 'CDR Geo Tower & Call Matrix', icon: 'phone_in_talk' },
-    fir: { label: 'FIR Evidence Corpus', icon: 'policy' },
-    audit: { label: 'BSA §65B Cryptographic Audit Vault', icon: 'gavel', badge: 'Tamper-Proof', badgeColor: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
+    agent: { label: 'AI Investigation Team', icon: 'psychology', badge: 'ACTIVE', badgeColor: 'bg-purple-50 text-purple-700 border border-purple-200' },
+    resolution: { label: 'Duplicate & Mule Detection', icon: 'fingerprint', badge: `${pendingReviewCount} Pending`, badgeColor: 'bg-amber-50 text-amber-800 border border-amber-200' },
+    financial: { label: 'Money Trail & Hawala Ledger', icon: 'account_balance' },
+    cdr: { label: 'Call Records & Cell Towers', icon: 'phone_in_talk' },
+    fir: { label: 'FIR Case Documents', icon: 'policy' },
+    audit: { label: 'Court Evidence & Audit Vault', icon: 'gavel', badge: 'Tamper-Proof', badgeColor: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
   };
 
   const activeTabMeta = tabMetadata[activeTab] || tabMetadata.graph;
@@ -182,14 +182,14 @@ export default function Header({
             <span className="tracking-tight text-[11px]">§65B CERTIFIED</span>
           </div>
 
-          {/* Ingest NLP Button */}
+          {/* Import Evidence Button */}
           <button 
             onClick={onOpenIngest}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold shadow-xs transition-all active:scale-95 cursor-pointer"
-            title="Ingest FIR document / unstructured OCR text into Neo4j"
+            title="Import case documents, FIRs, and files"
           >
             <span className="material-symbols-outlined text-[16px]">cloud_upload</span>
-            <span className="hidden sm:inline font-sans">Ingest NLP</span>
+            <span className="hidden sm:inline font-sans">Import Evidence</span>
           </button>
 
           {/* Officer Profile Avatar & Menu */}

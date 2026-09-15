@@ -38,17 +38,17 @@ export default function CdrTelemetryView() {
       <section className="bg-white rounded-2xl p-5 shadow-xs relative flex flex-col flex-shrink-0 min-h-fit border border-slate-200">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
           <div className="flex flex-col gap-1.5">
-            {/* Tactical Breadcrumb & Case Pin */}
+            {/* Breadcrumb & Case Pin */}
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="text-slate-500 font-mono uppercase font-bold text-[10px] tracking-wider">TACTICAL OPS</span>
+              <span className="text-slate-500 font-mono uppercase font-bold text-[10px] tracking-wider">CASE WORKSPACE</span>
               <span className="text-slate-300">/</span>
-              <span className="text-slate-500 font-mono uppercase font-bold text-[10px] tracking-wider">CDR GEO TOWER</span>
+              <span className="text-slate-500 font-mono uppercase font-bold text-[10px] tracking-wider">PHONE RECORDS</span>
               <span className="text-slate-300">/</span>
-              <span className="text-sky-700 font-mono font-bold text-[10px] tracking-wider">CALL MATRIX & BURST</span>
+              <span className="text-sky-700 font-mono font-bold text-[10px] tracking-wider">CALL SPIKES</span>
               <span className="text-slate-300">•</span>
               <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 text-[10px] font-mono font-bold flex items-center gap-1.5 border border-rose-200">
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
-                BURST DETECTED
+                UNUSUAL SPIKE DETECTED
               </span>
               <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-mono font-medium border border-slate-200">
                 CASE-KOL-2026-088
@@ -59,19 +59,19 @@ export default function CdrTelemetryView() {
             <div className="flex flex-col mt-0.5">
               <div className="flex items-baseline gap-2.5 flex-wrap">
                 <h1 className="font-display text-xl font-bold tracking-tight text-slate-900">
-                  CDR Telemetry & Extortion Spike Matrix
+                  Call Records & Suspicious Call Spikes
                 </h1>
                 <span className="text-xs text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200 font-mono font-bold">
                   TARGET: +91 9832145678 (Rajesh Kumar Sharma)
                 </span>
               </div>
               <p className="text-xs text-slate-600 mt-1 max-w-4xl font-normal">
-                Automated Telco Ingestion (Airtel WB, Reliance Jio, Vi India) • Geo-Spatial Tower Triangulation • IMSI/IMEI Burner Handset Correlation
+                Analyzes phone records from Airtel, Jio, and Vi • Identifies caller locations and cell towers • Flags burner phones
               </p>
             </div>
           </div>
 
-          {/* Tactical Ops Action Row */}
+          {/* Action Row */}
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={handleTriangulate}
@@ -80,7 +80,7 @@ export default function CdrTelemetryView() {
               <span className="material-symbols-outlined text-[16px]">
                 {triangulating ? 'autorenew' : 'cell_tower'}
               </span>
-              <span>{triangulating ? 'Triangulating...' : 'Run Tower Triangulation'}</span>
+              <span>{triangulating ? 'Locating...' : 'Locate Towers & Callers'}</span>
             </button>
             <button
               onClick={handleBsaCertificate}
