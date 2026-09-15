@@ -1118,9 +1118,9 @@ export const AGENT_QUERY_PRESETS = [
       summary: "Through Betweenness Centrality (0.942) and cross-case trajectory matching, DEBASISH CHATTERJEE (P008) is unequivocally identified as the hidden apex kingpin. Despite maintaining the lowest transaction frequency in the network, he is the single topological bridge connecting Cluster A (Extortion / Shubh Laxmi Finance) and Cluster B (Money Laundering / Mehta Global Traders).",
       reasoning_steps: [
         {
-          agent: "NER & Query Agent",
-          action: "spaCy Extraction & Cypher Synthesis",
-          details: "MATCH (p1:Person)-[r1]-(bridge:Person)-[r2]-(p2:Person) WHERE p1.cluster = 'cluster_a' AND p2.cluster = 'cluster_b' RETURN bridge, count(DISTINCT r1+r2) as cut_edges",
+          agent: "Entity Extraction Agent",
+          action: "Cross-Entity Link Identification",
+          details: "Identified cross-cluster connections bridging extortion and money-laundering cells.",
           status: "SUCCESS"
         },
         {

@@ -46,7 +46,7 @@ export default function AgentQueryBar({
       confidence: '96.0',
       metric_label: 'Centr. 0.942',
       rationale: 'Betweenness centrality ratio 0.942 (top 0.1% of graph) with zero direct outgoing calls to victims, delegating extortion ops to Rajesh Kumar Sharma.',
-      tags: ['#CDR_EXTORTION_SPIKE', '#FIR_101/24', '#NEO4J_2_HOP_BRIDGE']
+      tags: ['#CDR_EXTORTION_SPIKE', '#FIR_101/24', '#CRIME_2_HOP_LINK']
     },
     {
       id: 'H2',
@@ -65,8 +65,8 @@ export default function AgentQueryBar({
       status: 'REJECTED',
       confidence: '98.2',
       metric_label: 'Coercion Confirmed',
-      rationale: 'Forensic NLP sentiment analysis of 22 intercepted calls confirms acute duress. Financial transactions are unidirectional extortion outflows, not equity dividends.',
-      tags: ['#WHISPER_VOICE_NLP', '#UNIDIRECTIONAL_CASHFLOW']
+      rationale: 'Forensic voice and tone analysis of 22 intercepted calls confirms acute duress. Financial transactions are unidirectional extortion outflows, not equity dividends.',
+      tags: ['#VOICE_CALL_ANALYSIS', '#UNIDIRECTIONAL_CASHFLOW']
     }
   ];
 
@@ -144,8 +144,8 @@ export default function AgentQueryBar({
                 <span>{isLiveFastAPI ? 'AI ONLINE' : 'READY'}</span>
               </span>
               <span className="text-slate-300">•</span>
-              <span className="text-slate-500">Model:</span>
-              <span className="text-purple-700 font-bold">OpenAI API</span>
+              <span className="text-slate-500">Engine:</span>
+              <span className="text-purple-700 font-bold">Intelligence Core</span>
               <span className="text-slate-300">•</span>
               <span className="text-slate-500">Database:</span>
               <span className="text-emerald-700 font-bold">Connected</span>
@@ -302,7 +302,7 @@ export default function AgentQueryBar({
             </div>
           </div>
           <div className="mt-3 pt-2 flex items-center justify-between text-xs text-slate-600 border-t border-slate-100">
-            <span className="text-sky-700 font-medium">Cytoscape Visualized</span>
+            <span className="text-sky-700 font-medium">Network Visualized</span>
             <span className="text-[11px] text-slate-500 font-mono">Iterations: {agentResponse?.iterations || 1}</span>
           </div>
         </div>

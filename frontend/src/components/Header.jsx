@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation, Link } from 'react-router-dom';
 
 export default function Header({ 
   activeTab, 
@@ -17,6 +18,21 @@ export default function Header({
 }) {
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const location = useLocation();
+
+  // Infer active view from URL pathname if activeTab is not passed
+  const getTabFromPath = () => {
+    const path = location.pathname;
+    if (path.includes('/investigation')) return 'agent';
+    if (path.includes('/resolution')) return 'resolution';
+    if (path.includes('/financial')) return 'financial';
+    if (path.includes('/cdr')) return 'cdr';
+    if (path.includes('/fir')) return 'fir';
+    if (path.includes('/audit')) return 'audit';
+    return 'graph';
+  };
+
+  const currentTab = activeTab || getTabFromPath();
 
   const tabMetadata = {
     graph: { label: 'Knowledge Graph', icon: 'hub', badge: `${kpiStats?.totalNodes || 31} Nodes`, badgeColor: 'bg-sky-50 text-sky-700 border border-sky-200' },
@@ -28,7 +44,7 @@ export default function Header({
     audit: { label: 'Court Evidence & Audit Vault', icon: 'gavel', badge: 'Tamper-Proof', badgeColor: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
   };
 
-  const activeTabMeta = tabMetadata[activeTab] || tabMetadata.graph;
+  const activeTabMeta = tabMetadata[currentTab] || tabMetadata.graph;
 
   const roleLabels = {
     LEAD_INVESTIGATOR: { short: 'LEAD', sub: 'Unmasked PII', color: 'text-sky-700' },
@@ -44,7 +60,8 @@ export default function Header({
       <div className="h-14 w-full px-4 flex items-center justify-between gap-3">
         {/* Left Brand Identity & Portal Home Link */}
         <div className="flex items-center gap-3 min-w-0 flex-shrink-0">
-          <div 
+          <Link 
+            to="/"
             onClick={onGoHome}
             className="flex items-center gap-2.5 min-w-0 cursor-pointer hover:opacity-85 transition-opacity"
             title="Go to Homepage / Overview"
@@ -75,19 +92,18 @@ export default function Header({
                 </span>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* Portal Home Button */}
-          {onGoHome && (
-            <button
-              onClick={onGoHome}
-              className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 transition-colors shadow-xs cursor-pointer ml-1"
-              title="Return to Public Homepage"
-            >
-              <span className="material-symbols-outlined text-[15px] text-sky-600">home</span>
-              <span>Portal Home</span>
-            </button>
-          )}
+          <Link
+            to="/"
+            onClick={onGoHome}
+            className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 transition-colors shadow-xs cursor-pointer ml-1"
+            title="Return to Public Homepage"
+          >
+            <span className="material-symbols-outlined text-[15px] text-sky-600">home</span>
+            <span>Portal Home</span>
+          </Link>
         </div>
 
         {/* Center: Active View Breadcrumb Context */}
@@ -108,13 +124,13 @@ export default function Header({
 
         {/* Right Tactical Telemetry & RBAC Tier */}
         <div className="flex items-center gap-2.5 flex-shrink-0">
-          {/* Neo4j Live Connection Pill */}
+          {/* Database Live Connection Pill */}
           <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-xs font-mono">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span className="text-slate-500 font-medium text-[11px]">Neo4j:</span>
+            <span className="text-slate-500 font-medium text-[11px]">Database:</span>
             <span className="text-emerald-700 font-bold tracking-wide text-[11px]">
               {backendStatus?.isLive ? '12ms LIVE' : 'LOCAL DEMO'}
             </span>

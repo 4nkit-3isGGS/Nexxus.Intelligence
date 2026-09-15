@@ -1,16 +1,19 @@
 import React from 'react';
+import { NavLink, Link } from 'react-router-dom';
 
 export default function Sidebar({
-  activeTab,
-  setActiveTab,
   nodeCount = 31,
   pendingReviewCount = 3,
   backendStatus = { isLive: true },
+  officerRole = 'LEAD_INVESTIGATOR',
   onGoHome
 }) {
+  const isAuditRestricted = officerRole === 'INVESTIGATOR' || officerRole === 'ANALYST';
+
   const navItems = [
     {
       id: 'graph',
+      path: '/workspace/graph',
       label: 'Knowledge Graph',
       icon: 'hub',
       badge: nodeCount,
@@ -18,6 +21,7 @@ export default function Sidebar({
     },
     {
       id: 'agent',
+      path: '/workspace/investigation',
       label: 'AI Investigation Team',
       icon: 'psychology',
       badge: 'ACTIVE',
@@ -25,6 +29,7 @@ export default function Sidebar({
     },
     {
       id: 'resolution',
+      path: '/workspace/resolution',
       label: 'Duplicate Suspects',
       icon: 'fingerprint',
       badge: pendingReviewCount,
@@ -32,28 +37,34 @@ export default function Sidebar({
     },
     {
       id: 'financial',
+      path: '/workspace/financial',
       label: 'Money Trail & Hawala',
       icon: 'account_balance',
       badge: null
     },
     {
       id: 'cdr',
+      path: '/workspace/cdr',
       label: 'Call Records & Towers',
       icon: 'phone_in_talk',
       badge: null
     },
     {
       id: 'fir',
+      path: '/workspace/fir',
       label: 'FIR Case Documents',
       icon: 'policy',
       badge: null
     },
     {
       id: 'audit',
+      path: '/workspace/audit',
       label: 'Legal Audit Vault',
       icon: 'gavel',
-      badge: '§65B',
-      badgeColor: 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+      badge: isAuditRestricted ? '🔒 Restricted' : '§65B',
+      badgeColor: isAuditRestricted
+        ? 'bg-rose-50 text-rose-700 border border-rose-200'
+        : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
     }
   ];
 
@@ -73,53 +84,55 @@ export default function Sidebar({
             </span>
           </div>
 
-          {onGoHome && (
-            <button
-              onClick={onGoHome}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left text-slate-700 hover:text-sky-700 hover:bg-slate-50 border border-slate-200 shadow-xs font-semibold text-xs transition-colors cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[18px] text-sky-600">home</span>
-              <span>Portal Home / Overview</span>
-            </button>
-          )}
+          <Link
+            to="/"
+            onClick={onGoHome}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left text-slate-700 hover:text-sky-700 hover:bg-slate-50 border border-slate-200 shadow-xs font-semibold text-xs transition-colors cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[18px] text-sky-600">home</span>
+            <span>Portal Home / Overview</span>
+          </Link>
         </div>
 
         {/* Tactical Navigation Items */}
         <nav className="flex flex-col gap-1">
-          {navItems.map((item) => {
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-left group cursor-pointer ${
+          {navItems.map((item) => (
+            <NavLink
+              key={item.id}
+              to={item.path}
+              className={({ isActive }) =>
+                `w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-left group cursor-pointer ${
                   isActive
                     ? 'bg-sky-50 text-sky-800 font-bold border-l-2 border-sky-600 shadow-xs'
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-l-2 border-transparent'
-                }`}
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <span
-                    className={`material-symbols-outlined text-[20px] transition-transform group-hover:scale-105 ${
-                      isActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
-                    }`}
-                  >
-                    {item.icon}
-                  </span>
-                  <span className="text-[13px] truncate font-medium">{item.label}</span>
-                </div>
-                {item.badge && (
-                  <span
-                    className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold shrink-0 ${
-                      isActive ? 'bg-sky-600 text-white shadow-xs' : item.badgeColor
-                    }`}
-                  >
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span
+                      className={`material-symbols-outlined text-[20px] transition-transform group-hover:scale-105 ${
+                        isActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
+                      }`}
+                    >
+                      {item.icon}
+                    </span>
+                    <span className="text-[13px] truncate font-medium">{item.label}</span>
+                  </div>
+                  {item.badge && (
+                    <span
+                      className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold shrink-0 ${
+                        isActive ? 'bg-sky-600 text-white shadow-xs' : item.badgeColor
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </>
+              )}
+            </NavLink>
+          ))}
         </nav>
       </div>
 

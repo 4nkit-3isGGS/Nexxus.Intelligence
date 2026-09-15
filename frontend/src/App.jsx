@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import FilterBar from './components/FilterBar';
@@ -13,15 +14,27 @@ import EntityResolutionView from './components/EntityResolutionView';
 import IngestModal from './components/IngestModal';
 import HomePage from './components/HomePage';
 import AuthModal from './components/AuthModal';
+import RbacRoute from './components/RbacRoute';
+import NotFoundPage from './components/NotFoundPage';
 import { apiService } from './services/api';
 import { MOCK_GRAPH_DATA, AGENT_QUERY_PRESETS } from './data/mockIntelligenceData';
 
 export default function App() {
-  // Top-level Navigation View Mode: 'home' | 'workspace'
-  const [viewMode, setViewMode] = useState('home');
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Navigation View Tab: 'graph' | 'agent' | 'resolution' | 'financial' | 'cdr' | 'fir' | 'audit'
-  const [activeTab, setActiveTab] = useState('graph');
+  // Infer active workspace tab from URL pathname
+  const activeTab = useMemo(() => {
+    const path = location.pathname;
+    if (path.includes('/workspace/investigation')) return 'agent';
+    if (path.includes('/workspace/resolution')) return 'resolution';
+    if (path.includes('/workspace/financial')) return 'financial';
+    if (path.includes('/workspace/cdr')) return 'cdr';
+    if (path.includes('/workspace/fir')) return 'fir';
+    if (path.includes('/workspace/audit')) return 'audit';
+    if (path.includes('/workspace/graph')) return 'graph';
+    return 'graph';
+  }, [location.pathname]);
 
   // Core Data
   const [rawGraphData, setRawGraphData] = useState(MOCK_GRAPH_DATA);
@@ -93,7 +106,7 @@ export default function App() {
     setCurrentUser(user);
     setOfficerRole(user.role);
     apiService.setOfficerClearance(user.role);
-    setViewMode('workspace');
+    navigate('/workspace/graph');
     loadData();
   };
 
@@ -109,7 +122,7 @@ export default function App() {
   const handleLogout = () => {
     apiService.logout();
     setCurrentUser(null);
-    setViewMode('home');
+    navigate('/');
   };
 
   // Node Counts by Type
@@ -237,8 +250,7 @@ export default function App() {
 
   // Cross-app Investigation Trigger
   const handleTriggerInvestigation = (queryText, subjectId = null) => {
-    setViewMode('workspace');
-    setActiveTab('agent');
+    navigate('/workspace/investigation');
     handleRunAgentQuery(queryText, subjectId);
   };
 
@@ -334,232 +346,281 @@ export default function App() {
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-slate-100 text-slate-900 flex flex-col font-sans selection:bg-sky-500/20 selection:text-sky-900 relative">
-      {/* VIEW MODE 1: ATTRACTIVE EXECUTIVE HOMEPAGE */}
-      {viewMode === 'home' && (
-        <div className="flex-1 overflow-y-auto w-full h-full no-scrollbar">
-          <HomePage
-            onLaunchWorkspace={() => setViewMode('workspace')}
-            onOpenAuth={(tab = 'login') => {
-              setAuthModalTab(tab);
-              setShowAuthModal(true);
-            }}
-            currentUser={currentUser}
-            onQuickRoleSelect={handleQuickRoleSelect}
-            onInvestigate={(query, subjectId) => handleTriggerInvestigation(query, subjectId)}
-            stats={{
-              totalNodes: graphStats.total_nodes || rawGraphData?.nodes?.length || 31,
-              totalEdges: graphStats.total_relationships || rawGraphData?.edges?.length || 42,
-              totalAmount: '₹14,85,000'
-            }}
-          />
-        </div>
-      )}
+      <Routes>
+        {/* VIEW 1: ATTRACTIVE EXECUTIVE HOMEPAGE */}
+        <Route
+          path="/"
+          element={
+            <div className="flex-1 overflow-y-auto w-full h-full no-scrollbar">
+              <HomePage
+                onLaunchWorkspace={() => navigate('/workspace/graph')}
+                onOpenAuth={(tab = 'login') => {
+                  setAuthModalTab(tab);
+                  setShowAuthModal(true);
+                }}
+                currentUser={currentUser}
+                onQuickRoleSelect={handleQuickRoleSelect}
+                onInvestigate={(query, subjectId) => handleTriggerInvestigation(query, subjectId)}
+                stats={{
+                  totalNodes: graphStats.total_nodes || rawGraphData?.nodes?.length || 31,
+                  totalEdges: graphStats.total_relationships || rawGraphData?.edges?.length || 42,
+                  totalAmount: '₹14,85,000'
+                }}
+              />
+            </div>
+          }
+        />
 
-      {/* VIEW MODE 2: TACTICAL INVESTIGATION COMMAND CENTER WORKSPACE */}
-      {viewMode === 'workspace' && (
-        <div className="flex-1 flex flex-col h-full w-full overflow-hidden relative">
-          {/* 1. Tactical Header */}
-          <Header
-            activeTab={activeTab}
-            backendStatus={backendStatus}
-            refreshData={loadData}
-            caseInfo={rawGraphData?.case_info}
-            kpiStats={{
-              totalNodes: graphStats.total_nodes || rawGraphData?.nodes?.length || 0,
-              totalEdges: graphStats.total_relationships || rawGraphData?.edges?.length || 0,
-            }}
-            pendingReviewCount={3}
-            onOpenIngest={() => setShowIngestModal(true)}
-            officerRole={officerRole}
-            onRoleChange={handleRoleChange}
-            onGoHome={() => setViewMode('home')}
-            currentUser={currentUser}
-            onOpenAuth={(tab = 'login') => {
-              setAuthModalTab(tab);
-              setShowAuthModal(true);
-            }}
-            onLogout={handleLogout}
-          />
+        {/* WORKSPACE ROOT REDIRECT */}
+        <Route
+          path="/workspace"
+          element={<Navigate to="/workspace/graph" replace />}
+        />
 
-          {/* Main App Body Row: Sidebar + Primary Workspace */}
-          <div className="flex-1 flex overflow-hidden w-full relative min-h-0">
-            {/* 2. Tactical Ops Left Sidebar */}
-            <Sidebar
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              nodeCount={graphStats.total_nodes || rawGraphData?.nodes?.length || 31}
-              pendingReviewCount={3}
-              backendStatus={backendStatus}
-              onGoHome={() => setViewMode('home')}
-            />
+        {/* WORKSPACE COMMAND CENTER LAYOUT */}
+        <Route
+          path="/workspace/*"
+          element={
+            <div className="flex-1 flex flex-col h-full w-full overflow-hidden relative">
+              {/* 1. Tactical Header */}
+              <Header
+                activeTab={activeTab}
+                backendStatus={backendStatus}
+                refreshData={loadData}
+                caseInfo={rawGraphData?.case_info}
+                kpiStats={{
+                  totalNodes: graphStats.total_nodes || rawGraphData?.nodes?.length || 0,
+                  totalEdges: graphStats.total_relationships || rawGraphData?.edges?.length || 0,
+                }}
+                pendingReviewCount={3}
+                onOpenIngest={() => setShowIngestModal(true)}
+                officerRole={officerRole}
+                onRoleChange={handleRoleChange}
+                onGoHome={() => navigate('/')}
+                currentUser={currentUser}
+                onOpenAuth={(tab = 'login') => {
+                  setAuthModalTab(tab);
+                  setShowAuthModal(true);
+                }}
+                onLogout={handleLogout}
+              />
 
-            {/* 3. Primary Tactical Workspace Body */}
-            <div className="flex-1 flex flex-col h-full w-full overflow-hidden relative min-h-0 min-w-0 bg-slate-50/70">
-              {/* Ambient Subtle Grid */}
-              <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-                <div className="absolute inset-0 opacity-70 bg-[radial-gradient(rgba(15,23,42,0.06)_1px,transparent_1px)] [background-size:24px_24px]"></div>
+              {/* Main App Body Row: Sidebar + Primary Workspace */}
+              <div className="flex-1 flex overflow-hidden w-full relative min-h-0">
+                {/* 2. Tactical Ops Left Sidebar */}
+                <Sidebar
+                  activeTab={activeTab}
+                  nodeCount={graphStats.total_nodes || rawGraphData?.nodes?.length || 31}
+                  pendingReviewCount={3}
+                  backendStatus={backendStatus}
+                  officerRole={officerRole}
+                  onGoHome={() => navigate('/')}
+                />
+
+                {/* 3. Primary Tactical Workspace Body */}
+                <div className="flex-1 flex flex-col h-full w-full overflow-hidden relative min-h-0 min-w-0 bg-slate-50/70">
+                  {/* Ambient Subtle Grid */}
+                  <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+                    <div className="absolute inset-0 opacity-70 bg-[radial-gradient(rgba(15,23,42,0.06)_1px,transparent_1px)] [background-size:24px_24px]"></div>
+                  </div>
+
+                  <main className="relative z-10 flex-1 flex flex-col overflow-hidden w-full min-h-0 min-w-0">
+                    <Routes>
+                      {/* VIEW 1: INTERACTIVE GRAPH CANVAS */}
+                      <Route
+                        path="graph"
+                        element={
+                          <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+                            {/* Filter and Timeline Controls */}
+                            <FilterBar
+                              searchQuery={searchQuery}
+                              setSearchQuery={setSearchQuery}
+                              riskThreshold={riskThreshold}
+                              setRiskThreshold={setRiskThreshold}
+                              selectedTypes={selectedTypes}
+                              toggleType={toggleType}
+                              selectedCluster={selectedCluster}
+                              setSelectedCluster={setSelectedCluster}
+                              timelineDate={timelineDate}
+                              setTimelineDate={setTimelineDate}
+                              timelinePlaying={timelinePlaying}
+                              setTimelinePlaying={setTimelinePlaying}
+                              nodeCountsByType={nodeCountsByType}
+                              resetFilters={resetFilters}
+                              onSelectNode={(node) => {
+                                const fullNode = rawGraphData?.nodes?.find((n) => n.id === node.id) || node;
+                                setSelectedNode(fullNode);
+                                setHighlightedNodeIds([fullNode.id]);
+                              }}
+                            />
+
+                            {/* Force Canvas */}
+                            <div className="flex-1 relative overflow-hidden min-h-0">
+                              <GraphCanvas
+                                nodes={filteredNodes}
+                                edges={filteredEdges}
+                                selectedNode={selectedNode}
+                                onSelectNode={(node) => setSelectedNode(node)}
+                                selectedEdge={selectedEdge}
+                                onSelectEdge={(edge) => setSelectedEdge(edge)}
+                                highlightedNodeIds={highlightedNodeIds}
+                                highlightedEdgeIds={highlightedEdgeIds}
+                                timelineDate={timelineDate}
+                                activeLayout={activeLayout}
+                                onLayoutChange={(layout) => setActiveLayout(layout)}
+                              />
+                            </div>
+                          </div>
+                        }
+                      />
+
+                      {/* VIEW 2: AI AGENTIC INVESTIGATION CONSOLE */}
+                      <Route
+                        path="investigation"
+                        element={
+                          <AgentQueryBar
+                            onRunAgentQuery={handleRunAgentQuery}
+                            agentResponse={agentResponse}
+                            loadingQuery={loadingQuery}
+                            officerRole={officerRole}
+                            currentUser={currentUser}
+                            onRoleChange={handleRoleChange}
+                            onFocusSubgraph={(nodeIds, edgeIds) => {
+                              setHighlightedNodeIds(nodeIds || []);
+                              setHighlightedEdgeIds(edgeIds || []);
+                              navigate('/workspace/graph');
+                            }}
+                          />
+                        }
+                      />
+
+                      {/* VIEW 3: ENTITY RESOLUTION & DUPLICATE REVIEW QUEUE */}
+                      <Route
+                        path="resolution"
+                        element={
+                          <EntityResolutionView
+                            officerRole={officerRole}
+                            currentUser={currentUser}
+                            onRoleChange={handleRoleChange}
+                            onFocusEntity={(node) => {
+                              setSelectedNode(node);
+                              navigate('/workspace/graph');
+                            }}
+                            onJumpToGraph={() => navigate('/workspace/graph')}
+                            onInvestigateEntity={(node) => {
+                              handleTriggerInvestigation(`Perform graph entity resolution and investigate network for ${node.name} (${node.id})`, node.id);
+                            }}
+                          />
+                        }
+                      />
+
+                      {/* VIEW 4: CIRCULAR MONEY TRAIL & AML FLOW */}
+                      <Route
+                        path="financial"
+                        element={
+                          <FinancialFlowView
+                            onSelectEntity={(nodeId) => {
+                              const found = rawGraphData.nodes.find((n) => n.id === nodeId);
+                              if (found) {
+                                setSelectedNode(found);
+                                navigate('/workspace/graph');
+                              }
+                            }}
+                          />
+                        }
+                      />
+
+                      {/* VIEW 5: CDR TELEMETRY & CALL SPIKE MATRIX */}
+                      <Route
+                        path="cdr"
+                        element={<CdrTelemetryView />}
+                      />
+
+                      {/* VIEW 6: FIR CORPUS & IN-TEXT NER HIGHLIGHTER */}
+                      <Route
+                        path="fir"
+                        element={
+                          <FirCorpusView
+                            onSelectEntity={(entityName) => {
+                              const found = rawGraphData.nodes.find((n) => n.name.includes(entityName));
+                              if (found) {
+                                setSelectedNode(found);
+                                navigate('/workspace/graph');
+                              }
+                            }}
+                            onJumpToGraph={() => navigate('/workspace/graph')}
+                            onInvestigateFir={(fir) => {
+                              handleTriggerInvestigation(`Investigate FIR ${fir.fir_no} (${fir.doc_id}) involving ${fir.accused.join(', ')}`);
+                            }}
+                          />
+                        }
+                      />
+
+                      {/* VIEW 7: BSA SECTION 65B LEGAL AUDIT VAULT */}
+                      <Route
+                        path="audit"
+                        element={
+                          <RbacRoute
+                            allowedRoles={['LEAD_INVESTIGATOR', 'AUDITOR']}
+                            currentRole={officerRole}
+                            currentUser={currentUser}
+                            onRoleChange={handleRoleChange}
+                            pageTitle="Legal Audit Vault (BSA §65B)"
+                          >
+                            <LegalAuditVault
+                              caseInfo={rawGraphData.case_info}
+                              nodes={rawGraphData.nodes}
+                              edges={rawGraphData.edges}
+                              officerRole={officerRole}
+                              currentUser={currentUser}
+                              onRoleChange={handleRoleChange}
+                            />
+                          </RbacRoute>
+                        }
+                      />
+
+                      {/* Sub-workspace fallback */}
+                      <Route path="*" element={<Navigate to="/workspace/graph" replace />} />
+                    </Routes>
+                  </main>
+                </div>
               </div>
 
-              <main className="relative z-10 flex-1 flex flex-col overflow-hidden w-full min-h-0 min-w-0">
-                {/* VIEW 1: INTERACTIVE GRAPH CANVAS */}
-                {activeTab === 'graph' && (
-                  <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-                    {/* Filter and Timeline Controls */}
-                    <FilterBar
-                      searchQuery={searchQuery}
-                      setSearchQuery={setSearchQuery}
-                      riskThreshold={riskThreshold}
-                      setRiskThreshold={setRiskThreshold}
-                      selectedTypes={selectedTypes}
-                      toggleType={toggleType}
-                      selectedCluster={selectedCluster}
-                      setSelectedCluster={setSelectedCluster}
-                      timelineDate={timelineDate}
-                      setTimelineDate={setTimelineDate}
-                      timelinePlaying={timelinePlaying}
-                      setTimelinePlaying={setTimelinePlaying}
-                      nodeCountsByType={nodeCountsByType}
-                      resetFilters={resetFilters}
-                      onSelectNode={(node) => {
-                        const fullNode = rawGraphData?.nodes?.find((n) => n.id === node.id) || node;
-                        setSelectedNode(fullNode);
-                        setHighlightedNodeIds([fullNode.id]);
-                      }}
-                    />
+              {/* Slide-Over Evidence & Investigation Drawer */}
+              {selectedNode && (
+                <EvidenceDrawer
+                  selectedNode={selectedNode}
+                  officerRole={officerRole}
+                  currentUser={currentUser}
+                  onClose={() => setSelectedNode(null)}
+                  onFocusNode={(node) => {
+                    setHighlightedNodeIds([node.id]);
+                  }}
+                  onTraceKingpin={handleTraceKingpin}
+                  onOpenFirDoc={(docId) => {
+                    navigate('/workspace/fir');
+                  }}
+                  onExpandSubgraph={handleExpandSubgraph}
+                  onInvestigateNode={(node) => {
+                    handleTriggerInvestigation(`Investigate suspect ${node.name} (${node.id}) and map connected syndicate operations`, node.id);
+                  }}
+                  allEdges={rawGraphData?.edges || []}
+                />
+              )}
 
-                    {/* Force Canvas */}
-                    <div className="flex-1 relative overflow-hidden min-h-0">
-                      <GraphCanvas
-                        nodes={filteredNodes}
-                        edges={filteredEdges}
-                        selectedNode={selectedNode}
-                        onSelectNode={(node) => setSelectedNode(node)}
-                        selectedEdge={selectedEdge}
-                        onSelectEdge={(edge) => setSelectedEdge(edge)}
-                        highlightedNodeIds={highlightedNodeIds}
-                        highlightedEdgeIds={highlightedEdgeIds}
-                        timelineDate={timelineDate}
-                        activeLayout={activeLayout}
-                        onLayoutChange={(layout) => setActiveLayout(layout)}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* VIEW 2: AI AGENTIC INVESTIGATION CONSOLE */}
-                {activeTab === 'agent' && (
-                  <AgentQueryBar
-                    onRunAgentQuery={handleRunAgentQuery}
-                    agentResponse={agentResponse}
-                    loadingQuery={loadingQuery}
-                    officerRole={officerRole}
-                    currentUser={currentUser}
-                    onRoleChange={handleRoleChange}
-                    onFocusSubgraph={(nodeIds, edgeIds) => {
-                      setHighlightedNodeIds(nodeIds || []);
-                      setHighlightedEdgeIds(edgeIds || []);
-                      setActiveTab('graph');
-                    }}
-                  />
-                )}
-
-                {/* VIEW 3: ENTITY RESOLUTION & DUPLICATE REVIEW QUEUE */}
-                {activeTab === 'resolution' && (
-                  <EntityResolutionView
-                    officerRole={officerRole}
-                    currentUser={currentUser}
-                    onRoleChange={handleRoleChange}
-                    onFocusEntity={(node) => {
-                      setSelectedNode(node);
-                      setActiveTab('graph');
-                    }}
-                    onJumpToGraph={() => setActiveTab('graph')}
-                    onInvestigateEntity={(node) => {
-                      handleTriggerInvestigation(`Perform graph entity resolution and investigate network for ${node.name} (${node.id})`, node.id);
-                    }}
-                  />
-                )}
-
-                {/* VIEW 4: CIRCULAR MONEY TRAIL & AML FLOW */}
-                {activeTab === 'financial' && (
-                  <FinancialFlowView
-                    onSelectEntity={(nodeId) => {
-                      const found = rawGraphData.nodes.find((n) => n.id === nodeId);
-                      if (found) {
-                        setSelectedNode(found);
-                        setActiveTab('graph');
-                      }
-                    }}
-                  />
-                )}
-
-                {/* VIEW 5: CDR TELEMETRY & CALL SPIKE MATRIX */}
-                {activeTab === 'cdr' && (
-                  <CdrTelemetryView />
-                )}
-
-                {/* VIEW 6: FIR CORPUS & IN-TEXT NER HIGHLIGHTER */}
-                {activeTab === 'fir' && (
-                  <FirCorpusView
-                    onSelectEntity={(entityName) => {
-                      const found = rawGraphData.nodes.find((n) => n.name.includes(entityName));
-                      if (found) {
-                        setSelectedNode(found);
-                        setActiveTab('graph');
-                      }
-                    }}
-                    onJumpToGraph={() => setActiveTab('graph')}
-                    onInvestigateFir={(fir) => {
-                      handleTriggerInvestigation(`Investigate FIR ${fir.fir_no} (${fir.doc_id}) involving ${fir.accused.join(', ')}`);
-                    }}
-                  />
-                )}
-
-                {/* VIEW 7: BSA SECTION 65B LEGAL AUDIT VAULT */}
-                {activeTab === 'audit' && (
-                  <LegalAuditVault
-                    caseInfo={rawGraphData.case_info}
-                    nodes={rawGraphData.nodes}
-                    edges={rawGraphData.edges}
-                    officerRole={officerRole}
-                    currentUser={currentUser}
-                    onRoleChange={handleRoleChange}
-                  />
-                )}
-              </main>
+              {/* Ingestion Modal */}
+              <IngestModal
+                isOpen={showIngestModal}
+                onClose={() => setShowIngestModal(false)}
+                onIngestSuccess={loadData}
+              />
             </div>
-          </div>
+          }
+        />
 
-          {/* Slide-Over Evidence & Investigation Drawer */}
-          {selectedNode && (
-            <EvidenceDrawer
-              selectedNode={selectedNode}
-              officerRole={officerRole}
-              currentUser={currentUser}
-              onClose={() => setSelectedNode(null)}
-              onFocusNode={(node) => {
-                setHighlightedNodeIds([node.id]);
-              }}
-              onTraceKingpin={handleTraceKingpin}
-              onOpenFirDoc={(docId) => {
-                setActiveTab('fir');
-              }}
-              onExpandSubgraph={handleExpandSubgraph}
-              onInvestigateNode={(node) => {
-                handleTriggerInvestigation(`Investigate suspect ${node.name} (${node.id}) and map connected syndicate operations`, node.id);
-              }}
-              allEdges={rawGraphData?.edges || []}
-            />
-          )}
-
-          {/* Ingestion Modal */}
-          <IngestModal
-            isOpen={showIngestModal}
-            onClose={() => setShowIngestModal(false)}
-            onIngestSuccess={loadData}
-          />
-        </div>
-      )}
+        {/* Global 404 Not Found Page */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
 
       {/* Global Law Enforcement RBAC Authentication & Registration Modal */}
       <AuthModal
