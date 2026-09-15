@@ -235,13 +235,23 @@ export const MOCK_AUDIT_LOGS = [
 
 export const apiService = {
   // 0. Law Enforcement RBAC Clearance Management
-  setOfficerClearance(role, userId = null, badgeNumber = null, jurisdiction = null) {
-    currentOfficerSession = {
-      role: role || currentOfficerSession.role,
-      userId: userId || currentOfficerSession.userId,
-      badgeNumber: badgeNumber || currentOfficerSession.badgeNumber,
-      jurisdiction: jurisdiction || currentOfficerSession.jurisdiction
-    };
+  setOfficerClearance(roleOrObj, userId = null, badgeNumber = null, jurisdiction = null) {
+    let updatedRole = typeof roleOrObj === 'string' ? roleOrObj : roleOrObj?.role || currentOfficerSession.role;
+    const matchedPreset = DEMO_OFFICERS.find((o) => o.role === updatedRole);
+    if (matchedPreset && (!userId && !badgeNumber)) {
+      currentOfficerSession = { ...matchedPreset };
+    } else {
+      currentOfficerSession = {
+        ...currentOfficerSession,
+        role: updatedRole,
+        userId: userId || (typeof roleOrObj === 'object' ? roleOrObj.userId : currentOfficerSession.userId),
+        badgeNumber: badgeNumber || (typeof roleOrObj === 'object' ? roleOrObj.badgeNumber : currentOfficerSession.badgeNumber),
+        jurisdiction: jurisdiction || (typeof roleOrObj === 'object' ? roleOrObj.jurisdiction : currentOfficerSession.jurisdiction)
+      };
+    }
+    try {
+      localStorage.setItem('nexxus_officer_session', JSON.stringify(currentOfficerSession));
+    } catch (e) {}
     return { ...currentOfficerSession };
   },
 
@@ -514,6 +524,29 @@ export const apiService = {
     }
 
     return { nodes: [], edges: [] };
+  },
+
+  // 6b. Trace path to criminal kingpin / mastermind
+  async traceToKingpin(suspectId) {
+    const kingpinId = 'P008';
+    if (suspectId === kingpinId) {
+      return { data: { kingpin_id: kingpinId, path: [kingpinId] } };
+    }
+    const pathResult = await this.getShortestPath(suspectId, kingpinId);
+    if (pathResult?.nodes?.length > 0) {
+      return {
+        data: {
+          kingpin_id: kingpinId,
+          path: pathResult.nodes.map((n) => n.id)
+        }
+      };
+    }
+    return {
+      data: {
+        kingpin_id: kingpinId,
+        path: [suspectId, 'P003', kingpinId]
+      }
+    };
   },
 
   // 7. GET /api/entity/{id} — Entity details with phones & PII clearance
@@ -1068,14 +1101,6 @@ export const apiService = {
   },
 
   // 19. RBAC Authentication & Session Management
-  setOfficerClearance(newRole) {
-    currentOfficerSession = { ...currentOfficerSession, role: newRole };
-    try {
-      localStorage.setItem('nexxus_officer_session', JSON.stringify(currentOfficerSession));
-    } catch (e) {}
-    return currentOfficerSession;
-  },
-
   getCurrentUser() {
     return currentOfficerSession;
   },
