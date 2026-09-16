@@ -14,7 +14,9 @@ export default function Header({
   onGoHome,
   currentUser,
   onOpenAuth,
-  onLogout
+  onLogout,
+  onOpenFieldGuide,
+  onOpenDossier
 }) {
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -197,6 +199,26 @@ export default function Header({
             <span className="material-symbols-outlined text-[15px] text-emerald-700">verified_user</span>
             <span className="tracking-tight text-[11px]">§65B CERTIFIED</span>
           </div>
+
+          {/* Field Guide Help Button */}
+          <button 
+            onClick={onOpenFieldGuide}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 shadow-2xs transition-colors cursor-pointer"
+            title="Open Officer Field Guide & Operational Manual"
+          >
+            <span className="material-symbols-outlined text-sky-600 text-[16px]">menu_book</span>
+            <span className="hidden sm:inline font-sans">Field Guide</span>
+          </button>
+
+          {/* Export Case Dossier Button */}
+          <button 
+            onClick={onOpenDossier}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-800 text-xs font-bold border border-sky-200 shadow-2xs transition-colors cursor-pointer"
+            title="Export Court-Certified Evidence Dossier"
+          >
+            <span className="material-symbols-outlined text-sky-600 text-[16px]">description</span>
+            <span className="hidden md:inline font-sans">Export Dossier</span>
+          </button>
 
           {/* Import Evidence Button */}
           <button 

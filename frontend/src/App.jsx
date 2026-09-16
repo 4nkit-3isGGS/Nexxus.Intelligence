@@ -16,6 +16,10 @@ import HomePage from './components/HomePage';
 import AuthModal from './components/AuthModal';
 import RbacRoute from './components/RbacRoute';
 import NotFoundPage from './components/NotFoundPage';
+import ExportDossierModal from './components/ExportDossierModal';
+import OfficerFieldGuideModal from './components/OfficerFieldGuideModal';
+import InvestigationPlaybook from './components/InvestigationPlaybook';
+import { ToastProvider } from './context/ToastContext';
 import { apiService } from './services/api';
 import { MOCK_GRAPH_DATA, AGENT_QUERY_PRESETS } from './data/mockIntelligenceData';
 
@@ -48,6 +52,8 @@ export default function App() {
   const [officerRole, setOfficerRole] = useState(currentUser?.role || 'LEAD_INVESTIGATOR');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalTab, setAuthModalTab] = useState('login');
+  const [showDossierModal, setShowDossierModal] = useState(false);
+  const [showFieldGuideModal, setShowFieldGuideModal] = useState(false);
 
   // Filter States
   const [searchQuery, setSearchQuery] = useState('');
@@ -345,7 +351,8 @@ export default function App() {
   }, []);
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-slate-100 text-slate-900 flex flex-col font-sans selection:bg-sky-500/20 selection:text-sky-900 relative">
+    <ToastProvider>
+      <div className="h-screen w-screen overflow-hidden bg-slate-100 text-slate-900 flex flex-col font-sans selection:bg-sky-500/20 selection:text-sky-900 relative">
       <Routes>
         {/* VIEW 1: ATTRACTIVE EXECUTIVE HOMEPAGE */}
         <Route
@@ -403,6 +410,8 @@ export default function App() {
                   setShowAuthModal(true);
                 }}
                 onLogout={handleLogout}
+                onOpenFieldGuide={() => setShowFieldGuideModal(true)}
+                onOpenDossier={() => setShowDossierModal(true)}
               />
 
               {/* Main App Body Row: Sidebar + Primary Workspace */}
@@ -431,6 +440,26 @@ export default function App() {
                         path="graph"
                         element={
                           <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+                            {/* 1-Click Tactical Forensic Playbook Leads */}
+                            <InvestigationPlaybook
+                              nodes={rawGraphData?.nodes || []}
+                              onSelectNodeById={(id) => {
+                                const node = rawGraphData?.nodes?.find((n) => n.id === id);
+                                if (node) {
+                                  setSelectedNode(node);
+                                  setHighlightedNodeIds([node.id]);
+                                }
+                              }}
+                              onHighlightSubgraph={(nodeIds, edgeIds) => {
+                                setHighlightedNodeIds(nodeIds || []);
+                                setHighlightedEdgeIds(edgeIds || []);
+                              }}
+                              onSetTimelineDate={(date) => {
+                                setTimelineDate(date);
+                                setTimelinePlaying(false);
+                              }}
+                            />
+
                             {/* Filter and Timeline Controls */}
                             <FilterBar
                               searchQuery={searchQuery}
@@ -605,6 +634,7 @@ export default function App() {
                     handleTriggerInvestigation(`Investigate suspect ${node.name} (${node.id}) and map connected syndicate operations`, node.id);
                   }}
                   allEdges={rawGraphData?.edges || []}
+                  onOpenDossierModal={() => setShowDossierModal(true)}
                 />
               )}
 
@@ -629,6 +659,24 @@ export default function App() {
         onClose={() => setShowAuthModal(false)}
         onLoginSuccess={handleLoginSuccess}
       />
+
+      {/* Court Evidence Dossier & Export Modal */}
+      <ExportDossierModal
+        isOpen={showDossierModal}
+        onClose={() => setShowDossierModal(false)}
+        caseInfo={rawGraphData?.case_info}
+        nodes={rawGraphData?.nodes || []}
+        edges={rawGraphData?.edges || []}
+        currentUser={currentUser}
+        officerRole={officerRole}
+      />
+
+      {/* Officer Field Guide & Operational Manual Modal */}
+      <OfficerFieldGuideModal
+        isOpen={showFieldGuideModal}
+        onClose={() => setShowFieldGuideModal(false)}
+      />
     </div>
+    </ToastProvider>
   );
 }

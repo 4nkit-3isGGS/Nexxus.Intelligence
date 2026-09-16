@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
+import { useToast } from '../context/ToastContext';
 
 export default function EvidenceDrawer({
   selectedNode,
@@ -11,7 +12,8 @@ export default function EvidenceDrawer({
   onInvestigateNode,
   allEdges = [],
   officerRole = 'LEAD_INVESTIGATOR',
-  currentUser
+  currentUser,
+  onOpenDossierModal
 }) {
   const [activeTab, setActiveTab] = useState('profile');
   const [liveNeighbors, setLiveNeighbors] = useState([]);
@@ -74,14 +76,21 @@ export default function EvidenceDrawer({
     (e) => e.source === selectedNode.id || e.target === selectedNode.id
   );
 
+  const { toast } = useToast();
+
   const handleCopy = (text, fieldName) => {
     navigator.clipboard.writeText(text);
     setCopiedField(fieldName);
+    toast.success('Copied to Clipboard', `${fieldName || 'Evidence record'} copied.`);
     setTimeout(() => setCopiedField(null), 1800);
   };
 
   const handleExportDossier = () => {
-    alert(`Court-Certified Evidence Dossier generated for [${selectedNode.name}] under BSA 2023 / Sec 65B.`);
+    if (onOpenDossierModal) {
+      onOpenDossierModal(selectedNode);
+    } else {
+      toast.info('Case Dossier', `Court evidence dossier generated for ${selectedNode.name}.`);
+    }
   };
 
   const handleInspectEvidence = async (otherId) => {

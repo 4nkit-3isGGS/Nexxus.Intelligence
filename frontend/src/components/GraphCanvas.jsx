@@ -771,18 +771,18 @@ export default function GraphCanvas({
       {/* Floating Hover Tooltip */}
       {hoveredNode && !isDraggingCanvas && !draggingNodeId && (
         <div 
-          className="absolute pointer-events-none bg-white border border-slate-200 rounded-2xl p-3.5 shadow-xl z-40 max-w-xs transition-opacity animate-fade-in"
+          className="absolute pointer-events-none bg-white/95 backdrop-blur-md border border-slate-200 rounded-2xl p-3.5 shadow-xl z-40 max-w-xs transition-opacity animate-fade-in flex flex-col gap-1.5"
           style={{
             left: `${hoveredNode.x * zoom + pan.x + 18}px`,
             top: `${hoveredNode.y * zoom + pan.y - 18}px`,
           }}
         >
-          <div className="flex items-center justify-between space-x-2 mb-1">
-            <span className="font-bold text-slate-900 text-xs truncate">{hoveredNode.name || hoveredNode.id}</span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-bold text-slate-900 text-xs truncate font-display">{hoveredNode.name || hoveredNode.id}</span>
             <span
-              className={`px-1.5 py-0.2 rounded text-[10px] font-mono font-bold ${
+              className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
                 hoveredNode.risk_score >= 85
-                  ? 'bg-red-50 text-red-700 border border-red-200'
+                  ? 'bg-rose-50 text-rose-700 border border-rose-200'
                   : hoveredNode.risk_score >= 70
                   ? 'bg-amber-50 text-amber-800 border border-amber-200'
                   : 'bg-sky-50 text-sky-800 border border-sky-200'
@@ -791,8 +791,21 @@ export default function GraphCanvas({
               Risk: {hoveredNode.risk_score || 'N/A'}
             </span>
           </div>
-          <p className="text-[11px] text-sky-700 font-semibold mb-1">{hoveredNode.role || hoveredNode.type}</p>
-          <p className="text-[10px] text-slate-600 line-clamp-2">{hoveredNode.summary || 'No summary available.'}</p>
+          <div className="flex items-center gap-1.5 text-[11px] text-sky-700 font-semibold">
+            <span className="material-symbols-outlined text-[14px]">
+              {hoveredNode.type === 'Person' ? 'person' : hoveredNode.type === 'Phone' ? 'phone_iphone' : hoveredNode.type === 'Account' ? 'credit_card' : hoveredNode.type === 'Organization' ? 'domain' : 'badge'}
+            </span>
+            <span>{hoveredNode.role || hoveredNode.type}</span>
+          </div>
+          {hoveredNode.summary && (
+            <p className="text-[10px] text-slate-600 line-clamp-2 leading-relaxed">{hoveredNode.summary}</p>
+          )}
+          <div className="pt-1.5 mt-0.5 border-t border-slate-100 flex items-center justify-between text-[9px] font-mono text-slate-600">
+            <span className="flex items-center gap-1">
+              <span className="material-symbols-outlined text-[12px] text-sky-600">touch_app</span> Click to inspect
+            </span>
+            <span className="text-slate-600">{hoveredNode.id}</span>
+          </div>
         </div>
       )}
     </div>
