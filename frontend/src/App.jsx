@@ -37,7 +37,7 @@ export default function App() {
     if (path.includes('/workspace/fir')) return 'fir';
     if (path.includes('/workspace/audit')) return 'audit';
     if (path.includes('/workspace/graph')) return 'graph';
-    return 'graph';
+    return null;
   }, [location.pathname]);
 
   // Core Data
@@ -69,6 +69,13 @@ export default function App() {
   const [highlightedNodeIds, setHighlightedNodeIds] = useState([]);
   const [highlightedEdgeIds, setHighlightedEdgeIds] = useState([]);
   const [activeLayout, setActiveLayout] = useState('force');
+
+  // Ensure suspect criminal profile / dossier is visible only on the Knowledge Graph page
+  useEffect(() => {
+    if (activeTab !== 'graph' && selectedNode) {
+      setSelectedNode(null);
+    }
+  }, [activeTab, selectedNode]);
 
   // Agent State
   const [agentResponse, setAgentResponse] = useState(AGENT_QUERY_PRESETS[0].response);
@@ -615,8 +622,8 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Slide-Over Evidence & Investigation Drawer */}
-              {selectedNode && (
+              {/* Slide-Over Evidence & Investigation Drawer — Strictly visible only on Knowledge Graph page */}
+              {selectedNode && activeTab === 'graph' && (
                 <EvidenceDrawer
                   selectedNode={selectedNode}
                   officerRole={officerRole}

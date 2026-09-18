@@ -144,9 +144,9 @@ export default function EvidenceDrawer({
     : null;
 
   return (
-    <aside className="w-[500px] max-w-[95vw] fixed top-13 bottom-0 right-0 z-50 bg-white shadow-xl border-l border-slate-200/80 text-slate-900 flex flex-col overflow-hidden animate-fade-in">
+    <aside className="w-[500px] max-w-[95vw] fixed top-16 bottom-0 right-0 z-30 bg-white shadow-2xl border-l border-slate-200/80 text-slate-900 flex flex-col overflow-hidden animate-fade-in">
       {/* Top Header Bar */}
-      <div className="h-13 px-4 bg-white border-b border-slate-200/80 flex items-center justify-between flex-shrink-0">
+      <div className="h-14 px-4 bg-white border-b border-slate-200/80 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-rose-600 text-[18px]">
             security
@@ -169,11 +169,11 @@ export default function EvidenceDrawer({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center gap-1 transition-all border border-slate-200 shadow-2xs cursor-pointer"
+          className="px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center gap-1.5 transition-all border border-slate-200 shadow-2xs cursor-pointer"
           title="Close (ESC)"
         >
-          <span className="material-symbols-outlined text-[15px] text-slate-500">close</span>
-          <span className="text-xs font-medium">Close</span>
+          <span className="material-symbols-outlined text-[16px] text-slate-500">close</span>
+          <span className="text-xs font-semibold">Close</span>
           <kbd className="hidden sm:inline-block px-1 py-0.2 text-[9px] font-mono bg-white rounded border border-slate-200 text-slate-500 font-medium">ESC</kbd>
         </button>
       </div>
