@@ -43,63 +43,63 @@ export default function InvestigationPlaybook({
   };
 
   return (
-    <div className="w-full px-4 py-2 bg-white/90 border-b border-slate-200 shadow-2xs flex items-center justify-between gap-3 overflow-x-auto no-scrollbar z-20 backdrop-blur-xs flex-shrink-0">
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <span className="flex items-center gap-1 text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500">
-          <span className="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span>
-          Investigative Leads:
+    <div className="w-full px-4 py-1.5 bg-slate-50/80 border-b border-slate-200/80 flex items-center justify-between gap-3 overflow-x-auto no-scrollbar z-20 flex-shrink-0">
+      <div className="flex items-center gap-1.5 flex-shrink-0">
+        <span className="material-symbols-outlined text-[15px] text-slate-400">bolt</span>
+        <span className="text-[11px] font-mono font-medium uppercase tracking-wider text-slate-500">
+          Forensic Leads:
         </span>
       </div>
 
-      <div className="flex items-center gap-2 flex-nowrap flex-shrink-0 text-xs">
+      <div className="flex items-center gap-1.5 flex-nowrap flex-shrink-0 text-xs">
         {/* Playbook 1: Trace Apex Syndicate Leader */}
         <button
           onClick={handleTraceApexLeader}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 font-semibold shadow-2xs transition-all cursor-pointer hover:scale-[1.02] active:scale-95"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 shadow-2xs font-medium transition-all cursor-pointer"
           title="Highlight Debasish Chatterjee & Mastermind Subgraph"
         >
-          <span className="material-symbols-outlined text-[16px] text-purple-600">crown</span>
+          <span className="material-symbols-outlined text-[15px] text-purple-600">crown</span>
           <span>Trace Apex Leader</span>
         </button>
 
         {/* Playbook 2: Expose ₹500k Hawala Loop */}
         <button
           onClick={handleExposeHawalaLoop}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-semibold shadow-2xs transition-all cursor-pointer hover:scale-[1.02] active:scale-95"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 shadow-2xs font-medium transition-all cursor-pointer"
           title="Isolate ₹500,000 Circular Hawala Transfer Loop"
         >
-          <span className="material-symbols-outlined text-[16px] text-amber-600">cached</span>
-          <span>Expose ₹500k Hawala</span>
+          <span className="material-symbols-outlined text-[15px] text-amber-600">cached</span>
+          <span>₹500k Hawala Loop</span>
         </button>
 
         {/* Playbook 3: 22-Call Extortion Burst */}
         <button
           onClick={handleExtortionCallSpike}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 font-semibold shadow-2xs transition-all cursor-pointer hover:scale-[1.02] active:scale-95"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 shadow-2xs font-medium transition-all cursor-pointer"
           title="Jump to 22-Call Extortion Burst on March 5"
         >
-          <span className="material-symbols-outlined text-[16px] text-rose-600">crisis_alert</span>
-          <span>Extortion Call Spike</span>
+          <span className="material-symbols-outlined text-[15px] text-rose-600">crisis_alert</span>
+          <span>Call Spike (Mar 5)</span>
         </button>
 
         {/* Playbook 4: Suspect Disambiguation */}
         <button
           onClick={handleOpenDuplicateQueue}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 font-semibold shadow-2xs transition-all cursor-pointer hover:scale-[1.02] active:scale-95"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 shadow-2xs font-medium transition-all cursor-pointer"
           title="Review 3 Duplicate Suspect & Mule Disambiguation Records"
         >
-          <span className="material-symbols-outlined text-[16px] text-sky-600">fingerprint</span>
-          <span>Duplicate Review</span>
+          <span className="material-symbols-outlined text-[15px] text-sky-600">fingerprint</span>
+          <span>Duplicates (3)</span>
         </button>
 
         {/* Playbook 5: Audit Digital Custody */}
         <button
           onClick={handleOpenAuditVault}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-semibold shadow-2xs transition-all cursor-pointer hover:scale-[1.02] active:scale-95"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 shadow-2xs font-medium transition-all cursor-pointer"
           title="Verify BSA Section 65B Digital Evidence Ledger"
         >
-          <span className="material-symbols-outlined text-[16px] text-emerald-600">verified</span>
-          <span>Section 65B Audit</span>
+          <span className="material-symbols-outlined text-[15px] text-emerald-600">verified</span>
+          <span>BSA §65B Audit</span>
         </button>
       </div>
     </div>

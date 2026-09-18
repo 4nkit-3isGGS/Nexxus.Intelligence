@@ -6,21 +6,21 @@ export default function OfficerFieldGuideModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden text-slate-900">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in">
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden text-slate-900">
         
         {/* Top Header */}
-        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-slate-200/80 bg-slate-50/80 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-sky-50 border border-sky-200 text-sky-700 flex items-center justify-center shadow-xs">
-              <span className="material-symbols-outlined text-[24px]">menu_book</span>
+            <div className="w-10 h-10 rounded-2xl bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shadow-xs">
+              <span className="material-symbols-outlined text-[22px]">menu_book</span>
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
                 <h2 className="font-display font-bold text-base text-slate-900">
                   Officer Field Guide & Operational Manual
                 </h2>
-                <span className="px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 font-mono text-[10px] font-bold border border-sky-200">
+                <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-mono text-[10px] font-semibold border border-slate-200/80">
                   DEFENSE GUIDE
                 </span>
               </div>
@@ -32,19 +32,19 @@ export default function OfficerFieldGuideModal({ isOpen, onClose }) {
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="px-6 border-b border-slate-200 bg-white flex items-center gap-2">
+        <div className="px-6 border-b border-slate-200/80 bg-white flex items-center gap-4">
           <button
             onClick={() => setActiveTab('legend')}
-            className={`py-3 px-3 text-xs font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`py-3 px-1 text-xs font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'legend'
-                ? 'border-sky-600 text-sky-700 font-bold'
+                ? 'border-slate-900 text-slate-900 font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
@@ -53,9 +53,9 @@ export default function OfficerFieldGuideModal({ isOpen, onClose }) {
           </button>
           <button
             onClick={() => setActiveTab('signals')}
-            className={`py-3 px-3 text-xs font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`py-3 px-1 text-xs font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'signals'
-                ? 'border-sky-600 text-sky-700 font-bold'
+                ? 'border-slate-900 text-slate-900 font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
@@ -64,9 +64,9 @@ export default function OfficerFieldGuideModal({ isOpen, onClose }) {
           </button>
           <button
             onClick={() => setActiveTab('roles')}
-            className={`py-3 px-3 text-xs font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`py-3 px-1 text-xs font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'roles'
-                ? 'border-sky-600 text-sky-700 font-bold'
+                ? 'border-slate-900 text-slate-900 font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
@@ -75,9 +75,9 @@ export default function OfficerFieldGuideModal({ isOpen, onClose }) {
           </button>
           <button
             onClick={() => setActiveTab('shortcuts')}
-            className={`py-3 px-3 text-xs font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`py-3 px-1 text-xs font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'shortcuts'
-                ? 'border-sky-600 text-sky-700 font-bold'
+                ? 'border-slate-900 text-slate-900 font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >

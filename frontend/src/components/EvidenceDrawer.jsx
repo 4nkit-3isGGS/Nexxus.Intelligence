@@ -144,79 +144,79 @@ export default function EvidenceDrawer({
     : null;
 
   return (
-    <aside className="w-[520px] max-w-[95vw] fixed top-14 bottom-0 right-0 z-50 bg-white shadow-2xl border-l border-slate-200 text-slate-900 flex flex-col overflow-hidden animate-fade-in">
+    <aside className="w-[500px] max-w-[95vw] fixed top-13 bottom-0 right-0 z-50 bg-white shadow-xl border-l border-slate-200/80 text-slate-900 flex flex-col overflow-hidden animate-fade-in">
       {/* Top Header Bar */}
-      <div className="h-14 px-4 bg-white border-b border-slate-200 flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-2.5">
-          <span className="material-symbols-outlined text-rose-600 text-[20px] animate-pulse">
+      <div className="h-13 px-4 bg-white border-b border-slate-200/80 flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-rose-600 text-[18px]">
             security
           </span>
           <div className="flex flex-col">
             <span className="font-display text-[12px] text-slate-900 font-bold uppercase tracking-wider leading-tight">
-              TARGET PROFILE & EVIDENCE
+              Target Dossier
             </span>
-            <span className="text-[10px] text-slate-500 font-mono">
-              Entity ID: <span className="font-bold text-sky-600">{selectedNode.id}</span>
+            <span className="text-[10px] text-slate-400 font-mono">
+              ID: {selectedNode.id}
             </span>
           </div>
-          <span className="ml-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-bold flex items-center gap-1 font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-ping"></span>
-            FLAGGED TARGET
-          </span>
+          {isCritical && (
+            <span className="ml-1 px-1.5 py-0.2 rounded bg-rose-50 text-rose-800 border border-rose-200/60 text-[10px] font-medium font-mono">
+              Critical
+            </span>
+          )}
         </div>
 
-        {/* Prominent Close Button */}
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1.5 transition-all border border-slate-200 shadow-xs active:scale-95 cursor-pointer"
-          title="Close Target Dossier (ESC)"
+          className="px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center gap-1 transition-all border border-slate-200 shadow-2xs cursor-pointer"
+          title="Close (ESC)"
         >
-          <span className="material-symbols-outlined text-[17px] text-slate-500">close</span>
-          <span className="text-xs font-bold">Close</span>
-          <kbd className="hidden sm:inline-block px-1.5 py-0.2 text-[9px] font-mono bg-white rounded border border-slate-300 text-slate-600 font-bold">ESC</kbd>
+          <span className="material-symbols-outlined text-[15px] text-slate-500">close</span>
+          <span className="text-xs font-medium">Close</span>
+          <kbd className="hidden sm:inline-block px-1 py-0.2 text-[9px] font-mono bg-white rounded border border-slate-200 text-slate-500 font-medium">ESC</kbd>
         </button>
       </div>
 
       {/* Scrollable Dossier Content */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 no-scrollbar bg-slate-50/50">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-3.5 no-scrollbar bg-slate-50/40">
         {/* Suspect Profile Card */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs relative flex flex-col flex-shrink-0 min-h-fit gap-3.5">
-          <div className="flex items-start gap-3.5 relative z-10">
+        <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-2xs relative flex flex-col flex-shrink-0 min-h-fit gap-3">
+          <div className="flex items-start gap-3 relative z-10">
             {/* Biometric Portrait or Icon Box */}
-            <div className="relative w-20 h-20 rounded-xl overflow-hidden ring-2 ring-rose-500 shadow-xs flex-shrink-0 bg-slate-100 flex items-center justify-center">
+            <div className="relative w-18 h-18 rounded-lg overflow-hidden border border-slate-200 shadow-2xs flex-shrink-0 bg-slate-100 flex items-center justify-center">
               {portraitUrl ? (
                 <img
                   src={portraitUrl}
-                  alt={`Mugshot of ${selectedNode.name}`}
+                  alt={`Portrait of ${selectedNode.name}`}
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="material-symbols-outlined text-[36px] text-sky-600">
+                <span className="material-symbols-outlined text-[32px] text-slate-500">
                   {selectedNode.type === 'Person' ? 'person' : selectedNode.type === 'Vehicle' ? 'directions_car' : 'apartment'}
                 </span>
               )}
-              <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-rose-500 ring-2 ring-white animate-pulse"></span>
-              <span className="absolute bottom-0 inset-x-0 bg-rose-600 text-white text-center font-mono text-[10px] font-bold py-0.5 tracking-wider">
-                RISK {selectedNode.risk_score || 0}
+              <span className="absolute bottom-0 inset-x-0 bg-slate-900/80 text-white text-center font-mono text-[9px] font-semibold py-0.5">
+                Risk {selectedNode.risk_score || 0}
               </span>
             </div>
 
             {/* Suspect Details */}
             <div className="flex flex-col min-w-0 flex-1">
               <div className="flex items-center justify-between gap-1">
-                <h3 className="font-display text-lg text-slate-900 font-bold truncate">
+                <h3 className="font-display text-base text-slate-900 font-bold truncate">
                   {selectedNode.name}
                 </h3>
-                <span className="px-2 py-0.5 rounded-lg bg-sky-50 border border-sky-200 font-mono text-[11px] text-sky-700 font-bold">
+                <span className="px-1.5 py-0.2 rounded bg-slate-100 font-mono text-[10px] text-slate-600 font-medium border border-slate-200">
                   {selectedNode.id}
                 </span>
               </div>
 
               {selectedNode.aliases && selectedNode.aliases.length > 0 && (
-                <div className="flex items-center gap-1.5 text-slate-600 text-xs mt-0.5 flex-wrap">
-                  <span className="text-slate-500 font-medium">Aliases:</span>
+                <div className="flex items-center gap-1.5 text-slate-500 text-xs mt-0.5 flex-wrap">
+                  <span className="text-[11px]">Aliases:</span>
                   {selectedNode.aliases.map((alias, idx) => (
-                    <span key={idx} className="px-1.5 py-0.2 rounded-md bg-slate-100 text-slate-800 font-semibold font-mono text-[10px] border border-slate-200">
+                    <span key={idx} className="px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-mono text-[10px]">
                       "{alias}"
                     </span>
                   ))}
@@ -224,130 +224,100 @@ export default function EvidenceDrawer({
               )}
 
               <div className="flex items-center gap-1.5 text-xs mt-1">
-                <span className="w-2 h-2 rounded-full bg-rose-500"></span>
-                <span className="text-rose-700 font-semibold truncate">
+                <span className="text-slate-600 font-medium truncate">
                   {selectedNode.role || `${selectedNode.type} Entity`} • Cluster {selectedNode.cluster_id || 'A'}
                 </span>
               </div>
 
               {selectedNode.phone && (
                 <div className="flex items-center gap-1.5 text-xs text-slate-600 mt-1">
-                  <span className="material-symbols-outlined text-[15px] text-sky-600">phone_iphone</span>
-                  <span className="font-mono text-slate-900 font-bold select-all">{displayPhone}</span>
+                  <span className="material-symbols-outlined text-[14px] text-slate-400">phone_iphone</span>
+                  <span className="font-mono text-slate-900 font-semibold select-all">{displayPhone}</span>
                   {(isLead || isInvestigator) ? (
                     <button 
                       onClick={() => handleCopy(displayPhone, 'phone')}
-                      className="material-symbols-outlined text-[14px] text-slate-400 hover:text-sky-600 transition-colors cursor-pointer"
+                      className="material-symbols-outlined text-[13px] text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
                       title="Copy Phone Number"
                     >
                       content_copy
                     </button>
                   ) : (
-                    <span className="text-[9px] text-amber-700 font-mono font-bold px-1 rounded bg-amber-50 border border-amber-200">
+                    <span className="text-[9px] text-amber-700 font-mono font-medium px-1 rounded bg-amber-50 border border-amber-200">
                       MASKED
                     </span>
                   )}
                   {copiedField === 'phone' && (
-                    <span className="text-[10px] text-emerald-600 font-bold">COPIED</span>
+                    <span className="text-[10px] text-emerald-600 font-medium">COPIED</span>
                   )}
-                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-mono border border-slate-200">
-                    Airtel WB
-                  </span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Badges Strip */}
-          <div className="flex flex-wrap items-center gap-1.5 pt-1">
-            {isCritical && (
-              <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-mono text-[10px] font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-ping"></span>
-                CRITICAL THREAT
-              </span>
-            )}
-            <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono text-[10px] font-bold">
-              <span className="material-symbols-outlined text-[13px]">verified</span>
-              BSA §65B CERTIFIED
-            </span>
-            {isHigh && (
-              <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-mono text-[10px] font-bold">
-                <span className="material-symbols-outlined text-[13px]">warning</span>
-                WATCHLIST MATCH
-              </span>
-            )}
-            <span className="px-2.5 py-0.5 rounded-full bg-sky-50 border border-sky-200 font-mono text-[10px] text-sky-700 font-bold">
-              CYBER CRIME DIR
-            </span>
-          </div>
-
-          {/* Quick Actions Grid */}
-          <div className="grid grid-cols-3 gap-2 pt-1">
+          {/* Quick Actions */}
+          <div className="grid grid-cols-3 gap-1.5 pt-1">
             <button
               onClick={() => onTraceKingpin(selectedNode)}
-              className="flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
+              className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 text-xs font-medium transition-all cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[16px]">near_me</span>
-              <span className="truncate">Trace to Kingpin</span>
+              <span className="material-symbols-outlined text-[15px]">near_me</span>
+              <span className="truncate">Trace Apex</span>
             </button>
             <button
               onClick={handleTriggerSubgraph}
-              className="flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-sky-700 text-xs font-bold transition-colors shadow-xs cursor-pointer"
+              className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium transition-colors shadow-2xs cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[16px] text-sky-600">hub</span>
-              <span className="truncate">Expand Network</span>
+              <span className="material-symbols-outlined text-[15px] text-slate-500">hub</span>
+              <span className="truncate">Expand</span>
             </button>
             <button
               onClick={handleExportDossier}
-              className="flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-amber-800 text-xs font-bold transition-colors shadow-xs cursor-pointer"
+              className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium transition-colors shadow-2xs cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[16px] text-amber-600">picture_as_pdf</span>
-              <span className="truncate">Evidence Report</span>
+              <span className="material-symbols-outlined text-[15px] text-slate-500">description</span>
+              <span className="truncate">Export</span>
             </button>
           </div>
 
-          {/* Autonomous Multi-Agent Investigation Trigger */}
+          {/* AI Investigation Trigger */}
           {onInvestigateNode && (
             isAuditor ? (
-              <div className="w-full py-2.5 px-3 rounded-xl bg-slate-100 border border-slate-200 text-slate-500 text-xs font-semibold flex items-center justify-center gap-2">
-                <span className="material-symbols-outlined text-[17px] text-slate-400">lock</span>
-                <span>Auditor Role: Read-Only Compliance (Investigation Restricted)</span>
+              <div className="w-full py-2 px-3 rounded-lg bg-slate-100 border border-slate-200 text-slate-500 text-xs font-medium flex items-center justify-center gap-1.5">
+                <span className="material-symbols-outlined text-[15px]">lock</span>
+                <span>Auditor: Read-Only Compliance</span>
               </div>
             ) : (
               <button
                 onClick={() => onInvestigateNode(selectedNode)}
-                className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer group"
+                className="w-full py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium shadow-2xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                 title="Launch AI investigation on this suspect"
               >
-                <span className="material-symbols-outlined text-[18px] text-sky-200 group-hover:rotate-12 transition-transform">
-                  smart_toy
+                <span className="material-symbols-outlined text-[15px]">
+                  auto_awesome
                 </span>
-                <span>Run AI Investigation</span>
-                <span className="px-1.5 py-0.5 rounded bg-white/20 text-[10px] font-mono uppercase tracking-wider">
-                  AI ASSISTANT
-                </span>
+                <span>Run Multi-Agent Investigation</span>
               </button>
             )
           )}
         </div>
 
-        {/* Sticky Tab Navigation Bar */}
-        <div className="sticky top-0 z-20 bg-slate-100 p-1 rounded-xl flex items-center justify-between border border-slate-200 flex-shrink-0 shadow-xs">
+        {/* Tab Navigation Bar */}
+        <div className="sticky top-0 z-20 bg-slate-100 p-0.5 rounded-lg flex items-center justify-between border border-slate-200/80 flex-shrink-0">
           <button
             onClick={() => setActiveTab('profile')}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-xs transition-all text-center cursor-pointer ${
+            className={`flex-1 py-1.2 px-2 rounded-md text-xs transition-all text-center cursor-pointer ${
               activeTab === 'profile'
-                ? 'bg-white text-sky-700 font-bold shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 font-medium'
+                ? 'bg-white text-slate-900 font-semibold shadow-2xs'
+                : 'text-slate-500 hover:text-slate-900 font-medium'
             }`}
           >
             Profile
           </button>
           <button
             onClick={() => setActiveTab('links')}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-xs transition-all text-center flex items-center justify-center gap-1 cursor-pointer ${
+            className={`flex-1 py-1.2 px-2 rounded-md text-xs transition-all text-center flex items-center justify-center gap-1 cursor-pointer ${
               activeTab === 'links'
-                ? 'bg-white text-sky-700 font-bold shadow-xs'
+                ? 'bg-white text-slate-900 font-semibold shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900 font-medium'
             }`}
           >

@@ -104,12 +104,12 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/45 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl animate-fade-in text-slate-900 flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="bg-white border border-slate-200/80 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl animate-fade-in text-slate-900 flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
+        <div className="px-6 py-4 bg-slate-50/80 border-b border-slate-200/80 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-sky-50 text-sky-700 border border-sky-200 shadow-xs">
+            <div className="p-2 rounded-xl bg-slate-100 text-slate-700 border border-slate-200/80 shadow-xs">
               <span className="material-symbols-outlined text-[22px]">admin_panel_settings</span>
             </div>
             <div>
@@ -117,7 +117,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
                 <h3 className="font-display text-sm font-bold text-slate-900">
                   Law Enforcement Authentication & Clearance
                 </h3>
-                <span className="px-2 py-0.2 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[9px] font-bold">
+                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/70 font-mono text-[9px] font-semibold">
                   RBAC SECURE
                 </span>
               </div>
@@ -129,7 +129,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 border border-slate-200 flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-xl bg-white hover:bg-slate-100 text-slate-500 hover:text-slate-900 border border-slate-200/80 flex items-center justify-center transition-colors cursor-pointer"
             title="Close"
           >
             <span className="material-symbols-outlined text-[18px]">close</span>
@@ -137,12 +137,12 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
         </div>
 
         {/* Tab Switcher */}
-        <div className="px-6 pt-4 pb-2 border-b border-slate-100 flex items-center gap-2 flex-shrink-0 bg-white">
+        <div className="px-6 pt-3 pb-0 border-b border-slate-200/80 flex items-center gap-4 flex-shrink-0 bg-white">
           <button
             onClick={() => { setActiveTab('login'); setError(null); }}
-            className={`pb-2 text-xs font-bold transition-all border-b-2 cursor-pointer flex items-center gap-1.5 ${
+            className={`pb-2.5 text-xs font-semibold transition-all border-b-2 cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'login'
-                ? 'border-sky-600 text-sky-700'
+                ? 'border-slate-900 text-slate-900 font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-900'
             }`}
           >
@@ -151,9 +151,9 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
           </button>
           <button
             onClick={() => { setActiveTab('register'); setError(null); }}
-            className={`pb-2 text-xs font-bold transition-all border-b-2 cursor-pointer flex items-center gap-1.5 ${
+            className={`pb-2.5 text-xs font-semibold transition-all border-b-2 cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'register'
-                ? 'border-sky-600 text-sky-700'
+                ? 'border-slate-900 text-slate-900 font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-900'
             }`}
           >
@@ -165,7 +165,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
         {/* Modal Body */}
         <div className="p-6 overflow-y-auto flex-1 no-scrollbar flex flex-col gap-4 text-xs">
           {error && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2 animate-fade-in text-xs font-medium">
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200/70 text-rose-700 flex items-center gap-2 animate-fade-in text-xs font-medium">
               <span className="material-symbols-outlined text-[18px] text-rose-600">error</span>
               <span>{error}</span>
             </div>
@@ -175,13 +175,13 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
           {activeTab === 'login' && (
             <div className="flex flex-col gap-4">
               {/* 1-Click Demo Roles */}
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col gap-2.5">
+              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex flex-col gap-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono uppercase font-bold text-slate-500 tracking-wider flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px] text-sky-600">bolt</span>
+                  <span className="text-[10px] font-mono uppercase font-semibold text-slate-500 tracking-wider flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[14px] text-amber-600">bolt</span>
                     1-Click Evaluator & Demo Clearance
                   </span>
-                  <span className="text-[10px] text-sky-700 font-bold font-mono">Instant Entry</span>
+                  <span className="text-[10px] text-slate-500 font-medium font-mono">Instant Access</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {DEMO_OFFICERS.map((officer) => (
@@ -189,25 +189,25 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
                       key={officer.userId}
                       onClick={() => handleDemoLogin(officer)}
                       disabled={loading}
-                      className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-sky-400 hover:bg-sky-50/50 text-left transition-all shadow-xs flex flex-col gap-1 cursor-pointer active:scale-98 disabled:opacity-50 group"
+                      className="p-2.5 rounded-xl bg-white border border-slate-200/80 hover:border-slate-400 hover:bg-slate-50/50 text-left transition-all shadow-xs flex flex-col gap-1 cursor-pointer active:scale-98 disabled:opacity-50 group"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-900 text-xs group-hover:text-sky-700">
+                        <span className="font-semibold text-slate-900 text-xs group-hover:text-slate-900">
                           {officer.name}
                         </span>
-                        <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-bold ${
-                          officer.role === 'LEAD_INVESTIGATOR' ? 'bg-sky-50 text-sky-700 border border-sky-200' :
+                        <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-medium ${
+                          officer.role === 'LEAD_INVESTIGATOR' ? 'bg-slate-100 text-slate-800 border border-slate-200' :
                           officer.role === 'INVESTIGATOR' ? 'bg-slate-100 text-slate-700 border border-slate-200' :
-                          officer.role === 'ANALYST' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
-                          'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                          officer.role === 'ANALYST' ? 'bg-slate-100 text-slate-700 border border-slate-200' :
+                          'bg-emerald-50 text-emerald-800 border border-emerald-200/70'
                         }`}>
                           {officer.role.replace('_', ' ')}
                         </span>
                       </div>
-                      <span className="text-[10px] text-slate-500 font-mono">
-                        Badge: <span className="font-semibold text-slate-700">{officer.badgeNumber}</span>
+                      <span className="text-[10px] text-slate-400 font-mono">
+                        Badge: <span className="font-medium text-slate-600">{officer.badgeNumber}</span>
                       </span>
-                      <span className="text-[10px] text-slate-600 line-clamp-1">
+                      <span className="text-[10px] text-slate-500 line-clamp-1">
                         {officer.clearanceLevel}
                       </span>
                     </button>
@@ -216,15 +216,15 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
               </div>
 
               <div className="flex items-center gap-3 my-1">
-                <div className="flex-1 h-px bg-slate-200"></div>
-                <span className="text-[10px] font-mono uppercase text-slate-400 font-bold">OR SIGN IN WITH CREDENTIALS</span>
-                <div className="flex-1 h-px bg-slate-200"></div>
+                <div className="flex-1 h-px bg-slate-200/80"></div>
+                <span className="text-[10px] font-mono uppercase text-slate-400 font-semibold">OR SIGN IN WITH CREDENTIALS</span>
+                <div className="flex-1 h-px bg-slate-200/80"></div>
               </div>
 
               {/* Form */}
               <form onSubmit={handleCustomLogin} className="flex flex-col gap-3">
                 <div className="flex flex-col gap-1">
-                  <label className="text-[11px] font-semibold text-slate-700 font-mono uppercase">
+                  <label className="text-[11px] font-medium text-slate-700 font-mono uppercase">
                     Badge Number or Police Email
                   </label>
                   <div className="relative">
@@ -233,7 +233,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
                       value={loginIdent}
                       onChange={(e) => setLoginIdent(e.target.value)}
                       placeholder="e.g. WB-CID-0941 or officer@police.gov.in"
-                      className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none focus:border-sky-500 font-medium"
+                      className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-300 focus:border-slate-500 text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none font-medium"
                     />
                     <span className="material-symbols-outlined text-[17px] text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2">
                       badge
@@ -242,7 +242,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-[11px] font-semibold text-slate-700 font-mono uppercase">
+                  <label className="text-[11px] font-medium text-slate-700 font-mono uppercase">
                     Security PIN / Password
                   </label>
                   <div className="relative">
@@ -251,7 +251,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
                       value={loginPass}
                       onChange={(e) => setLoginPass(e.target.value)}
                       placeholder="••••••••••••"
-                      className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none focus:border-sky-500 font-medium"
+                      className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-300 focus:border-slate-500 text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none font-medium"
                     />
                     <span className="material-symbols-outlined text-[17px] text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2">
                       lock
@@ -262,7 +262,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-2 py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50"
+                  className="w-full mt-2 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50"
                 >
                   <span className="material-symbols-outlined text-[17px]">
                     {loading ? 'autorenew' : 'security'}
@@ -278,7 +278,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
             <form onSubmit={handleRegister} className="flex flex-col gap-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1">
-                  <label className="text-[11px] font-semibold text-slate-700 font-mono uppercase">
+                  <label className="text-[11px] font-medium text-slate-700 font-mono uppercase">
                     Officer Full Name *
                   </label>
                   <input
@@ -287,12 +287,12 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
                     value={regName}
                     onChange={(e) => setRegName(e.target.value)}
                     placeholder="e.g. Insp. Amit Roy"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none focus:border-sky-500 font-medium"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 focus:border-slate-500 text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none font-medium"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-[11px] font-semibold text-slate-700 font-mono uppercase">
+                  <label className="text-[11px] font-medium text-slate-700 font-mono uppercase">
                     Service Badge Number *
                   </label>
                   <input
@@ -301,14 +301,14 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
                     value={regBadge}
                     onChange={(e) => setRegBadge(e.target.value)}
                     placeholder="e.g. WB-CID-8812"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none focus:border-sky-500 font-medium font-mono"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 focus:border-slate-500 text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none font-medium font-mono"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1">
-                  <label className="text-[11px] font-semibold text-slate-700 font-mono uppercase">
+                  <label className="text-[11px] font-medium text-slate-700 font-mono uppercase">
                     Official Email *
                   </label>
                   <input
@@ -317,12 +317,12 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
                     placeholder="officer@cid.wb.gov.in"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none focus:border-sky-500 font-medium"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 focus:border-slate-500 text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none font-medium"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-[11px] font-semibold text-slate-700 font-mono uppercase">
+                  <label className="text-[11px] font-medium text-slate-700 font-mono uppercase">
                     Investigation Unit / Cell
                   </label>
                   <input
@@ -330,19 +330,19 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
                     value={regDept}
                     onChange={(e) => setRegDept(e.target.value)}
                     placeholder="e.g. Kolkata Cyber Cell"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none focus:border-sky-500 font-medium"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 focus:border-slate-500 text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none font-medium"
                   />
                 </div>
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-[11px] font-semibold text-slate-700 font-mono uppercase">
+                <label className="text-[11px] font-medium text-slate-700 font-mono uppercase">
                   Requested RBAC Clearance Tier *
                 </label>
                 <select
                   value={regRole}
                   onChange={(e) => setRegRole(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-sky-500 font-semibold"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 focus:border-slate-500 text-slate-900 text-xs focus:outline-none font-medium"
                 >
                   <option value="LEAD_INVESTIGATOR">👑 LEAD_INVESTIGATOR (DSP / ACP — Full Clearance, Unmasked PII, Asset Freeze)</option>
                   <option value="INVESTIGATOR">🔍 INVESTIGATOR (Inspector / SI — Field Ops, Telecomm / CDR)</option>
@@ -352,7 +352,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-[11px] font-semibold text-slate-700 font-mono uppercase">
+                <label className="text-[11px] font-medium text-slate-700 font-mono uppercase">
                   Security PIN / Password
                 </label>
                 <input
@@ -360,17 +360,17 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
                   value={regPass}
                   onChange={(e) => setRegPass(e.target.value)}
                   placeholder="Set password (default: demo123)"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none focus:border-sky-500 font-medium"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 focus:border-slate-500 text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none font-medium"
                 />
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-2.5">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-start gap-2.5">
                 <input
                   type="checkbox"
                   id="terms"
                   checked={acceptedTerms}
                   onChange={(e) => setAcceptedTerms(e.target.checked)}
-                  className="mt-0.5 rounded text-sky-600 focus:ring-sky-500"
+                  className="mt-0.5 rounded text-slate-900 focus:ring-slate-500"
                 />
                 <label htmlFor="terms" className="text-[11px] text-slate-600 leading-snug cursor-pointer">
                   I certify that I am authorized personnel accessing criminal intelligence subject to the <strong>Official Secrets Act</strong> and Section 65B of the <strong>Bharatiya Sakshya Adhiniyam, 2023</strong>.
@@ -380,7 +380,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-1 py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50"
+                className="w-full mt-1 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50"
               >
                 <span className="material-symbols-outlined text-[17px]">
                   {loading ? 'autorenew' : 'how_to_reg'}

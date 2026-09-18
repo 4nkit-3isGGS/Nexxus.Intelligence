@@ -653,87 +653,87 @@ export default function GraphCanvas({
       />
 
       {/* Canvas Floating Bottom Controls & Legend Strip */}
-      <div className="absolute left-4 bottom-4 z-30 flex flex-col gap-2.5 pointer-events-auto">
+      <div className="absolute left-4 bottom-4 z-30 flex flex-col gap-2 pointer-events-auto">
         {/* Layout Switcher & Navigation Controls */}
-        <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white/95 shadow-md border border-slate-200 backdrop-blur-md">
+        <div className="flex items-center gap-2 p-1 rounded-xl bg-white/95 shadow-lg border border-slate-200/80 backdrop-blur-md">
           {/* Topology Engine Switcher */}
-          <div className="flex items-center p-0.5 rounded-xl bg-slate-100 text-xs font-mono border border-slate-200">
+          <div className="flex items-center p-0.5 rounded-lg bg-slate-100 text-xs font-mono">
             <button
               onClick={() => {
                 applyLayout('force');
                 onLayoutChange?.('force');
               }}
-              className={`px-3 py-1 rounded-lg transition-all font-semibold cursor-pointer ${
+              className={`px-2.5 py-1 rounded-md transition-all font-medium cursor-pointer ${
                 activeLayout === 'force'
-                  ? 'bg-sky-600 text-white shadow-xs'
+                  ? 'bg-slate-900 text-white shadow-2xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Force-Directed
+              Force
             </button>
             <button
               onClick={() => {
                 applyLayout('cluster');
                 onLayoutChange?.('cluster');
               }}
-              className={`px-3 py-1 rounded-lg transition-all font-semibold cursor-pointer ${
+              className={`px-2.5 py-1 rounded-md transition-all font-medium cursor-pointer ${
                 activeLayout === 'cluster'
-                  ? 'bg-sky-600 text-white shadow-xs'
+                  ? 'bg-slate-900 text-white shadow-2xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Cluster Hierarchy
+              Cluster
             </button>
             <button
               onClick={() => {
                 applyLayout('radial');
                 onLayoutChange?.('radial');
               }}
-              className={`px-3 py-1 rounded-lg transition-all font-semibold cursor-pointer ${
+              className={`px-2.5 py-1 rounded-md transition-all font-medium cursor-pointer ${
                 activeLayout === 'radial'
-                  ? 'bg-sky-600 text-white shadow-xs'
+                  ? 'bg-slate-900 text-white shadow-2xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Radial Multi-Tier
+              Radial
             </button>
           </div>
 
-          <div className="h-4 w-px bg-slate-200 mx-0.5"></div>
+          <div className="h-4 w-px bg-slate-200"></div>
 
           {/* Canvas Operations */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             <button
               onClick={() => setZoom((z) => Math.min(z * 1.2, 3.0))}
-              className="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center justify-center transition-colors border border-slate-200 shadow-xs cursor-pointer"
+              className="w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
               title="Zoom In"
             >
-              <span className="material-symbols-outlined text-[17px]">add</span>
+              <span className="material-symbols-outlined text-[16px]">add</span>
             </button>
             <button
               onClick={() => setZoom((z) => Math.max(z * 0.8, 0.4))}
-              className="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center justify-center transition-colors border border-slate-200 shadow-xs cursor-pointer"
+              className="w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
               title="Zoom Out"
             >
-              <span className="material-symbols-outlined text-[17px]">remove</span>
+              <span className="material-symbols-outlined text-[16px]">remove</span>
             </button>
             <button
               onClick={resetView}
-              className="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center justify-center transition-colors border border-slate-200 shadow-xs cursor-pointer"
+              className="w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
               title="Reset Canvas Centering"
             >
-              <span className="material-symbols-outlined text-[17px]">filter_center_focus</span>
+              <span className="material-symbols-outlined text-[16px]">filter_center_focus</span>
             </button>
             <button
               onClick={() => setPhysicsRunning(!physicsRunning)}
-              className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors border shadow-xs cursor-pointer ${
+              className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors cursor-pointer ${
                 physicsRunning 
-                  ? 'bg-slate-50 hover:bg-slate-100 text-sky-700 border-slate-200' 
-                  : 'bg-amber-50 text-amber-800 border-amber-200'
+                  ? 'text-slate-700 hover:bg-slate-100' 
+                  : 'bg-amber-50 text-amber-800'
               }`}
               title={physicsRunning ? 'Pause Physics Simulation' : 'Resume Physics Simulation'}
             >
-              <span className="material-symbols-outlined text-[17px]">
+              <span className="material-symbols-outlined text-[16px]">
                 {physicsRunning ? 'pause' : 'play_arrow'}
               </span>
             </button>
@@ -741,29 +741,29 @@ export default function GraphCanvas({
         </div>
 
         {/* Network Legend Overlay */}
-        <div className="px-3.5 py-1.5 rounded-2xl bg-white/95 shadow-md border border-slate-200 backdrop-blur-md flex items-center gap-3.5 text-[11px] font-mono text-slate-700">
+        <div className="px-3 py-1.2 rounded-lg bg-white/95 shadow-md border border-slate-200/80 backdrop-blur-md flex items-center gap-3 text-[10px] font-mono text-slate-600">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-600"></span>
-            <span className="font-semibold">Critical (&gt;85)</span>
+            <span className="w-2 h-2 rounded-full bg-rose-600"></span>
+            <span>Critical (&gt;85)</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-            <span className="font-semibold">High (70-84)</span>
+            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span>High (70-84)</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
-            <span className="font-semibold">Moderate</span>
+            <span className="w-2 h-2 rounded-full bg-sky-500"></span>
+            <span>Moderate</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
-            <span className="font-semibold">Victim / Low</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+            <span>Low</span>
           </div>
           <div className="h-3 w-px bg-slate-200"></div>
-          <div className="flex items-center gap-1 text-amber-700 font-semibold">
-            <span className="material-symbols-outlined text-[14px]">payments</span> Financial
+          <div className="flex items-center gap-1 text-slate-700">
+            <span className="material-symbols-outlined text-[13px] text-amber-600">payments</span> Financial
           </div>
-          <div className="flex items-center gap-1 text-sky-600 font-semibold">
-            <span className="material-symbols-outlined text-[14px]">cell_tower</span> Comms
+          <div className="flex items-center gap-1 text-slate-700">
+            <span className="material-symbols-outlined text-[13px] text-sky-600">cell_tower</span> Comms
           </div>
         </div>
       </div>
@@ -771,40 +771,38 @@ export default function GraphCanvas({
       {/* Floating Hover Tooltip */}
       {hoveredNode && !isDraggingCanvas && !draggingNodeId && (
         <div 
-          className="absolute pointer-events-none bg-white/95 backdrop-blur-md border border-slate-200 rounded-2xl p-3.5 shadow-xl z-40 max-w-xs transition-opacity animate-fade-in flex flex-col gap-1.5"
+          className="absolute pointer-events-none bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-xl p-3 shadow-xl z-40 max-w-xs transition-opacity animate-fade-in flex flex-col gap-1.5"
           style={{
-            left: `${hoveredNode.x * zoom + pan.x + 18}px`,
-            top: `${hoveredNode.y * zoom + pan.y - 18}px`,
+            left: `${hoveredNode.x * zoom + pan.x + 16}px`,
+            top: `${hoveredNode.y * zoom + pan.y - 16}px`,
           }}
         >
           <div className="flex items-center justify-between gap-2">
-            <span className="font-bold text-slate-900 text-xs truncate font-display">{hoveredNode.name || hoveredNode.id}</span>
+            <span className="font-semibold text-slate-900 text-xs truncate font-display">{hoveredNode.name || hoveredNode.id}</span>
             <span
-              className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+              className={`px-1.5 py-0.2 rounded font-mono text-[10px] font-medium ${
                 hoveredNode.risk_score >= 85
-                  ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                  ? 'bg-rose-50 text-rose-800 border border-rose-200/60'
                   : hoveredNode.risk_score >= 70
-                  ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                  : 'bg-sky-50 text-sky-800 border border-sky-200'
+                  ? 'bg-amber-50 text-amber-800 border border-amber-200/60'
+                  : 'bg-slate-100 text-slate-700'
               }`}
             >
-              Risk: {hoveredNode.risk_score || 'N/A'}
+              Risk {hoveredNode.risk_score || 'N/A'}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 text-[11px] text-sky-700 font-semibold">
-            <span className="material-symbols-outlined text-[14px]">
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-600 font-medium">
+            <span className="material-symbols-outlined text-[13px] text-slate-400">
               {hoveredNode.type === 'Person' ? 'person' : hoveredNode.type === 'Phone' ? 'phone_iphone' : hoveredNode.type === 'Account' ? 'credit_card' : hoveredNode.type === 'Organization' ? 'domain' : 'badge'}
             </span>
             <span>{hoveredNode.role || hoveredNode.type}</span>
           </div>
           {hoveredNode.summary && (
-            <p className="text-[10px] text-slate-600 line-clamp-2 leading-relaxed">{hoveredNode.summary}</p>
+            <p className="text-[10px] text-slate-500 line-clamp-2 leading-relaxed">{hoveredNode.summary}</p>
           )}
-          <div className="pt-1.5 mt-0.5 border-t border-slate-100 flex items-center justify-between text-[9px] font-mono text-slate-600">
-            <span className="flex items-center gap-1">
-              <span className="material-symbols-outlined text-[12px] text-sky-600">touch_app</span> Click to inspect
-            </span>
-            <span className="text-slate-600">{hoveredNode.id}</span>
+          <div className="pt-1 mt-0.5 border-t border-slate-100 flex items-center justify-between text-[9px] font-mono text-slate-400">
+            <span>Click to inspect</span>
+            <span>{hoveredNode.id}</span>
           </div>
         </div>
       )}

@@ -9,17 +9,17 @@ export default function FirCorpusView({ onJumpToGraph, onInvestigateFir }) {
   return (
     <div className="flex-1 flex flex-col overflow-y-auto bg-transparent text-slate-900 p-4 lg:p-6 gap-5 no-scrollbar">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-700 border border-sky-200 shadow-xs">
+          <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 border border-slate-200/80 shadow-xs">
             <span className="material-symbols-outlined text-[22px]">policy</span>
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono uppercase text-sky-700 font-bold tracking-wider">
+              <span className="text-[10px] font-mono uppercase text-slate-500 font-semibold tracking-wider">
                 POLICE RECORDS // FIRST INFORMATION REPORTS
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/70">
                 DIGITIZED TEXT
               </span>
             </div>
@@ -29,15 +29,15 @@ export default function FirCorpusView({ onJumpToGraph, onInvestigateFir }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-mono">
+        <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200/80 text-xs font-mono">
           {FIR_CORPUS.map((fir) => (
             <button
               key={fir.doc_id}
               onClick={() => setSelectedDocId(fir.doc_id)}
-              className={`px-3.5 py-1.5 rounded-xl border transition-all shadow-xs cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-lg transition-all cursor-pointer font-medium ${
                 selectedDocId === fir.doc_id
-                  ? 'bg-sky-600 text-white font-bold border-sky-600 shadow-xs'
-                  : 'bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900 hover:bg-slate-200'
+                  ? 'bg-white text-slate-900 font-semibold shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               {fir.doc_id}
@@ -48,10 +48,10 @@ export default function FirCorpusView({ onJumpToGraph, onInvestigateFir }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* FIR Document Transcript */}
-        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 flex flex-col gap-4 shadow-xs">
+        <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-2xl p-5 flex flex-col gap-4 shadow-xs">
           <div className="flex flex-wrap items-center justify-between border-b border-slate-100 pb-3 gap-2">
             <div>
-              <span className="text-[10px] text-slate-500 font-mono block uppercase font-bold tracking-wider">
+              <span className="text-[10px] text-slate-400 font-mono block uppercase font-semibold tracking-wider">
                 {currentFir.police_station}
               </span>
               <h3 className="font-display text-base font-bold text-slate-900 mt-0.5">
@@ -59,44 +59,44 @@ export default function FirCorpusView({ onJumpToGraph, onInvestigateFir }) {
               </h3>
             </div>
 
-            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+            <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200/70">
               {currentFir.offence}
             </span>
           </div>
 
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 font-mono text-xs text-slate-800 leading-relaxed max-h-[480px] overflow-y-auto whitespace-pre-wrap no-scrollbar">
+          <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-4 font-mono text-xs text-slate-800 leading-relaxed max-h-[480px] overflow-y-auto whitespace-pre-wrap no-scrollbar">
             {currentFir.text}
           </div>
         </div>
 
         {/* Extracted Details Sidebar */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between shadow-xs gap-4">
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-5 flex flex-col justify-between shadow-xs gap-4">
           <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-700 border-b border-slate-100 pb-2.5">
-              <span className="material-symbols-outlined text-[17px]">auto_awesome</span>
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-700 border-b border-slate-100 pb-2.5">
+              <span className="material-symbols-outlined text-[17px] text-slate-600">auto_awesome</span>
               <span>Key Details Extracted by AI</span>
             </div>
 
             <div className="flex flex-col gap-3">
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 font-mono block font-bold uppercase tracking-wider">COMPLAINANT / VICTIM</span>
-                <span className="text-slate-900 font-bold text-xs">{currentFir.complainant}</span>
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/80 flex flex-col gap-1">
+                <span className="text-[10px] text-slate-400 font-mono block font-semibold uppercase tracking-wider">COMPLAINANT / VICTIM</span>
+                <span className="text-slate-900 font-semibold text-xs">{currentFir.complainant}</span>
               </div>
 
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 font-mono block font-bold uppercase tracking-wider">ACCUSED SUSPECTS NAMED</span>
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/80 flex flex-col gap-1">
+                <span className="text-[10px] text-slate-400 font-mono block font-semibold uppercase tracking-wider">ACCUSED SUSPECTS NAMED</span>
                 <div className="flex flex-wrap gap-1.5 mt-1">
                   {currentFir.accused.map((a, i) => (
-                    <span key={i} className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-mono text-[11px] font-bold">
+                    <span key={i} className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200/70 font-mono text-[11px] font-semibold">
                       {a}
                     </span>
                   ))}
                 </div>
               </div>
 
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 font-mono block font-bold uppercase tracking-wider">CASE INCIDENT SUMMARY</span>
-                <p className="text-slate-700 text-xs leading-relaxed font-normal">{currentFir.summary}</p>
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/80 flex flex-col gap-1">
+                <span className="text-[10px] text-slate-400 font-mono block font-semibold uppercase tracking-wider">CASE INCIDENT SUMMARY</span>
+                <p className="text-slate-600 text-xs leading-relaxed font-normal">{currentFir.summary}</p>
               </div>
             </div>
           </div>
@@ -105,10 +105,10 @@ export default function FirCorpusView({ onJumpToGraph, onInvestigateFir }) {
             {onInvestigateFir && (
               <button
                 onClick={() => onInvestigateFir(currentFir)}
-                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 group"
+                className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 group"
                 title="Launch multi-agent investigation into accused suspects and incident syndicate links"
               >
-                <span className="material-symbols-outlined text-[17px] text-sky-200 group-hover:rotate-12 transition-transform">
+                <span className="material-symbols-outlined text-[17px] text-slate-300">
                   smart_toy
                 </span>
                 <span>Investigate FIR with Agent Swarm</span>
@@ -117,7 +117,7 @@ export default function FirCorpusView({ onJumpToGraph, onInvestigateFir }) {
 
             <button
               onClick={onJumpToGraph}
-              className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+              className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200/80 text-slate-800 text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
             >
               <span>Jump to Knowledge Graph</span>
               <span className="material-symbols-outlined text-[17px]">arrow_forward</span>

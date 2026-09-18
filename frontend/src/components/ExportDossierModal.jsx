@@ -87,21 +87,21 @@ Authority: Cyber Crime Directorate, West Bengal Police`;
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden text-slate-900">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in">
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden text-slate-900">
         
         {/* Modal Topbar (Hidden on Print) */}
-        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between print:hidden">
+        <div className="px-6 py-4 border-b border-slate-200/80 bg-slate-50/80 flex items-center justify-between print:hidden">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-sky-50 border border-sky-200 text-sky-700 flex items-center justify-center shadow-xs">
-              <span className="material-symbols-outlined text-[24px]">description</span>
+            <div className="w-10 h-10 rounded-2xl bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shadow-xs">
+              <span className="material-symbols-outlined text-[22px]">description</span>
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
                 <h2 className="font-display font-bold text-base text-slate-900">
                   Court-Admissible Case Evidence Dossier
                 </h2>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-mono text-[10px] font-bold border border-emerald-200">
+                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-mono text-[10px] font-semibold border border-emerald-200/70">
                   BSA §65B CERTIFIED
                 </span>
               </div>
@@ -114,21 +114,21 @@ Authority: Cyber Crime Directorate, West Bengal Police`;
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px]">print</span>
               <span>Print / Save PDF</span>
             </button>
             <button
               onClick={handleDownloadJSON}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition-colors cursor-pointer"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 text-xs font-medium border border-slate-200/80 transition-colors cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[16px]">download</span>
+              <span className="material-symbols-outlined text-[16px] text-slate-500">download</span>
               <span>JSON</span>
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer ml-1"
+              className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer ml-1"
             >
               <span className="material-symbols-outlined text-[20px]">close</span>
             </button>
@@ -136,12 +136,12 @@ Authority: Cyber Crime Directorate, West Bengal Police`;
         </div>
 
         {/* View Switcher Tabs (Hidden on Print) */}
-        <div className="px-6 border-b border-slate-200 bg-white flex items-center gap-2 print:hidden">
+        <div className="px-6 border-b border-slate-200/80 bg-white flex items-center gap-4 print:hidden">
           <button
             onClick={() => setActiveTab('dossier')}
-            className={`py-3 px-3.5 text-xs font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
+            className={`py-3 px-1 text-xs font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === 'dossier'
-                ? 'border-sky-600 text-sky-700 font-bold'
+                ? 'border-slate-900 text-slate-900 font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
@@ -150,9 +150,9 @@ Authority: Cyber Crime Directorate, West Bengal Police`;
           </button>
           <button
             onClick={() => setActiveTab('certificate')}
-            className={`py-3 px-3.5 text-xs font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
+            className={`py-3 px-1 text-xs font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === 'certificate'
-                ? 'border-sky-600 text-sky-700 font-bold'
+                ? 'border-slate-900 text-slate-900 font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
@@ -161,9 +161,9 @@ Authority: Cyber Crime Directorate, West Bengal Police`;
           </button>
           <button
             onClick={() => setActiveTab('json')}
-            className={`py-3 px-3.5 text-xs font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
+            className={`py-3 px-1 text-xs font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === 'json'
-                ? 'border-sky-600 text-sky-700 font-bold'
+                ? 'border-slate-900 text-slate-900 font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >

@@ -21,81 +21,71 @@ export default function HomePage({
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col selection:bg-sky-500/20 selection:text-sky-900">
+    <div className="w-full min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col selection:bg-slate-900 selection:text-white">
       {/* 1. TOP EXECUTIVE NAVBAR */}
-      <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-15 flex items-center justify-between">
           {/* Brand */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600 shadow-xs">
-              <span className="material-symbols-outlined text-[22px]">shield</span>
+            <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center shadow-2xs">
+              <span className="material-symbols-outlined text-[18px]">shield</span>
             </div>
             <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <span className="font-display text-base font-bold tracking-tight text-slate-900">
-                  NEXXUS<span className="text-sky-600">.INTELLIGENCE</span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-display text-sm font-bold tracking-tight text-slate-900">
+                  NEXXUS<span className="text-sky-600 font-medium">.INTELLIGENCE</span>
                 </span>
-                <span className="px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 text-[10px] font-mono font-bold border border-sky-200">
-                  DEFENSE v2.6
+                <span className="px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 text-[10px] font-mono font-medium border border-slate-200">
+                  v2.6
                 </span>
               </div>
-              <span className="text-[10px] text-slate-500 font-mono">
-                AI Crime Knowledge Graph & Multi-Agent Defense
+              <span className="text-[10px] text-slate-400 font-mono hidden sm:inline">
+                Defense-Grade Crime Knowledge Graph
               </span>
             </div>
           </div>
 
           {/* Navigation Links */}
-          <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-600">
-            <a href="#capabilities" className="hover:text-sky-600 transition-colors">Core Capabilities</a>
-            <a href="#rbac" className="hover:text-sky-600 transition-colors">RBAC Clearance</a>
-            <a href="#cases" className="hover:text-sky-600 transition-colors">Active Cases</a>
-            <a href="#compliance" className="hover:text-sky-600 transition-colors">BSA §65B Vault</a>
+          <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-slate-600">
+            <a href="#capabilities" className="hover:text-slate-900 transition-colors">Capabilities</a>
+            <a href="#rbac" className="hover:text-slate-900 transition-colors">Clearance Tiers</a>
+            <a href="#compliance" className="hover:text-slate-900 transition-colors">BSA §65B Vault</a>
           </nav>
 
           {/* Right Header Actions */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             {currentUser ? (
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => onOpenAuth('login')}
-                  className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 transition-colors cursor-pointer"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200 transition-colors cursor-pointer"
                   title="Switch Officer Profile"
                 >
-                  <span className="material-symbols-outlined text-[16px] text-sky-600">badge</span>
+                  <span className="material-symbols-outlined text-[15px] text-slate-500">badge</span>
                   <span>{currentUser.name}</span>
-                  <span className="px-1.5 py-0.2 rounded bg-sky-50 text-sky-700 font-mono text-[9px] font-bold border border-sky-200">
-                    {currentUser.role?.replace('_', ' ')}
-                  </span>
                 </button>
                 <button
                   onClick={onLaunchWorkspace}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-xs transition-all cursor-pointer active:scale-95"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium shadow-2xs transition-all cursor-pointer"
                 >
                   <span>Launch Workspace</span>
-                  <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                  <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
                 </button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => onOpenAuth('login')}
-                  className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
                 >
                   Sign In
                 </button>
                 <button
-                  onClick={() => onOpenAuth('register')}
-                  className="hidden sm:inline-flex px-3.5 py-2 rounded-xl text-xs font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 transition-colors cursor-pointer"
-                >
-                  Register Clearance
-                </button>
-                <button
                   onClick={onLaunchWorkspace}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-xs transition-all cursor-pointer active:scale-95"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium shadow-2xs transition-all cursor-pointer"
                 >
-                  <span>Launch Command Center</span>
-                  <span className="material-symbols-outlined text-[16px]">rocket_launch</span>
+                  <span>Command Center</span>
+                  <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
                 </button>
               </div>
             )}
@@ -104,163 +94,158 @@ export default function HomePage({
       </header>
 
       {/* 2. HERO SECTION */}
-      <section className="relative pt-12 pb-16 lg:pt-16 lg:pb-24 overflow-hidden border-b border-slate-200 bg-gradient-to-b from-white via-slate-50/50 to-slate-100/50">
+      <section className="relative pt-14 pb-16 lg:pt-20 lg:pb-24 overflow-hidden border-b border-slate-200/80 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center text-center">
-          {/* Government / Hackathon Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-sky-50 border border-sky-200 text-sky-800 text-xs font-mono font-semibold mb-6 shadow-xs">
-            <span className="w-2 h-2 rounded-full bg-sky-600 animate-pulse"></span>
+          {/* Government / Compliance Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-mono font-medium mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
             <span>BHARATIYA SAKSHYA ADHINIYAM (BSA) COMPLIANT</span>
           </div>
 
           {/* Main Headline */}
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 max-w-4xl leading-[1.15]">
-            AI-Powered Criminal Intelligence & Knowledge Graph Defense Platform
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 max-w-4xl leading-[1.12]">
+            AI Criminal Intelligence & Knowledge Graph Defense Platform
           </h1>
 
           {/* Subtitle */}
-          <p className="mt-5 text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed font-normal">
-            Connects criminal networks, tracks suspicious money trails, identifies duplicate suspect identities, and generates court-ready digital evidence under Indian law.
+          <p className="mt-5 text-base sm:text-lg text-slate-500 max-w-2xl leading-relaxed font-normal">
+            Automates syndicate network mapping, circular hawala tracking, suspect disambiguation, and court-admissible digital evidence generation under Indian law.
           </p>
 
           {/* Interactive Quick AI Investigation Bar */}
-          <form onSubmit={handleHeroSubmit} className="mt-8 w-full max-w-2xl flex flex-col sm:flex-row items-center gap-2 p-1.5 rounded-2xl bg-white border border-slate-300 shadow-md focus-within:ring-2 focus-within:ring-sky-500/30 focus-within:border-sky-500 transition-all">
-            <div className="flex-1 flex items-center gap-2.5 px-3 py-1 w-full">
-              <span className="material-symbols-outlined text-sky-600 text-[22px]">psychology</span>
+          <form onSubmit={handleHeroSubmit} className="mt-8 w-full max-w-2xl flex flex-col sm:flex-row items-center gap-2 p-1.5 rounded-xl bg-slate-50 border border-slate-300/80 shadow-xs focus-within:bg-white focus-within:border-slate-400 focus-within:ring-2 focus-within:ring-slate-100 transition-all">
+            <div className="flex-1 flex items-center gap-2 px-3 py-1 w-full">
+              <span className="material-symbols-outlined text-slate-400 text-[20px]">psychology</span>
               <input
                 type="text"
                 value={heroQuery}
                 onChange={(e) => setHeroQuery(e.target.value)}
-                placeholder="Search or ask AI (e.g. 'Investigate Rahul Sharma' or 'Trace money trail')..."
-                className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 font-medium"
+                placeholder="Ask AI or search (e.g. 'Investigate Rahul Sharma' or 'Trace money trail')..."
+                className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 font-normal"
               />
             </div>
             <button
               type="submit"
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 flex-shrink-0"
+              className="w-full sm:w-auto px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium shadow-2xs transition-all flex items-center justify-center gap-1.5 cursor-pointer flex-shrink-0"
             >
-              <span className="material-symbols-outlined text-[17px]">auto_awesome</span>
-              <span>Start Investigation</span>
+              <span className="material-symbols-outlined text-[15px]">auto_awesome</span>
+              <span>Investigate</span>
             </button>
           </form>
 
-          {/* Quick Preset Chips on Homepage */}
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-xs">
-            <span className="text-[10px] text-slate-500 font-mono font-bold uppercase">Quick Inquiries:</span>
+          {/* Quick Preset Chips */}
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5 text-xs">
+            <span className="text-[10px] text-slate-400 font-mono font-medium uppercase">Quick Leads:</span>
             <button
               type="button"
               onClick={() => onInvestigate ? onInvestigate('Investigate Rahul Sharma P001 and map his associates', 'P001') : onLaunchWorkspace()}
-              className="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-700 hover:text-sky-700 hover:border-sky-300 transition-all text-[11px] font-medium shadow-2xs cursor-pointer"
+              className="px-2.5 py-0.8 rounded-full bg-slate-100 hover:bg-slate-200/70 border border-slate-200/80 text-slate-600 hover:text-slate-900 transition-all text-[11px] font-normal cursor-pointer"
             >
-              🔍 Investigate Rahul Sharma (P001)
+              Rahul Sharma (P001)
             </button>
             <button
               type="button"
               onClick={() => onInvestigate ? onInvestigate('Hypothesis H1: Evaluate Debasish Chatterjee covert cut-out bridge to Kolkata syndicates', 'P008') : onLaunchWorkspace()}
-              className="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-700 hover:text-sky-700 hover:border-sky-300 transition-all text-[11px] font-medium shadow-2xs cursor-pointer"
+              className="px-2.5 py-0.8 rounded-full bg-slate-100 hover:bg-slate-200/70 border border-slate-200/80 text-slate-600 hover:text-slate-900 transition-all text-[11px] font-normal cursor-pointer"
             >
-              👑 Kingpin Debasish Chatterjee (P008)
+              Apex Leader Debasish (P008)
             </button>
             <button
               type="button"
               onClick={() => onInvestigate ? onInvestigate('Hypothesis H2: Trace ₹500,000 mule circular loop through Kolkata Comm Bank') : onLaunchWorkspace()}
-              className="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-700 hover:text-sky-700 hover:border-sky-300 transition-all text-[11px] font-medium shadow-2xs cursor-pointer"
+              className="px-2.5 py-0.8 rounded-full bg-slate-100 hover:bg-slate-200/70 border border-slate-200/80 text-slate-600 hover:text-slate-900 transition-all text-[11px] font-normal cursor-pointer"
             >
-              💸 Hawala Layering Loop
+              ₹500k Hawala Loop
             </button>
           </div>
 
           {/* Primary Action Button Cluster */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-2.5">
             <button
               onClick={onLaunchWorkspace}
-              className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-bold shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-95"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[20px]">hub</span>
-              <span>Launch Live Investigation Workspace</span>
-              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+              <span className="material-symbols-outlined text-[17px]">hub</span>
+              <span>Open Investigation Workspace</span>
+              <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
             </button>
 
             <button
               onClick={() => onOpenAuth('login')}
-              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white hover:bg-slate-50 text-slate-800 text-sm font-bold border border-slate-300 shadow-xs transition-all cursor-pointer active:scale-95"
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 text-xs font-semibold border border-slate-200 shadow-2xs transition-all cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[20px] text-sky-600">admin_panel_settings</span>
-              <span>Law Enforcement Sign In</span>
+              <span className="material-symbols-outlined text-[17px] text-slate-500">admin_panel_settings</span>
+              <span>Officer Sign In</span>
             </button>
           </div>
 
-
-          {/* Quick 1-Click Role Switcher Strip */}
-          <div className="mt-8 p-3 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-wrap items-center justify-center gap-2 text-xs">
-            <span className="text-slate-500 font-mono text-[11px] font-bold uppercase mr-1">
-              ⚡ Quick 1-Click Evaluator Roles:
+          {/* Quick Evaluator Roles Strip */}
+          <div className="mt-8 p-1.5 rounded-xl bg-slate-100/80 border border-slate-200/70 flex flex-wrap items-center justify-center gap-1 text-xs">
+            <span className="text-slate-400 font-mono text-[10px] uppercase px-2 font-medium">
+              Demo Clearances:
             </span>
             <button
               onClick={() => onQuickRoleSelect('LEAD_INVESTIGATOR')}
-              className="px-3 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 font-bold border border-sky-200 transition-colors flex items-center gap-1 cursor-pointer"
+              className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-50 text-slate-800 font-medium border border-slate-200/60 shadow-2xs transition-colors flex items-center gap-1 cursor-pointer"
             >
-              <span>👑</span>
               <span>Lead Investigator (DSP)</span>
             </button>
             <button
               onClick={() => onQuickRoleSelect('INVESTIGATOR')}
-              className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer"
+              className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-50 text-slate-800 font-medium border border-slate-200/60 shadow-2xs transition-colors flex items-center gap-1 cursor-pointer"
             >
-              <span>🔍</span>
               <span>Field Investigator (SI)</span>
             </button>
             <button
               onClick={() => onQuickRoleSelect('ANALYST')}
-              className="px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-800 font-semibold border border-purple-200 transition-colors flex items-center gap-1 cursor-pointer"
+              className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-50 text-slate-800 font-medium border border-slate-200/60 shadow-2xs transition-colors flex items-center gap-1 cursor-pointer"
             >
-              <span>📊</span>
-              <span>Intelligence Analyst</span>
+              <span>Crime Analyst</span>
             </button>
             <button
               onClick={() => onQuickRoleSelect('AUDITOR')}
-              className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold border border-emerald-200 transition-colors flex items-center gap-1 cursor-pointer"
+              className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-50 text-slate-800 font-medium border border-slate-200/60 shadow-2xs transition-colors flex items-center gap-1 cursor-pointer"
             >
-              <span>⚖️</span>
               <span>Judicial Auditor (§65B)</span>
             </button>
           </div>
 
           {/* Telemetry Metrics Ribbon */}
-          <div className="mt-12 w-full max-w-5xl grid grid-cols-2 md:grid-cols-4 gap-3.5 text-left">
-            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs">
-              <span className="text-[10px] font-mono text-slate-500 uppercase font-bold tracking-wider">ACTIVE KNOWLEDGE GRAPH</span>
+          <div className="mt-12 w-full max-w-5xl grid grid-cols-2 md:grid-cols-4 gap-3 text-left">
+            <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <span className="text-[10px] font-mono text-slate-400 uppercase font-semibold tracking-wider">ACTIVE KNOWLEDGE GRAPH</span>
               <div className="mt-1 flex items-baseline gap-1.5">
                 <span className="text-2xl font-mono font-bold text-slate-900">{stats.totalNodes || 31}</span>
-                <span className="text-xs text-sky-700 font-semibold">Entities</span>
+                <span className="text-xs text-slate-500">Entities</span>
               </div>
-              <span className="text-[11px] text-slate-500 font-medium">Persons, Phones, Shells, Vehicles</span>
+              <span className="text-[11px] text-slate-400">Persons, Phones, Shells, Vehicles</span>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs">
-              <span className="text-[10px] font-mono text-amber-800 uppercase font-bold tracking-wider">HAWALA MONEY TRAIL</span>
+            <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <span className="text-[10px] font-mono text-slate-400 uppercase font-semibold tracking-wider">HAWALA MONEY TRAIL</span>
               <div className="mt-1 flex items-baseline gap-1.5">
-                <span className="text-2xl font-mono font-bold text-amber-800">{stats.totalAmount || '₹14.85L'}</span>
-                <span className="text-xs text-slate-600 font-semibold">INR</span>
+                <span className="text-2xl font-mono font-bold text-slate-900">{stats.totalAmount || '₹14.85L'}</span>
+                <span className="text-xs text-slate-500">INR</span>
               </div>
-              <span className="text-[11px] text-slate-500 font-medium">3-Hop Circular Layering Loop</span>
+              <span className="text-[11px] text-slate-400">3-Hop Circular Layering Loop</span>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs">
-              <span className="text-[10px] font-mono text-rose-600 uppercase font-bold tracking-wider">EXTORTION CDR SPIKE</span>
+            <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <span className="text-[10px] font-mono text-slate-400 uppercase font-semibold tracking-wider">EXTORTION CDR SPIKE</span>
               <div className="mt-1 flex items-baseline gap-1.5">
-                <span className="text-2xl font-mono font-bold text-rose-600">22</span>
-                <span className="text-xs text-slate-600 font-semibold">Calls/Day</span>
+                <span className="text-2xl font-mono font-bold text-slate-900">22</span>
+                <span className="text-xs text-slate-500">Calls/Day</span>
               </div>
-              <span className="text-[11px] text-slate-500 font-medium">Sector V BTS Triangulated</span>
+              <span className="text-[11px] text-slate-400">Sector V BTS Triangulated</span>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs">
-              <span className="text-[10px] font-mono text-emerald-700 uppercase font-bold tracking-wider">EVIDENCE ADMISSIBILITY</span>
+            <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <span className="text-[10px] font-mono text-slate-400 uppercase font-semibold tracking-wider">EVIDENCE ADMISSIBILITY</span>
               <div className="mt-1 flex items-baseline gap-1.5">
-                <span className="text-2xl font-mono font-bold text-emerald-700">100%</span>
-                <span className="text-xs text-emerald-800 font-semibold">Verified</span>
+                <span className="text-2xl font-mono font-bold text-slate-900">100%</span>
+                <span className="text-xs text-emerald-700 font-medium">Verified</span>
               </div>
-              <span className="text-[11px] text-slate-500 font-medium">Section 65B SHA-256 Chain</span>
+              <span className="text-[11px] text-slate-400">Section 65B SHA-256 Chain</span>
             </div>
           </div>
         </div>

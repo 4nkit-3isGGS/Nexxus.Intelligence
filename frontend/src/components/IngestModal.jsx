@@ -52,12 +52,12 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl animate-fade-in text-slate-900">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="bg-white border border-slate-200/80 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-fade-in text-slate-900">
         {/* Header */}
-        <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div className="px-6 py-4 bg-slate-50/80 border-b border-slate-200/80 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-sky-50 text-sky-700 border border-sky-200 shadow-xs">
+            <div className="p-2 rounded-xl bg-slate-100 text-slate-700 border border-slate-200/80 shadow-xs">
               <span className="material-symbols-outlined text-[20px]">cloud_upload</span>
             </div>
             <div>
@@ -70,17 +70,17 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 border border-slate-200 flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-xl bg-white hover:bg-slate-100 text-slate-500 hover:text-slate-900 border border-slate-200/80 flex items-center justify-center transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">close</span>
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-5 flex flex-col gap-4 text-xs">
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex flex-col gap-1.5">
-            <div className="flex items-center gap-2 text-sky-700 font-bold">
-              <span className="material-symbols-outlined text-[16px]">data_object</span>
+        <div className="p-6 flex flex-col gap-4 text-xs">
+          <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex flex-col gap-1.5">
+            <div className="flex items-center gap-2 text-slate-900 font-semibold">
+              <span className="material-symbols-outlined text-[16px] text-slate-600">data_object</span>
               <span>Smart Evidence Document Scanner</span>
             </div>
             <p className="text-slate-600 text-[11px] leading-relaxed">
@@ -90,24 +90,24 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
 
           {/* Stepper Pipeline */}
           <div className="flex flex-col gap-2">
-            <span className="text-slate-500 uppercase text-[10px] font-mono font-bold tracking-wider">
+            <span className="text-slate-500 uppercase text-[10px] font-mono font-semibold tracking-wider">
               How case files are processed:
             </span>
             <div className="grid grid-cols-2 gap-2">
-              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs flex items-center gap-2 text-[11px] text-slate-800 font-semibold">
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 shadow-xs flex items-center gap-2 text-[11px] text-slate-800 font-medium">
                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                 <span>1. Scan & Read Files</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs flex items-center gap-2 text-[11px] text-slate-800 font-semibold">
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 shadow-xs flex items-center gap-2 text-[11px] text-slate-800 font-medium">
                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                 <span>2. Extract Suspects & Links</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs flex items-center gap-2 text-[11px] text-slate-800 font-semibold">
-                <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 shadow-xs flex items-center gap-2 text-[11px] text-slate-800 font-medium">
+                <span className="w-2 h-2 rounded-full bg-slate-700"></span>
                 <span>3. Build Crime Network</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs flex items-center gap-2 text-[11px] text-slate-800 font-semibold">
-                <span className="w-2 h-2 rounded-full bg-purple-600"></span>
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 shadow-xs flex items-center gap-2 text-[11px] text-slate-800 font-medium">
+                <span className="w-2 h-2 rounded-full bg-slate-700"></span>
                 <span>4. Court Evidence Check</span>
               </div>
             </div>
@@ -115,7 +115,7 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
 
           {/* Result / Error Banner */}
           {result && (
-            <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between">
+            <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200/70 text-emerald-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-[18px]">task_alt</span>
                 <span className="font-semibold text-xs">Successfully added 10 evidence items and 5 suspect connections!</span>
@@ -124,7 +124,7 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
           )}
 
           {error && (
-            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2">
+            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200/70 text-rose-700 flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px]">error</span>
               <span className="font-medium text-xs">{error}</span>
             </div>
@@ -134,14 +134,14 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
           <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors border border-slate-200 cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors border border-slate-200/80 cursor-pointer"
             >
               Cancel
             </button>
             <button
               onClick={handleIngestSample}
               disabled={loading}
-              className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-50"
+              className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[16px]">
                 {loading ? 'autorenew' : 'upload'}

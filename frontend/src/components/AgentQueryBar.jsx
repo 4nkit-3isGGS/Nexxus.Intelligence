@@ -101,9 +101,9 @@ export default function AgentQueryBar({
     <div className="flex-1 flex flex-col overflow-y-auto w-full h-full p-4 lg:p-6 gap-4 no-scrollbar">
       {/* RBAC Error Banner if access denied */}
       {agentResponse?.error && (
-        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center justify-between shadow-xs">
+        <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center justify-between shadow-2xs">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[20px] text-rose-600">lock</span>
+            <span className="material-symbols-outlined text-[18px] text-rose-600">lock</span>
             <span className="font-semibold">{agentResponse.error}</span>
           </div>
           <span className="px-2 py-0.5 rounded bg-white text-rose-700 font-mono text-[10px] font-bold border border-rose-200">
@@ -113,273 +113,248 @@ export default function AgentQueryBar({
       )}
 
       {/* 1. AI COPILOT QUERY COMMAND BAR */}
-      <section className="relative flex flex-col flex-shrink-0 min-h-fit rounded-2xl p-5 bg-white shadow-xs border border-slate-200">
-        <div className="relative z-10 flex flex-col gap-3.5">
+      <section className="relative flex flex-col flex-shrink-0 min-h-fit rounded-xl p-4 bg-white shadow-2xs border border-slate-200/80">
+        <div className="relative z-10 flex flex-col gap-3">
           {/* Title & Live Status */}
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2.5">
-              <div className="relative flex items-center justify-center w-8 h-8 rounded-xl bg-purple-50 border border-purple-200 shadow-xs">
-                <span className="material-symbols-outlined text-purple-600 text-[20px] animate-pulse">
+              <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-900 text-white shadow-2xs">
+                <span className="material-symbols-outlined text-[16px]">
                   psychology
                 </span>
-                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-sky-500 animate-ping"></span>
               </div>
               <div>
-                <h2 className="font-display text-base tracking-tight text-slate-900 flex items-center gap-2 font-bold">
-                  AI Investigation Assistant
-                  <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 text-[10px] border border-purple-200 font-mono font-bold">
-                    Multi-Agent Intelligence
+                <h2 className="font-display text-sm tracking-tight text-slate-900 flex items-center gap-2 font-bold">
+                  AI Multi-Agent Investigation
+                  <span className="px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 text-[10px] font-mono font-medium border border-slate-200">
+                    Active
                   </span>
                 </h2>
               </div>
             </div>
 
             <div className="flex items-center gap-2 text-xs font-mono">
-              <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-bold text-[11px] border ${
-                isLiveFastAPI 
-                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300' 
-                  : 'bg-sky-50 text-sky-800 border-sky-300'
-              }`}>
-                <span className={`w-2 h-2 rounded-full ${isLiveFastAPI ? 'bg-emerald-500 animate-pulse' : 'bg-sky-500'}`}></span>
-                <span>{isLiveFastAPI ? 'AI ONLINE' : 'READY'}</span>
+              <span className="inline-flex items-center gap-1.5 text-emerald-700 font-semibold text-[11px]">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span>{isLiveFastAPI ? 'AI LIVE' : 'AI READY'}</span>
               </span>
               <span className="text-slate-300">•</span>
-              <span className="text-slate-500">Engine:</span>
-              <span className="text-purple-700 font-bold">Intelligence Core</span>
-              <span className="text-slate-300">•</span>
-              <span className="text-slate-500">Database:</span>
-              <span className="text-emerald-700 font-bold">Connected</span>
+              <span className="text-slate-500">FastAPI Traversal</span>
             </div>
           </div>
 
           {/* Main Input Bar Form */}
           {officerRole === 'AUDITOR' && (
-            <div className="p-3 rounded-xl bg-purple-50 border border-purple-200 text-purple-900 text-xs flex flex-wrap items-center justify-between gap-2 shadow-xs">
+            <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 text-xs flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-purple-700 text-[18px]">gavel</span>
-                <span className="font-semibold">
-                  Judicial Auditor Mode (Read-Only): You can review verified evidence and audit records. Active investigations are handled by investigators.
+                <span className="material-symbols-outlined text-slate-500 text-[16px]">gavel</span>
+                <span>
+                  Judicial Auditor Mode (Read-Only): Active inquiries restricted to investigators.
                 </span>
               </div>
               {onRoleChange && (
                 <button
                   type="button"
                   onClick={() => onRoleChange('LEAD_INVESTIGATOR')}
-                  className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-[11px] transition-colors cursor-pointer"
+                  className="px-2 py-0.8 rounded-md bg-slate-900 text-white font-medium text-[11px] cursor-pointer"
                 >
-                  Switch to Lead Investigator
+                  Switch to Lead
                 </button>
               )}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row items-stretch gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-300 shadow-inner focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-500/20 transition-all">
-            <div className="flex-1 flex items-center px-3 py-1 gap-2.5">
-              <span className="material-symbols-outlined text-sky-600 text-[22px] flex-shrink-0">
-                travel_explore
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-stretch gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200 shadow-2xs focus-within:bg-white focus-within:border-slate-400 focus-within:ring-2 focus-within:ring-slate-100 transition-all">
+            <div className="flex-1 flex items-center px-2.5 py-1 gap-2">
+              <span className="material-symbols-outlined text-slate-400 text-[18px] flex-shrink-0">
+                search
               </span>
               <input
                 type="text"
                 value={inputQuery}
                 onChange={(e) => setInputQuery(e.target.value)}
-                placeholder={officerRole === 'AUDITOR' ? "Auditor Role: Read-only compliance mode active..." : "Ask AI Investigator (e.g. 'Investigate Rahul Sharma P001' or 'Trace Debasish Chatterjee hawala loop')..."}
+                placeholder={officerRole === 'AUDITOR' ? "Auditor Mode: Read-only compliance mode active..." : "Ask AI Investigator (e.g. 'Investigate Rahul Sharma P001' or 'Trace hawala loop')..."}
                 disabled={officerRole === 'AUDITOR'}
-                className="w-full bg-transparent border-none outline-none text-xs text-slate-900 placeholder:text-slate-400 font-medium disabled:opacity-60"
+                className="w-full bg-transparent border-none outline-none text-xs text-slate-900 placeholder:text-slate-400 font-normal disabled:opacity-60"
               />
             </div>
-            <div className="flex items-center gap-1.5 flex-shrink-0 px-1">
+            <div className="flex items-center gap-1.5 flex-shrink-0">
               <button
                 type="submit"
                 disabled={loadingQuery || !inputQuery.trim() || officerRole === 'AUDITOR'}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-xs transition-all disabled:opacity-50 cursor-pointer active:scale-95"
+                className="flex items-center gap-1.5 px-3.5 py-1.8 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium shadow-2xs transition-all disabled:opacity-40 cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[17px]">
+                <span className="material-symbols-outlined text-[15px]">
                   {officerRole === 'AUDITOR' ? 'lock' : 'auto_awesome'}
                 </span>
                 <span>
-                  {loadingQuery ? 'Analyzing Case...' : officerRole === 'AUDITOR' ? 'Auditor Restricted' : 'Investigate'}
-                </span>
-                <span className="ml-1 px-1.5 py-0.2 rounded text-[9px] bg-sky-700 uppercase tracking-wider text-white font-mono font-bold">
-                  {officerRole === 'AUDITOR' ? 'READ-ONLY' : 'AI'}
+                  {loadingQuery ? 'Analyzing...' : officerRole === 'AUDITOR' ? 'Restricted' : 'Investigate'}
                 </span>
               </button>
             </div>
           </form>
 
           {/* Preset Scenario Quick Chips */}
-          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-            <span className="text-[10px] text-slate-500 font-mono uppercase font-bold tracking-wider mr-1">
-              EXAMPLE QUESTIONS:
+          <div className="flex flex-wrap items-center gap-1 pt-0.5">
+            <span className="text-[10px] text-slate-400 font-mono uppercase font-semibold mr-1">
+              Examples:
             </span>
             <button
               onClick={() => handleSelectPreset('Investigate Rahul Sharma P001 and map his co-conspirators and front entities')}
-              className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:text-sky-700 hover:bg-slate-200 transition-all text-xs flex items-center gap-1 shadow-xs border border-slate-200 cursor-pointer font-medium"
+              className="px-2 py-0.8 rounded-md bg-slate-100 hover:bg-slate-200/70 text-slate-700 transition-all text-xs flex items-center gap-1 cursor-pointer font-normal"
             >
-              <span>🔍</span> <span>Investigate Rahul Sharma (P001)</span>
+              <span>Rahul Sharma (P001)</span>
             </button>
             <button
               onClick={() => handleSelectPreset('Hypothesis H1: Evaluate Debasish Chatterjee covert cut-out bridge to Kolkata syndicates')}
-              className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:text-sky-700 hover:bg-slate-200 transition-all text-xs flex items-center gap-1 shadow-xs border border-slate-200 cursor-pointer font-medium"
+              className="px-2 py-0.8 rounded-md bg-slate-100 hover:bg-slate-200/70 text-slate-700 transition-all text-xs flex items-center gap-1 cursor-pointer font-normal"
             >
-              <span>👑</span> <span>Kingpin Bridge (H1)</span>
+              <span>Kingpin Bridge (H1)</span>
             </button>
             <button
               onClick={() => handleSelectPreset('Hypothesis H2: Trace ₹500,000 mule circular loop through Kolkata Comm Bank')}
-              className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:text-sky-700 hover:bg-slate-200 transition-all text-xs flex items-center gap-1 shadow-xs border border-slate-200 cursor-pointer font-medium"
+              className="px-2 py-0.8 rounded-md bg-slate-100 hover:bg-slate-200/70 text-slate-700 transition-all text-xs flex items-center gap-1 cursor-pointer font-normal"
             >
-              <span>💸</span> <span>Hawala Loop (H2)</span>
+              <span>Hawala Loop (H2)</span>
             </button>
             <button
               onClick={() => handleSelectPreset('Analyze 22-call extortion burst between P008 and victim Manoj Tiwari')}
-              className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:text-sky-700 hover:bg-slate-200 transition-all text-xs flex items-center gap-1 shadow-xs border border-slate-200 cursor-pointer font-medium"
+              className="px-2 py-0.8 rounded-md bg-slate-100 hover:bg-slate-200/70 text-slate-700 transition-all text-xs flex items-center gap-1 cursor-pointer font-normal"
             >
-              <span>📞</span> <span>22-Call Spike</span>
-            </button>
-            <button
-              onClick={() => handleSelectPreset('Generate Bharatiya Sakshya Adhiniyam 2023 §65B hash certificate for court bundle')}
-              className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:text-emerald-700 hover:bg-slate-200 transition-all text-xs flex items-center gap-1 shadow-xs border border-slate-200 cursor-pointer font-medium"
-            >
-              <span>⚖️</span> <span>BSA §65B Synthesis</span>
+              <span>22-Call Spike</span>
             </button>
           </div>
         </div>
       </section>
 
-      {/* 2. EXECUTIVE THREAT SCORECARD (Dynamic 4 Grid HUD Metric Cards) */}
-      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 flex-shrink-0 min-h-fit">
+      {/* 2. EXECUTIVE THREAT SCORECARD */}
+      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 flex-shrink-0 min-h-fit">
         {/* Card 1: Threat Classification */}
-        <div className="relative p-4 rounded-2xl bg-white shadow-xs flex flex-col justify-between overflow-hidden border border-slate-200">
+        <div className="p-4 rounded-xl bg-white shadow-2xs flex flex-col justify-between border border-slate-200/80">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-rose-600 font-bold flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
                 Classification
               </span>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold border ${
-                riskScore >= 70 ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-800 border-amber-200'
+              <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono font-medium ${
+                riskScore >= 70 ? 'bg-rose-50 text-rose-800 border border-rose-200/60' : 'bg-amber-50 text-amber-800 border border-amber-200/60'
               }`}>
-                {riskScore >= 70 ? 'TIER 1 CRITICAL' : 'TIER 2 MODERATE'}
+                {riskScore >= 70 ? 'CRITICAL' : 'MODERATE'}
               </span>
             </div>
             <div className="mt-2 flex items-baseline justify-between">
-              <span className="font-display text-xl font-bold text-rose-600 tracking-tight">
+              <span className="font-display text-lg font-bold text-slate-900 tracking-tight">
                 {threatTier}
               </span>
-              <span className="font-mono text-xl text-slate-900 font-bold">
+              <span className="font-mono text-lg text-slate-900 font-bold">
                 {Number(riskScore).toFixed(0)}<span className="text-xs text-slate-400 font-normal">/100</span>
               </span>
             </div>
           </div>
-          <div className="mt-3 pt-2 flex items-center justify-between text-xs text-slate-600 border-t border-slate-100">
-            <span className="flex items-center text-rose-600 font-semibold">
-              <span className="material-symbols-outlined text-[15px] mr-1">trending_up</span> Risk Engine
-            </span>
-            <span className="text-[11px] text-slate-500 font-mono">
-              Target: {agentResponse?.subject_id || 'Syndicate Network'}
+          <div className="mt-3 pt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100">
+            <span>Risk Engine</span>
+            <span className="text-[11px] font-mono">
+              Target: {agentResponse?.subject_id || 'Network'}
             </span>
           </div>
         </div>
 
         {/* Card 2: Knowledge Graph Traversal */}
-        <div className="relative p-4 rounded-2xl bg-white shadow-xs flex flex-col justify-between overflow-hidden border border-slate-200">
+        <div className="p-4 rounded-xl bg-white shadow-2xs flex flex-col justify-between border border-slate-200/80">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-sky-700 font-bold flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[15px] text-sky-600">account_tree</span>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
                 Graph Traversal
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 font-mono font-bold border border-sky-200">
-                2-HOP EGO NETWORK
+              <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-mono font-medium">
+                2-HOP EGO
               </span>
             </div>
             <div className="mt-2 flex items-baseline justify-between">
-              <span className="font-display text-xl font-bold text-slate-900 tracking-tight">
-                {nodesCount} <span className="text-sm font-normal text-slate-500 font-sans">Nodes</span>
+              <span className="font-display text-lg font-bold text-slate-900 tracking-tight">
+                {nodesCount} <span className="text-xs font-normal text-slate-500 font-sans">Nodes</span>
               </span>
-              <span className="font-mono text-xl text-sky-700 font-bold">
+              <span className="font-mono text-lg text-slate-700 font-bold">
                 {edgesCount} <span className="text-xs text-slate-400 font-normal">Edges</span>
               </span>
             </div>
           </div>
-          <div className="mt-3 pt-2 flex items-center justify-between text-xs text-slate-600 border-t border-slate-100">
-            <span className="text-sky-700 font-medium">Network Visualized</span>
-            <span className="text-[11px] text-slate-500 font-mono">Iterations: {agentResponse?.iterations || 1}</span>
+          <div className="mt-3 pt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100">
+            <span>Network Discovered</span>
+            <span className="text-[11px] font-mono">Passes: {agentResponse?.iterations || 1}</span>
           </div>
         </div>
 
         {/* Card 3: Hypothesis Engine */}
-        <div className="relative p-4 rounded-2xl bg-white shadow-xs flex flex-col justify-between overflow-hidden border border-slate-200">
+        <div className="p-4 rounded-xl bg-white shadow-2xs flex flex-col justify-between border border-slate-200/80">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-purple-700 font-bold flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[15px] text-purple-600">psychology</span>
-                Hypothesis Engine
+              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+                Hypotheses
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-mono font-bold border border-purple-200">
+              <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-mono font-medium">
                 DUAL CRITIC
               </span>
             </div>
             <div className="mt-2 flex items-baseline justify-between">
-              <span className="font-display text-xl font-bold text-slate-900 tracking-tight">
-                {totalHypotheses} <span className="text-sm font-normal text-slate-500 font-sans">Theories</span>
+              <span className="font-display text-lg font-bold text-slate-900 tracking-tight">
+                {totalHypotheses} <span className="text-xs font-normal text-slate-500 font-sans">Evaluated</span>
               </span>
-              <span className="text-xs font-mono font-bold text-emerald-700">
-                {confirmedHypotheses} CONFIRMED
+              <span className="text-xs font-mono font-semibold text-emerald-700">
+                {confirmedHypotheses} Supported
               </span>
             </div>
           </div>
-          <div className="mt-3 pt-2 flex items-center justify-between text-xs text-slate-600 border-t border-slate-100">
-            <span className="text-emerald-700 font-medium">Cross-Correlated</span>
-            <span className="text-slate-500 text-[11px] font-mono font-medium">Zero Hallucination</span>
+          <div className="mt-3 pt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100">
+            <span>Cross-Correlated</span>
+            <span className="text-slate-400 text-[11px] font-mono">Zero Hallucination</span>
           </div>
         </div>
 
         {/* Card 4: Legal Admissibility */}
-        <div className="relative p-4 rounded-2xl bg-white shadow-xs flex flex-col justify-between overflow-hidden border border-slate-200">
+        <div className="p-4 rounded-xl bg-white shadow-2xs flex flex-col justify-between border border-slate-200/80">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-700 font-bold flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[15px] text-emerald-600">verified_user</span>
-                Legal Admissibility
+              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+                Admissibility
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-mono font-bold border border-emerald-200">
+              <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-800 font-mono font-medium border border-emerald-200/60">
                 SEC. 65B
               </span>
             </div>
             <div className="mt-2 flex items-baseline justify-between">
-              <span className="font-display text-xl font-bold text-slate-900 tracking-tight">
+              <span className="font-display text-lg font-bold text-slate-900 tracking-tight">
                 BSA 2023
               </span>
-              <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
-                CERTIFIED
+              <span className="text-xs font-mono font-semibold text-emerald-700">
+                SHA-256 Valid
               </span>
             </div>
           </div>
-          <div className="mt-3 pt-2 flex items-center justify-between text-xs text-slate-600 border-t border-slate-100">
-            <span className="text-slate-500 font-mono text-[11px]">Ledger Hash: 7f83b1…26d9</span>
-            <span className="text-emerald-700 text-[11px] font-mono flex items-center gap-0.5 font-bold">
-              <span className="material-symbols-outlined text-[13px]">lock</span> Audited
+          <div className="mt-3 pt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100">
+            <span className="font-mono text-[11px]">Ledger: 7f83b1…</span>
+            <span className="text-emerald-700 text-[11px] font-mono font-medium">
+              Tamper-Proof
             </span>
           </div>
         </div>
       </section>
 
       {/* 3. EVALUATED HYPOTHESES ENGINE PANEL */}
-      <section className="flex flex-col flex-shrink-0 min-h-fit gap-3">
+      <section className="flex flex-col flex-shrink-0 min-h-fit gap-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-1.5 h-4 bg-sky-600 rounded-full"></div>
-            <h3 className="font-display text-sm font-bold text-slate-900 tracking-tight uppercase">
-              Autonomous Hypothesis Engine <span className="text-slate-400 font-normal">/</span> <span className="text-sky-700 font-mono text-xs">Verification Matrix</span>
+            <h3 className="font-display text-xs font-bold text-slate-900 tracking-tight uppercase">
+              Evaluated Hypotheses & Findings
             </h3>
           </div>
-          <span className="text-[11px] text-slate-500 font-mono uppercase tracking-wider">
-            Zero Hallucination Verified • Dual Cross-Validation
+          <span className="text-[11px] text-slate-400 font-mono">
+            Dual Cross-Validation Matrix
           </span>
         </div>
 
         {/* Comparative Hypotheses Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           {hypotheses.map((h, idx) => {
             const isSupported = (h.status || 'SUPPORTED') === 'SUPPORTED';
             const confidenceNum = Number(h.confidence || (isSupported ? 95.0 : 98.2));
@@ -388,36 +363,31 @@ export default function AgentQueryBar({
             return (
               <div
                 key={h.id || idx}
-                className="relative p-4 rounded-2xl bg-white shadow-xs flex flex-col justify-between group hover:border-sky-400 transition-colors border border-slate-200"
+                className="p-4 rounded-xl bg-white shadow-2xs flex flex-col justify-between border border-slate-200/80 hover:border-slate-300 transition-colors"
               >
                 <div>
                   <div className="flex items-center justify-between pb-1">
                     <div className="flex items-center gap-1.5">
-                      <span className={`px-2 py-0.5 rounded-lg text-xs font-mono font-bold ${
-                        isSupported ? 'bg-sky-50 text-sky-700 border border-sky-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
-                      }`}>
+                      <span className="px-1.5 py-0.2 rounded text-xs font-mono font-semibold bg-slate-100 text-slate-700 border border-slate-200/60">
                         {h.id || `H${idx + 1}`}
                       </span>
-                      <span className="text-[10px] text-slate-500 font-mono font-semibold">{h.code || `CRIM-HYP-0${idx + 1}`}</span>
+                      <span className="text-[10px] text-slate-400 font-mono">{h.code || `CRIM-HYP-0${idx + 1}`}</span>
                     </div>
-                    <div className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${
-                      isSupported ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
+                    <div className={`flex items-center gap-1 px-2 py-0.2 rounded text-xs font-mono font-medium ${
+                      isSupported ? 'bg-emerald-50 text-emerald-800 border border-emerald-200/60' : 'bg-rose-50 text-rose-800 border border-rose-200/60'
                     }`}>
-                      <span className="material-symbols-outlined text-[14px]">
-                        {isSupported ? 'check_circle' : 'cancel'}
-                      </span>
                       <span>{h.status || (isSupported ? 'SUPPORTED' : 'REJECTED')}</span>
                     </div>
                   </div>
 
-                  <p className="mt-2 text-sm font-bold text-slate-900 leading-snug">
+                  <p className="mt-2 text-xs font-semibold text-slate-900 leading-snug">
                     {h.title || h.claim}
                   </p>
 
-                  <div className="mt-3 p-2.5 rounded-xl bg-slate-50 text-xs text-slate-700 space-y-1 border border-slate-200">
-                    <div className="flex items-center justify-between text-slate-500 font-mono text-[10px] uppercase font-bold tracking-wider">
-                      <span>Forensic Rationale</span>
-                      <span className={`font-mono font-bold ${isSupported ? 'text-sky-700' : 'text-rose-600'}`}>
+                  <div className="mt-3 p-2 rounded-lg bg-slate-50 text-xs space-y-1 border border-slate-200/60">
+                    <div className="flex items-center justify-between text-slate-400 font-mono text-[10px] uppercase font-semibold">
+                      <span>Rationale</span>
+                      <span className={`font-mono ${isSupported ? 'text-slate-700' : 'text-rose-700'}`}>
                         {h.metric_label || (isSupported ? 'Empirical Match' : 'Refuted')}
                       </span>
                     </div>
@@ -425,21 +395,21 @@ export default function AgentQueryBar({
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-100">
-                  <div className="flex flex-wrap gap-1.5 mb-2">
+                <div className="mt-3 pt-2.5 border-t border-slate-100">
+                  <div className="flex flex-wrap gap-1 mb-2">
                     {tags.map((tag, tIdx) => (
-                      <span key={tIdx} className="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 font-mono text-[10px] border border-slate-200 font-medium">
+                      <span key={tIdx} className="px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 font-mono text-[9px]">
                         {tag}
                       </span>
                     ))}
                   </div>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-500 font-medium">{isSupported ? 'Confidence:' : 'Refutation Confidence:'}</span>
-                    <span className={`font-mono font-bold ${isSupported ? 'text-emerald-700' : 'text-rose-600'}`}>
-                      {confidenceNum.toFixed(1)}% {isSupported ? 'Support' : 'Refuted'}
+                    <span className="text-slate-400 text-[11px]">Confidence</span>
+                    <span className={`font-mono text-[11px] font-semibold ${isSupported ? 'text-emerald-700' : 'text-rose-700'}`}>
+                      {confidenceNum.toFixed(1)}%
                     </span>
                   </div>
-                  <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1.5">
+                  <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden mt-1">
                     <div
                       className={`h-full rounded-full ${isSupported ? 'bg-emerald-600' : 'bg-rose-500'}`}
                       style={{ width: `${Math.min(100, Math.max(10, confidenceNum))}%` }}
@@ -453,37 +423,35 @@ export default function AgentQueryBar({
       </section>
 
       {/* 4. MULTI-AGENT REASONING PIPELINE & COURT DOSSIER */}
-      <section className="rounded-2xl p-5 bg-white shadow-xs flex flex-col flex-shrink-0 min-h-fit gap-3 border border-slate-200">
-        <div className="flex flex-wrap items-center justify-between gap-2.5">
+      <section className="rounded-xl p-4 bg-white shadow-2xs flex flex-col flex-shrink-0 min-h-fit gap-3 border border-slate-200/80">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-purple-600 text-[20px]">timeline</span>
-            <h3 className="font-display text-sm font-bold text-slate-900 tracking-tight">
-              AI Investigation Steps & Findings
+            <h3 className="font-display text-xs font-bold text-slate-900 tracking-tight uppercase">
+              Investigation Steps & Findings
             </h3>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={() => setShowSteps(!showSteps)}
-              className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs transition-colors flex items-center gap-1 border border-slate-200 font-semibold cursor-pointer shadow-xs"
+              className="px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs transition-colors flex items-center gap-1 border border-slate-200 font-medium cursor-pointer shadow-2xs"
             >
-              <span>{showSteps ? 'Collapse Steps' : `View ${agentExecutionSteps.length} Investigation Steps`}</span>
-              <span className="material-symbols-outlined text-[15px]">
+              <span>{showSteps ? 'Hide Steps' : `Steps (${agentExecutionSteps.length})`}</span>
+              <span className="material-symbols-outlined text-[14px]">
                 {showSteps ? 'expand_less' : 'expand_more'}
               </span>
             </button>
             <button
               onClick={() => setShowDossier(!showDossier)}
-              className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs transition-colors flex items-center gap-1 border border-amber-200 font-semibold cursor-pointer shadow-xs"
+              className="px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs transition-colors flex items-center gap-1 border border-slate-200 font-medium cursor-pointer shadow-2xs"
             >
-              <span className="material-symbols-outlined text-[15px] text-amber-600">gavel</span>
               <span>Evidence Summary</span>
             </button>
             {onFocusSubgraph && (
               <button
                 onClick={() => onFocusSubgraph(agentResponse?.highlighted_nodes, agentResponse?.highlighted_edges)}
-                className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                className="px-3 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[15px]">hub</span>
+                <span className="material-symbols-outlined text-[14px]">hub</span>
                 <span>Highlight on Graph</span>
               </button>
             )}
@@ -492,15 +460,15 @@ export default function AgentQueryBar({
 
         {/* Execution Steps Timeline */}
         {showSteps && (
-          <div className="flex flex-col gap-1.5 pt-2 border-t border-slate-100 animate-fade-in">
+          <div className="flex flex-col gap-1 pt-2 border-t border-slate-100 animate-fade-in">
             {agentExecutionSteps.map((step, idx) => (
-              <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                <div className="flex items-center gap-2.5">
-                  <span className="font-mono text-sky-700 font-bold">{idx + 1}.</span>
-                  <span className="font-bold text-slate-900">{step.agent}:</span>
-                  <span className="text-slate-700">{step.action}</span>
+              <div key={idx} className="flex items-center justify-between p-2 rounded-lg bg-slate-50/70 border border-slate-200/60 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-slate-400">{idx + 1}.</span>
+                  <span className="font-medium text-slate-900">{step.agent}:</span>
+                  <span className="text-slate-600">{step.action}</span>
                 </div>
-                <span className="font-mono text-[10px] text-slate-600 px-2 py-0.5 rounded bg-white border border-slate-200 font-semibold shrink-0">
+                <span className="font-mono text-[10px] text-slate-400 shrink-0">
                   {step.time || '18ms'}
                 </span>
               </div>
@@ -508,28 +476,22 @@ export default function AgentQueryBar({
           </div>
         )}
 
-        {/* Collapsible Judicial Dossier Preview */}
+        {/* Judicial Dossier Preview */}
         {showDossier && (
-          <div className="p-4 rounded-2xl bg-slate-50 border border-sky-300 flex flex-col gap-3 animate-fade-in text-xs shadow-xs">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-              <span className="font-bold uppercase tracking-wider text-[11px] font-mono text-emerald-700 flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[15px]">verified</span>
-                Court-Ready Evidence Summary (BSA Section 65B Certified)
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 flex flex-col gap-2.5 animate-fade-in text-xs shadow-2xs">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-1.5">
+              <span className="font-semibold uppercase tracking-wider text-[11px] font-mono text-emerald-800 flex items-center gap-1">
+                <span className="material-symbols-outlined text-[14px]">verified</span>
+                Evidence Summary (BSA §65B Certified)
               </span>
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-slate-500 text-[10px]">Verified Hash Ledger</span>
-                <button
-                  onClick={handleCopyDossier}
-                  className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 font-mono text-[11px] border border-slate-200 font-semibold flex items-center gap-1 cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[14px]">
-                    {copiedDossier ? 'check' : 'content_copy'}
-                  </span>
-                  <span>{copiedDossier ? 'Copied!' : 'Copy Summary'}</span>
-                </button>
-              </div>
+              <button
+                onClick={handleCopyDossier}
+                className="px-2 py-0.5 rounded bg-white hover:bg-slate-100 text-slate-700 font-mono text-[10px] border border-slate-200 font-medium flex items-center gap-1 cursor-pointer"
+              >
+                <span>{copiedDossier ? 'Copied' : 'Copy'}</span>
+              </button>
             </div>
-            <div className="bg-white p-3.5 rounded-xl border border-slate-200 font-mono text-xs text-slate-800 leading-relaxed max-h-[360px] overflow-y-auto whitespace-pre-wrap no-scrollbar">
+            <div className="bg-white p-3 rounded-lg border border-slate-200/80 font-mono text-xs text-slate-700 leading-relaxed max-h-[300px] overflow-y-auto whitespace-pre-wrap no-scrollbar">
               {dossierContent}
             </div>
           </div>
