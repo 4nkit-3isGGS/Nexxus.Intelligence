@@ -190,3 +190,60 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Executive Card Configuration matching user design system */
+.executive-card {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid #E2E8F0;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 28px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.executive-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
+  border-color: #BFDBFE;
+}
+
+/* Hero Typography */
+.hero-title {
+  font-size: clamp(38px, 4.2vw, 64px);
+  line-height: 1.08;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  color: #0F172A;
+}
+
+.hero-subtitle {
+  font-size: 18px;
+  line-height: 1.65;
+  color: #64748B;
+  max-width: 650px;
+}
+
+/* Icon container color presets */
+.icon-blue {
+  background-color: #EFF6FF;
+  color: #2563EB;
+}
+.icon-purple {
+  background-color: #F5F3FF;
+  color: #8B5CF6;
+}
+.icon-yellow {
+  background-color: #FFFBEB;
+  color: #F59E0B;
+}
+.icon-red {
+  background-color: #FEF2F2;
+  color: #EF4444;
+}
+.icon-green {
+  background-color: #ECFDF5;
+  color: #10B981;
+}
+

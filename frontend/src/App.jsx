@@ -372,6 +372,7 @@ export default function App() {
                   setAuthModalTab(tab);
                   setShowAuthModal(true);
                 }}
+                onOpenFieldGuide={() => setShowFieldGuideModal(true)}
                 currentUser={currentUser}
                 onQuickRoleSelect={handleQuickRoleSelect}
                 onInvestigate={(query, subjectId) => handleTriggerInvestigation(query, subjectId)}
