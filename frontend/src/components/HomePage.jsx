@@ -86,18 +86,25 @@ export default function HomePage({
               <span className="material-symbols-outlined text-[20px]">search</span>
             </button>
 
-            {/* Officer Settings / Clearance Modal Button */}
-            <button
-              onClick={() => onOpenAuth?.('login')}
-              className="w-10 h-10 rounded-full border border-[#E2E8F0] hover:border-[#CBD5E1] bg-white hover:bg-slate-50 flex items-center justify-center text-[#64748B] hover:text-[#0F172A] transition-all cursor-pointer shadow-2xs relative active:scale-95"
-              title={currentUser ? `Clearance: ${currentUser.name} (${currentUser.role})` : "Officer Clearance & Settings"}
-              aria-label="Officer Settings and Clearance"
-            >
-              <span className="material-symbols-outlined text-[20px]">settings</span>
-              {currentUser && (
-                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#10B981] ring-2 ring-white"></span>
-              )}
-            </button>
+            {/* Sign In / Officer Profile Button (Replaces Settings Icon) */}
+            {currentUser ? (
+              <button
+                onClick={() => onOpenAuth?.('login')}
+                className="flex items-center gap-2 px-3 sm:px-3.5 py-2 rounded-xl border border-[#E2E8F0] hover:border-[#CBD5E1] bg-white hover:bg-slate-50 text-[#0F172A] text-xs sm:text-sm font-semibold shadow-2xs transition-all cursor-pointer active:scale-95 whitespace-nowrap"
+                title={`Signed in as ${currentUser.name} (${currentUser.role}) - Click to switch`}
+              >
+                <span className="w-2 h-2 rounded-full bg-[#10B981] ring-2 ring-emerald-100 flex-shrink-0"></span>
+                <span className="max-w-[120px] truncate">{currentUser.name}</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => onOpenAuth?.('login')}
+                className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl border border-[#E2E8F0] hover:border-[#CBD5E1] bg-white hover:bg-slate-50 text-[#0F172A] text-xs sm:text-sm font-semibold shadow-2xs hover:shadow-xs transition-all cursor-pointer active:scale-95 whitespace-nowrap"
+              >
+                <span className="material-symbols-outlined text-[18px] text-[#64748B]">login</span>
+                <span>Sign In</span>
+              </button>
+            )}
 
             {/* Main Primary CTA Button */}
             <button
