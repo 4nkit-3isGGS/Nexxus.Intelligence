@@ -7,6 +7,14 @@ export default function LegalAuditVault({
   currentUser, 
   onRoleChange 
 }) {
+  const formatMaskedHash = (hashStr) => {
+    if (!hashStr) return 'xxxx...xxxx';
+    const str = String(hashStr).trim();
+    if (str.includes('(GENESIS)')) return 'xxxx...0000000000 (GENESIS)';
+    if (str.length <= 10) return `xxxx...${str}`;
+    return `xxxx...${str.slice(-10)}`;
+  };
+
   const [auditLogs, setAuditLogs] = useState(MOCK_AUDIT_LOGS);
   const [loadingLogs, setLoadingLogs] = useState(false);
   const [verifying, setVerifying] = useState(false);
@@ -201,9 +209,7 @@ export default function LegalAuditVault({
               </div>
               <div className="flex items-center justify-between gap-2 mt-1">
                 <span className="text-xs text-slate-900 font-mono truncate font-semibold" title={String(latestTipHash || '')}>
-                  {typeof latestTipHash === 'string' && latestTipHash.length > 18
-                    ? `${latestTipHash.slice(0, 10)}...${latestTipHash.slice(-8)}`
-                    : (latestTipHash || 'ef2d12...fe39d')}
+                  {formatMaskedHash(latestTipHash)}
                 </span>
                 <button
                   onClick={handleCopyTip}
@@ -404,13 +410,13 @@ export default function LegalAuditVault({
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2 border-t border-slate-200/70 font-mono text-[10px]">
-                  <div className="truncate text-slate-500">
+                  <div className="truncate text-slate-500" title={`Full PREV_HASH: ${prevHash}`}>
                     <span className="font-semibold text-slate-600">PREV_HASH: </span>
-                    <span className="text-slate-400">{prevHash}</span>
+                    <span className="text-slate-500 font-mono">{formatMaskedHash(prevHash)}</span>
                   </div>
-                  <div className="truncate text-slate-800 font-medium">
+                  <div className="truncate text-slate-800 font-medium" title={`Full ENTRY_HASH: ${entryHash}`}>
                     <span className="font-semibold text-slate-600">ENTRY_HASH: </span>
-                    <span className="text-slate-900 font-semibold">{entryHash}</span>
+                    <span className="text-slate-900 font-semibold font-mono">{formatMaskedHash(entryHash)}</span>
                   </div>
                 </div>
               </div>

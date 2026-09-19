@@ -26,6 +26,8 @@ export default function FilterBar({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchContainerRef = useRef(null);
   const highRiskContainerRef = useRef(null);
+  const typeFilterContainerRef = useRef(null);
+  const timelineContainerRef = useRef(null);
 
   const clusters = [
     { id: 'ALL', label: 'All Entities' },
@@ -108,6 +110,12 @@ export default function FilterBar({
       }
       if (highRiskContainerRef.current && !highRiskContainerRef.current.contains(e.target)) {
         setShowHighRisk(false);
+      }
+      if (typeFilterContainerRef.current && !typeFilterContainerRef.current.contains(e.target)) {
+        setShowTypeFilter(false);
+      }
+      if (timelineContainerRef.current && !timelineContainerRef.current.contains(e.target)) {
+        setShowTimeline(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -275,7 +283,7 @@ export default function FilterBar({
           </div>
 
           {/* Entity Types Dropdown */}
-          <div className="relative">
+          <div className="relative" ref={typeFilterContainerRef}>
             <button
               onClick={() => setShowTypeFilter(!showTypeFilter)}
               className="flex items-center gap-1.5 px-2.5 py-1.2 rounded-lg bg-white text-slate-700 text-xs hover:bg-slate-50 transition-colors border border-slate-200 shadow-2xs font-medium cursor-pointer"
@@ -316,7 +324,7 @@ export default function FilterBar({
           </div>
 
           {/* Timeline Button */}
-          <div className="relative">
+          <div className="relative" ref={timelineContainerRef}>
             <button
               onClick={() => setShowTimeline(!showTimeline)}
               className={`flex items-center gap-1.5 px-2.5 py-1.2 rounded-lg transition-all text-xs border shadow-2xs font-medium cursor-pointer ${

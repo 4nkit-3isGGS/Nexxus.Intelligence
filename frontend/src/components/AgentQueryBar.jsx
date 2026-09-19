@@ -138,8 +138,6 @@ export default function AgentQueryBar({
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                 <span>{isLiveFastAPI ? 'AI LIVE' : 'AI READY'}</span>
               </span>
-              <span className="text-slate-300">•</span>
-              <span className="text-slate-500">FastAPI Traversal</span>
             </div>
           </div>
 

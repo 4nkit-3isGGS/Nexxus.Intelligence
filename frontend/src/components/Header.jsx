@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 
 export default function Header({ 
@@ -20,7 +20,35 @@ export default function Header({
 }) {
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const roleDropdownRef = useRef(null);
+  const profileMenuRef = useRef(null);
   const location = useLocation();
+
+  // Close dropdowns on outside click or ESC key
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (roleDropdownRef.current && !roleDropdownRef.current.contains(event.target)) {
+        setShowRoleDropdown(false);
+      }
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setShowRoleDropdown(false);
+        setShowProfileMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   // Infer active view from URL pathname if activeTab is not passed
   const getTabFromPath = () => {
@@ -127,7 +155,7 @@ export default function Header({
           </div>
 
           {/* RBAC Clearance Tier Selector */}
-          <div className="relative">
+          <div className="relative" ref={roleDropdownRef}>
             <button 
               onClick={() => setShowRoleDropdown(!showRoleDropdown)}
               className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs transition-colors border border-slate-200/80 shadow-2xs cursor-pointer"
@@ -205,7 +233,7 @@ export default function Header({
           </button>
 
           {/* User Profile Avatar */}
-          <div className="relative ml-1">
+          <div className="relative ml-1" ref={profileMenuRef}>
             <button 
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 flex items-center justify-center flex-shrink-0 cursor-pointer transition-colors shadow-2xs"
