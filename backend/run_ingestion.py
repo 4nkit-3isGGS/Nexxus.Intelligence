@@ -10,7 +10,9 @@ from backend.app.ingestion.graph_ingestor import ingest_nlp_payload
 
 
 def run():
-    contract_file = "output_contract.JSON"
+    contract_file = "Abhidhas_output_enriched.JSON"
+    if not os.path.exists(contract_file):
+        contract_file = "output_contract.json"
     if not os.path.exists(contract_file):
         print(f"Error: {contract_file} not found.")
         sys.exit(1)

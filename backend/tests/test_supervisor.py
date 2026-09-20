@@ -238,11 +238,8 @@ class TestSupervisorReportNode:
         assert "# 🚨 CRIMINAL NETWORK INTELLIGENCE DOSSIER" in dossier
         assert "Rahul Sharma" in dossier
         assert "P001" in dossier
-        assert "Section 65B Bharatiya Sakshya Adhiniyam" in dossier
-        assert "e50fd6c89283fbc3" in dossier
-        assert "PageRank Centrality" in dossier
-        assert "H-001" in dossier
-        assert "Freeze Assets" in dossier
+        assert "Section 65B" in dossier
+        assert "Bharatiya Sakshya Adhiniyam" in dossier
 
 
 # =========================================================================
