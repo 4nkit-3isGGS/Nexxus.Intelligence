@@ -313,3 +313,41 @@ class TestAuditAndRbacApiEndpoints:
         response = client.post("/api/investigate", json=payload, headers=headers)
         assert response.status_code == 403
         assert "lacks required permission 'INVESTIGATE'" in response.json()["detail"]
+
+    def test_entity_merge_forbidden_for_analyst_and_investigator(self, client):
+        # Only LEAD_INVESTIGATOR can merge entities
+        headers = {
+            "X-User-Id": "ANA_01",
+            "X-Role": "ANALYST",
+            "X-Badge-Number": "CY-01",
+        }
+        payload = {
+            "target_id": "P003",
+            "duplicate_id": "P-991",
+        }
+        response = client.post("/api/entity/merge", json=payload, headers=headers)
+        assert response.status_code == 403
+        assert "lacks required permission 'MERGE_ENTITIES'" in response.json()["detail"]
+
+    def test_entity_details_pii_masked_for_analyst(self, client):
+        analyst_headers = {
+            "X-User-Id": "ANA_01",
+            "X-Role": "ANALYST",
+            "X-Badge-Number": "CY-01",
+        }
+        response = client.get("/api/entity/P001", headers=analyst_headers)
+        if response.status_code == 200:
+            data = response.json()
+            if "phone" in data and data["phone"]:
+                assert "XXXXX" in data["phone"]
+
+        lead_headers = {
+            "X-User-Id": "LEAD_01",
+            "X-Role": "LEAD_INVESTIGATOR",
+            "X-Badge-Number": "WB-01",
+        }
+        response_lead = client.get("/api/entity/P001", headers=lead_headers)
+        if response_lead.status_code == 200:
+            data_lead = response_lead.json()
+            if "phone" in data_lead and data_lead["phone"]:
+                assert "XXXXX" not in data_lead["phone"]

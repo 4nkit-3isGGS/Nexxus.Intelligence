@@ -1,0 +1,728 @@
+import React, { useState, useEffect } from 'react';
+import { apiService } from '../services/api';
+import { useToast } from '../context/ToastContext';
+
+export default function EvidenceDrawer({
+  selectedNode,
+  onClose,
+  onFocusNode,
+  onTraceKingpin,
+  onOpenFirDoc,
+  onExpandSubgraph,
+  onInvestigateNode,
+  allEdges = [],
+  officerRole = 'LEAD_INVESTIGATOR',
+  currentUser,
+  onOpenDossierModal
+}) {
+  const [activeTab, setActiveTab] = useState('profile');
+  const [liveNeighbors, setLiveNeighbors] = useState([]);
+  const [sharedLocations, setSharedLocations] = useState([]);
+  const [subgraphDepth, setSubgraphDepth] = useState(2);
+  const [loadingNeighbors, setLoadingNeighbors] = useState(false);
+  const [loadingShared, setLoadingShared] = useState(false);
+  const [selectedEdgeEvidence, setSelectedEdgeEvidence] = useState(null);
+  const [copiedField, setCopiedField] = useState(null);
+  const scrollRef = React.useRef(null);
+
+  // Reset scroll to top when selectedNode changes
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  }, [selectedNode]);
+
+  useEffect(() => {
+    if (!selectedNode) return;
+
+    // Fetch 1-hop direct neighbors from API
+    const fetchNeighbors = async () => {
+      setLoadingNeighbors(true);
+      const res = await apiService.getEntityNeighbors(selectedNode.id);
+      if (Array.isArray(res)) {
+        setLiveNeighbors(res);
+      }
+      setLoadingNeighbors(false);
+    };
+
+    // Fetch shared locations from API
+    const fetchShared = async () => {
+      setLoadingShared(true);
+      const res = await apiService.getSharedLocations(selectedNode.id);
+      if (Array.isArray(res)) {
+        setSharedLocations(res);
+      }
+      setLoadingShared(false);
+    };
+
+    fetchNeighbors();
+    fetchShared();
+  }, [selectedNode]);
+
+  // Keyboard shortcut (ESC) to close drawer
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose?.();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  if (!selectedNode) return null;
+
+  const connectedEdges = allEdges.filter(
+    (e) => e.source === selectedNode.id || e.target === selectedNode.id
+  );
+
+  const { toast } = useToast();
+
+  const handleCopy = (text, fieldName) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(fieldName);
+    toast.success('Copied to Clipboard', `${fieldName || 'Evidence record'} copied.`);
+    setTimeout(() => setCopiedField(null), 1800);
+  };
+
+  const handleExportDossier = () => {
+    if (onOpenDossierModal) {
+      onOpenDossierModal(selectedNode);
+    } else {
+      toast.info('Case Dossier', `Court evidence dossier generated for ${selectedNode.name}.`);
+    }
+  };
+
+  const handleInspectEvidence = async (otherId) => {
+    const ev = await apiService.getEvidence(selectedNode.id, otherId);
+    setSelectedEdgeEvidence(ev);
+  };
+
+  const handleTriggerSubgraph = async () => {
+    const sub = await apiService.getEntitySubgraph(selectedNode.id, subgraphDepth);
+    if (onExpandSubgraph) {
+      onExpandSubgraph(sub);
+    }
+  };
+
+  const isCritical = (selectedNode.risk_score || 0) >= 85;
+  const isHigh = (selectedNode.risk_score || 0) >= 70;
+
+  // Law Enforcement RBAC PII Clearance & Redaction Logic
+  const isLead = officerRole === 'LEAD_INVESTIGATOR' || officerRole === 'ADMIN';
+  const isInvestigator = officerRole === 'INVESTIGATOR';
+  const isAnalyst = officerRole === 'ANALYST';
+  const isAuditor = officerRole === 'AUDITOR';
+
+  // Dynamic PII Redaction matching Bharat Sakshya Adhiniyam standards
+  const rawPhone = selectedNode.phone || '9832145678';
+  const displayPhone = (isLead || isInvestigator)
+    ? rawPhone
+    : `+91-XXXXX-XX${rawPhone.slice(-3)}`;
+
+  const rawAadhaar = '4892-1204-5829';
+  const displayAadhaar = isLead ? rawAadhaar : 'XXXX-XXXX-5829';
+
+  const rawAccount = selectedNode.account || '30123456789';
+  const displayAccount = isLead ? rawAccount : `*******${rawAccount.slice(-4)}`;
+
+  const clearanceBadge = isLead
+    ? { label: 'TIER 1 // UNMASKED PII', style: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
+    : isInvestigator
+    ? { label: 'TIER 2 // MASKED AADHAAR', style: 'bg-sky-50 text-sky-700 border-sky-200' }
+    : isAnalyst
+    ? { label: 'TIER 2 // FULLY MASKED PII', style: 'bg-amber-50 text-amber-800 border-amber-200' }
+    : { label: 'TIER 3 // READ-ONLY AUDIT', style: 'bg-purple-50 text-purple-800 border-purple-200' };
+
+  // Biometric fallback avatar images
+  const portraitUrl = selectedNode.id === 'P003' 
+    ? "https://lh3.googleusercontent.com/aida-public/AB6AXuD_R3QdKfINDV_QvT9YM5XQsU5l5YN1cOG19uSHoDUbYG4FsW4n_bhA4vviPx8y7tCf0qa5Ir6BNsGBtRkMJo_PjWrhtflPTFyzeMKUVY016iyGoK8WTnM_IqL3o1OfvZKhRhOUFV-KV38_2RwMCfj_7UFPBsYU5h2fpvrrYRIxazX20UqCbEEvwSmFbhhIQWRcocXWSgJJqC99HUwGQIdYyFg53T5QTnQn00fx2tG1xYH8CNDXidh1"
+    : selectedNode.id === 'P008'
+    ? "https://lh3.googleusercontent.com/aida-public/AB6AXuA1-lSQBY1T70YowNjtiyP7r0Cp--UIS8F6H2lXxLfGDs2giUxpD9mC2pYxd2EYt3XhYN5gnLZSazF_WjBXmLl_JwKPDe22Lk8dEfhqUMo8ya4MkNSAK1xoEKL2BP_Izyde0Ygs0GpML2qthuBcZPqssH0JpgUdmFlybXYOGR1k_5p8BwkAjDVwi4fD1kwLMnZS8QMRhI3FoOK-05CLNiwAbpm58cbHpmASc3d2WRoC08TkVcMsYoMC"
+    : selectedNode.id === 'P002'
+    ? "https://lh3.googleusercontent.com/aida-public/AB6AXuCgpYGXni-SFXhLNK1AuxKskfWK2QU0meqGVkdOBs88Ptn-XT7ZMIS95qqCrhxQ1RwcHg4DqJTQ-9Jboeoqy1rvHyewpGu1rLPKmjbwsaloTFU8EA8USgZRProZAtvY48FT3S6-DqmHkW7toTTKJrn5slx8-CMVPEuCohMvCcoJDsY49S3D4D7PCfLy08PVqJIT7eaOqUAGjFwtzz_ocdy-InLyyZEC0S83GLcgNMzktsQUGcOG9vRf"
+    : null;
+
+  return (
+    <aside className="w-[500px] max-w-[95vw] fixed top-16 bottom-0 right-0 z-30 bg-white shadow-2xl border-l border-slate-200/80 text-slate-900 flex flex-col overflow-hidden animate-fade-in">
+      {/* Top Header Bar */}
+      <div className="h-14 px-4 bg-white border-b border-slate-200/80 flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-rose-600 text-[18px]">
+            security
+          </span>
+          <div className="flex flex-col">
+            <span className="font-display text-[12px] text-slate-900 font-bold uppercase tracking-wider leading-tight">
+              Target Dossier
+            </span>
+            <span className="text-[10px] text-slate-400 font-mono">
+              ID: {selectedNode.id}
+            </span>
+          </div>
+          {isCritical && (
+            <span className="ml-1 px-1.5 py-0.2 rounded bg-rose-50 text-rose-800 border border-rose-200/60 text-[10px] font-medium font-mono">
+              Critical
+            </span>
+          )}
+        </div>
+
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center gap-1.5 transition-all border border-slate-200 shadow-2xs cursor-pointer"
+          title="Close (ESC)"
+        >
+          <span className="material-symbols-outlined text-[16px] text-slate-500">close</span>
+          <span className="text-xs font-semibold">Close</span>
+          <kbd className="hidden sm:inline-block px-1 py-0.2 text-[9px] font-mono bg-white rounded border border-slate-200 text-slate-500 font-medium">ESC</kbd>
+        </button>
+      </div>
+
+      {/* Scrollable Dossier Content */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-3.5 no-scrollbar bg-slate-50/40">
+        {/* Suspect Profile Card */}
+        <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-2xs relative flex flex-col flex-shrink-0 min-h-fit gap-3">
+          <div className="flex items-start gap-3 relative z-10">
+            {/* Biometric Portrait or Icon Box */}
+            <div className="relative w-18 h-18 rounded-lg overflow-hidden border border-slate-200 shadow-2xs flex-shrink-0 bg-slate-100 flex items-center justify-center">
+              {portraitUrl ? (
+                <img
+                  src={portraitUrl}
+                  alt={`Portrait of ${selectedNode.name}`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="material-symbols-outlined text-[32px] text-slate-500">
+                  {selectedNode.type === 'Person' ? 'person' : selectedNode.type === 'Vehicle' ? 'directions_car' : 'apartment'}
+                </span>
+              )}
+              <span className="absolute bottom-0 inset-x-0 bg-slate-900/80 text-white text-center font-mono text-[9px] font-semibold py-0.5">
+                Risk {selectedNode.risk_score || 0}
+              </span>
+            </div>
+
+            {/* Suspect Details */}
+            <div className="flex flex-col min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-1">
+                <h3 className="font-display text-base text-slate-900 font-bold truncate">
+                  {selectedNode.name}
+                </h3>
+                <span className="px-1.5 py-0.2 rounded bg-slate-100 font-mono text-[10px] text-slate-600 font-medium border border-slate-200">
+                  {selectedNode.id}
+                </span>
+              </div>
+
+              {selectedNode.aliases && selectedNode.aliases.length > 0 && (
+                <div className="flex items-center gap-1.5 text-slate-500 text-xs mt-0.5 flex-wrap">
+                  <span className="text-[11px]">Aliases:</span>
+                  {selectedNode.aliases.map((alias, idx) => (
+                    <span key={idx} className="px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-mono text-[10px]">
+                      "{alias}"
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex items-center gap-1.5 text-xs mt-1">
+                <span className="text-slate-600 font-medium truncate">
+                  {selectedNode.role || `${selectedNode.type} Entity`} • Cluster {selectedNode.cluster_id || 'A'}
+                </span>
+              </div>
+
+              {selectedNode.phone && (
+                <div className="flex items-center gap-1.5 text-xs text-slate-600 mt-1">
+                  <span className="material-symbols-outlined text-[14px] text-slate-400">phone_iphone</span>
+                  <span className="font-mono text-slate-900 font-semibold select-all">{displayPhone}</span>
+                  {(isLead || isInvestigator) ? (
+                    <button 
+                      onClick={() => handleCopy(displayPhone, 'phone')}
+                      className="material-symbols-outlined text-[13px] text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                      title="Copy Phone Number"
+                    >
+                      content_copy
+                    </button>
+                  ) : (
+                    <span className="text-[9px] text-amber-700 font-mono font-medium px-1 rounded bg-amber-50 border border-amber-200">
+                      MASKED
+                    </span>
+                  )}
+                  {copiedField === 'phone' && (
+                    <span className="text-[10px] text-emerald-600 font-medium">COPIED</span>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="grid grid-cols-3 gap-1.5 pt-1">
+            <button
+              onClick={() => onTraceKingpin(selectedNode)}
+              className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 text-xs font-medium transition-all cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[15px]">near_me</span>
+              <span className="truncate">Trace Apex</span>
+            </button>
+            <button
+              onClick={handleTriggerSubgraph}
+              className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium transition-colors shadow-2xs cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[15px] text-slate-500">hub</span>
+              <span className="truncate">Expand</span>
+            </button>
+            <button
+              onClick={handleExportDossier}
+              className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium transition-colors shadow-2xs cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[15px] text-slate-500">description</span>
+              <span className="truncate">Export</span>
+            </button>
+          </div>
+
+          {/* AI Investigation Trigger */}
+          {onInvestigateNode && (
+            isAuditor ? (
+              <div className="w-full py-2 px-3 rounded-lg bg-slate-100 border border-slate-200 text-slate-500 text-xs font-medium flex items-center justify-center gap-1.5">
+                <span className="material-symbols-outlined text-[15px]">lock</span>
+                <span>Auditor: Read-Only Compliance</span>
+              </div>
+            ) : (
+              <button
+                onClick={() => onInvestigateNode(selectedNode)}
+                className="w-full py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium shadow-2xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                title="Launch AI investigation on this suspect"
+              >
+                <span className="material-symbols-outlined text-[15px]">
+                  auto_awesome
+                </span>
+                <span>Run Multi-Agent Investigation</span>
+              </button>
+            )
+          )}
+        </div>
+
+        {/* Tab Navigation Bar */}
+        <div className="sticky top-0 z-20 bg-slate-100 p-0.5 rounded-lg flex items-center justify-between border border-slate-200/80 flex-shrink-0">
+          <button
+            onClick={() => setActiveTab('profile')}
+            className={`flex-1 py-1.2 px-2 rounded-md text-xs transition-all text-center cursor-pointer ${
+              activeTab === 'profile'
+                ? 'bg-white text-slate-900 font-semibold shadow-2xs'
+                : 'text-slate-500 hover:text-slate-900 font-medium'
+            }`}
+          >
+            Profile
+          </button>
+          <button
+            onClick={() => setActiveTab('links')}
+            className={`flex-1 py-1.2 px-2 rounded-md text-xs transition-all text-center flex items-center justify-center gap-1 cursor-pointer ${
+              activeTab === 'links'
+                ? 'bg-white text-slate-900 font-semibold shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900 font-medium'
+            }`}
+          >
+            <span>Links</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-800 text-[9px] font-bold">
+              {connectedEdges.length || liveNeighbors.length || 3}
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab('locations')}
+            className={`flex-1 py-1.5 px-2 rounded-lg text-xs transition-all text-center cursor-pointer ${
+              activeTab === 'locations'
+                ? 'bg-white text-sky-700 font-bold shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 font-medium'
+            }`}
+          >
+            Locations
+          </button>
+          <button
+            onClick={() => setActiveTab('evidence')}
+            className={`flex-1 py-1.5 px-2 rounded-lg text-xs transition-all text-center cursor-pointer ${
+              activeTab === 'evidence'
+                ? 'bg-white text-sky-700 font-bold shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 font-medium'
+            }`}
+          >
+            BSA §65B
+          </button>
+        </div>
+
+        {/* TAB 1: PROFILE TAB */}
+        {activeTab === 'profile' && (
+          <div className="flex flex-col gap-3.5 flex-shrink-0 min-h-fit">
+            {/* Algorithmic Threat Score Meter Card */}
+            <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col flex-shrink-0 min-h-fit gap-3">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-700 text-xs font-mono uppercase font-semibold">
+                  Algorithmic Threat Score
+                </span>
+                <span className="text-rose-600 font-mono font-bold text-lg">
+                  {selectedNode.risk_score || 91} <span className="text-[12px] text-slate-400 font-normal">/ 100</span>
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3.5">
+                {/* Circular Score Gauge */}
+                <div className="relative w-16 h-16 flex-shrink-0 flex items-center justify-center">
+                  <svg className="w-16 h-16 -rotate-90" viewBox="0 0 36 36">
+                    <path
+                      className="text-slate-200"
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3.5"
+                    />
+                    <path
+                      className="text-rose-500 stroke-current"
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      strokeDasharray={`${selectedNode.risk_score || 91}, 100`}
+                      strokeLinecap="round"
+                      strokeWidth="3.5"
+                    />
+                  </svg>
+                  <div className="absolute flex flex-col items-center justify-center">
+                    <span className="text-[13px] font-bold text-slate-900 font-mono">
+                      {selectedNode.risk_score || 91}%
+                    </span>
+                  </div>
+                </div>
+
+                {/* Sub-Score Breakdown Bars */}
+                <div className="flex-1 flex flex-col gap-1.5">
+                  <div className="flex flex-col gap-0.5">
+                    <div className="flex justify-between text-[11px] font-mono">
+                      <span className="text-slate-600 font-medium">Centrality Influence</span>
+                      <span className="text-rose-600 font-bold">88%</span>
+                    </div>
+                    <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-rose-500 h-full w-[88%]"></div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-0.5">
+                    <div className="flex justify-between text-[11px] font-mono">
+                      <span className="text-slate-600 font-medium">Cross-Case Links (FIR 101 & 103)</span>
+                      <span className="text-rose-600 font-bold">94%</span>
+                    </div>
+                    <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-rose-500 h-full w-[94%]"></div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-0.5">
+                    <div className="flex justify-between text-[11px] font-mono">
+                      <span className="text-slate-600 font-medium">Extortion Call Spikes</span>
+                      <span className="text-amber-600 font-bold">92% (22/day)</span>
+                    </div>
+                    <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-amber-500 h-full w-[92%]"></div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-0.5">
+                    <div className="flex justify-between text-[11px] font-mono">
+                      <span className="text-slate-600 font-medium">Financial Layering Anomalies</span>
+                      <span className="text-purple-600 font-bold">82%</span>
+                    </div>
+                    <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-purple-600 h-full w-[82%]"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Known Identifiers & Blind Index Table */}
+            <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col gap-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-700 text-xs font-mono uppercase font-semibold">
+                  Known Identifiers & PII Protection
+                </span>
+                <span className={`text-[10px] px-2 py-0.5 rounded font-bold font-mono border ${clearanceBadge.style}`}>
+                  {clearanceBadge.label}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 gap-2 text-xs">
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-slate-500 text-[10px] font-mono font-medium">FULL NAME</span>
+                    <span className="text-slate-900 font-bold">{selectedNode.name}</span>
+                  </div>
+                  <button 
+                    onClick={() => handleCopy(selectedNode.name, 'name')}
+                    className="material-symbols-outlined text-[15px] text-slate-400 hover:text-sky-600 transition-colors cursor-pointer"
+                  >
+                    content_copy
+                  </button>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-slate-500 text-[10px] font-mono font-medium">AADHAAR / TAX BLIND INDEX</span>
+                      <span className="px-1 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-mono font-bold">
+                        {isLead ? 'UNMASKED' : 'MASKED'}
+                      </span>
+                    </div>
+                    <span className="text-slate-900 font-mono font-bold">{displayAadhaar}</span>
+                    <span className="text-[9px] text-slate-500 font-mono">Hash: a89fb73d...32de</span>
+                  </div>
+                  {isLead && (
+                    <button 
+                      onClick={() => handleCopy(displayAadhaar, 'aadhaar')}
+                      className="material-symbols-outlined text-[15px] text-slate-400 hover:text-sky-600 transition-colors cursor-pointer"
+                    >
+                      content_copy
+                    </button>
+                  )}
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-slate-500 text-[10px] font-mono font-medium">PRIMARY SUSPECT MULE BANK</span>
+                      <span className="px-1 py-0.2 rounded bg-rose-50 text-rose-700 border border-rose-200 text-[9px] font-bold">
+                        LAYER 1 MULE
+                      </span>
+                    </div>
+                    <span className="text-slate-900 font-mono font-bold">
+                      Kolkata Comm. Bank #{displayAccount}
+                    </span>
+                  </div>
+                  <span className="material-symbols-outlined text-[16px] text-slate-500">account_balance</span>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-slate-500 text-[10px] font-mono font-medium">ESCORT VEHICLE PLATE</span>
+                      <span className="px-1 py-0.2 rounded bg-amber-50 text-amber-800 border border-amber-200 text-[9px] font-bold">
+                        CLONED TAG ALERT
+                      </span>
+                    </div>
+                    <span className="text-slate-900 font-mono font-bold">
+                      {selectedNode.vehicle || 'WB01AB1234 (Toyota Fortuner)'}
+                    </span>
+                    <span className="text-[9px] text-rose-600 font-medium">Fastag Mismatch: Salt Lake Sector V Toll</span>
+                  </div>
+                  <span className="material-symbols-outlined text-[16px] text-amber-600">directions_car</span>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-slate-500 text-[10px] font-mono font-medium">LAST KNOWN CELL TOWER</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                      <span className="text-slate-900 font-bold">Salt Lake Sector V, Bidhannagar</span>
+                    </div>
+                    <span className="text-[9px] text-emerald-700 font-mono font-medium">Ping recorded 14m ago (BTS ID: #KOL-SL-04)</span>
+                  </div>
+                  <span className="material-symbols-outlined text-[16px] text-sky-600">cell_tower</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: DIRECT LINKS TAB */}
+        {activeTab === 'links' && (
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center justify-between text-slate-700 text-xs font-mono uppercase font-semibold">
+              <span>Direct Intelligence Links</span>
+              <span className="text-sky-700 font-bold">
+                {connectedEdges.length || liveNeighbors.length || 3} Graph Connections
+              </span>
+            </div>
+
+            {connectedEdges.map((edge) => {
+              const otherId = edge.source === selectedNode.id ? edge.target : edge.source;
+              const isOutgoing = edge.source === selectedNode.id;
+              return (
+                <div 
+                  key={edge.id || `${edge.source}-${edge.target}`}
+                  className="p-3 rounded-xl bg-white border-l-4 border-l-sky-600 border border-slate-200 shadow-xs hover:bg-slate-50 transition-colors cursor-pointer"
+                  onClick={() => handleInspectEvidence(otherId)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-sky-600 text-[16px]">
+                        {isOutgoing ? 'call_made' : 'call_received'}
+                      </span>
+                      <span className="text-xs text-slate-900 font-bold">
+                        {edge.target_name || otherId}
+                      </span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-mono font-bold">
+                      {Math.round((edge.confidence || 0.95) * 100)}% Conf.
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-slate-600 mt-1">
+                    <span className="text-sky-700 font-mono font-bold">Edge: {edge.type}</span>
+                    <span className="font-semibold text-slate-800">{edge.amount ? `₹${(edge.amount).toLocaleString('en-IN')}` : edge.calls ? `${edge.calls} Calls` : 'Verified Link'}</span>
+                  </div>
+                  {edge.details && (
+                    <p className="text-slate-600 text-[11px] leading-tight mt-1">
+                      {edge.details}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+
+            {/* Selected edge evidence inspection popup */}
+            {selectedEdgeEvidence && (
+              <div className="p-3 rounded-xl bg-white border border-sky-300 mt-2 flex flex-col gap-1.5 animate-fade-in shadow-md">
+                <div className="flex items-center justify-between text-xs font-mono text-sky-700 font-bold">
+                  <span>FORENSIC PROVENANCE EVIDENCE</span>
+                  <button onClick={() => setSelectedEdgeEvidence(null)} className="text-slate-400 hover:text-slate-700 cursor-pointer">✕</button>
+                </div>
+                <p className="text-[11px] text-slate-700">
+                  Source: {selectedEdgeEvidence.source_doc || 'CDR Telemetry / Bank Ingestion'}
+                </p>
+                <div className="font-mono text-[9px] text-slate-600 truncate select-all bg-slate-50 p-1.5 rounded border border-slate-200">
+                  Hash: {selectedEdgeEvidence.sha256 || '7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069'}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 3: LOCATIONS TAB */}
+        {activeTab === 'locations' && (
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center justify-between text-slate-700 text-xs font-mono uppercase font-semibold">
+              <span>Cell Towers & Co-Locations</span>
+              <span className="text-emerald-700 font-bold">GPS Triangulated</span>
+            </div>
+
+            <div className="p-3 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-sky-600 text-[18px]">cell_tower</span>
+                  <span className="text-xs text-slate-900 font-bold">Sector V Bidhannagar</span>
+                </div>
+                <span className="px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200 font-mono text-[10px] font-semibold">#KOL-SL-04</span>
+              </div>
+              <p className="text-[11px] text-slate-600">
+                Primary extortion coordination tower. 18 outgoing calls logged within 2 hours.
+              </p>
+              <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 border-t border-slate-100 pt-1">
+                <span>Lat: 22.5804° N, Lon: 88.4378° E</span>
+                <span className="text-emerald-700 font-bold">Signal: Strong (Airtel)</span>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-amber-600 text-[18px]">store</span>
+                  <span className="text-xs text-slate-900 font-bold">Salt Lake Tea Stall</span>
+                </div>
+                <span className="px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-mono text-[10px] font-bold">CO-LOCATED</span>
+              </div>
+              <p className="text-[11px] text-slate-600">
+                Physical meeting site shared with Sunita Das and Debasish Chatterjee.
+              </p>
+              <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 border-t border-slate-100 pt-1">
+                <span>Observed: 2026-03-10 18:45 IST</span>
+                <span className="text-amber-700 font-bold">Informant Verified</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: BSA §65B EVIDENCE TAB */}
+        {activeTab === 'evidence' && (
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center justify-between text-slate-700 text-xs font-mono uppercase font-semibold">
+              <span>Court-Admissible Dossier Items</span>
+              <span className="text-emerald-700 font-bold flex items-center gap-1">
+                <span className="material-symbols-outlined text-[14px]">verified</span>
+                BSA §65B
+              </span>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-rose-600 text-[16px]">gavel</span>
+                  <span className="text-xs text-slate-900 font-bold">FIR 101/24</span>
+                </div>
+                <span className="px-1.5 py-0.2 rounded bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-mono font-bold">
+                  Sec 384/386/120B BNS
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-600 leading-relaxed">
+                Suspect demanded ₹50 Lakh extortion via VOIP call spoofing victim's family. Location matched CDR tower #KOL-SL-04.
+              </p>
+              <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 border-t border-slate-100 pt-1.5">
+                <span>IO: Sub-Insp. B. Banerjee</span>
+                <span>Bidhannagar Cyber PS</span>
+              </div>
+              <div className="p-2 rounded bg-slate-50 border border-slate-200 font-mono text-[9px] text-sky-700 truncate select-all flex items-center justify-between">
+                <span>sha256:7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069</span>
+                <button 
+                  onClick={() => handleCopy('7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069', 'fir101')}
+                  className="material-symbols-outlined text-[13px] text-slate-400 hover:text-sky-600 transition-colors ml-1 cursor-pointer"
+                >
+                  content_copy
+                </button>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-sky-600 text-[16px]">shield_alert</span>
+                  <span className="text-xs text-slate-900 font-bold">FIR 103/24</span>
+                </div>
+                <span className="px-1.5 py-0.2 rounded bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-mono font-bold">
+                  Sec 419/420/66D IT Act
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-600 leading-relaxed">
+                Operation of fake loan app recovery cell extorting citizens using morphed media contacts.
+              </p>
+              <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 border-t border-slate-100 pt-1.5">
+                <span>Kolkata Cyber Crime PS</span>
+                <span className="text-emerald-700 font-bold">Hash Certified</span>
+              </div>
+              <div className="p-2 rounded bg-slate-50 border border-slate-200 font-mono text-[9px] text-slate-600 truncate select-all">
+                sha256:3a1e948c267bca90432f8910e19ac9001b...d431
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom Sticky Action Bar */}
+      <div className="p-3 bg-white border-t border-slate-200 flex items-center justify-between gap-2 flex-shrink-0 shadow-xs">
+        <button 
+          onClick={onClose}
+          className="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all flex items-center justify-center gap-1 shadow-xs border border-slate-200 cursor-pointer"
+          title="Close Drawer (ESC)"
+        >
+          <span className="material-symbols-outlined text-[17px]">close</span>
+          <span>Close</span>
+        </button>
+        <button 
+          onClick={() => alert(`Real-time CDR interception request broadcasted to Telco BTS for [${selectedNode.name}].`)}
+          className="flex-1 py-2.5 px-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+        >
+          <span className="material-symbols-outlined text-[17px]">cell_tower</span>
+          <span>Live CDR Intercept</span>
+        </button>
+        <button 
+          onClick={handleExportDossier}
+          className="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-amber-800 font-bold text-xs transition-all flex items-center justify-center gap-1 shadow-xs cursor-pointer active:scale-95"
+        >
+          <span className="material-symbols-outlined text-amber-600 text-[17px]">description</span>
+          <span>Charge Sheet</span>
+        </button>
+      </div>
+    </aside>
+  );
+}

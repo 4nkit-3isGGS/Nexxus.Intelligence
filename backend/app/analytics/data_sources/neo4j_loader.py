@@ -23,11 +23,14 @@ via environment variables if Person 2's instance runs elsewhere.
 import os
 import networkx as nx
 from neo4j import GraphDatabase
-from graph.data_sources.case_utils import derive_case_ids
+try:
+    from graph.data_sources.case_utils import derive_case_ids
+except ImportError:
+    from backend.app.analytics.data_sources.case_utils import derive_case_ids
 
 NEO4J_URI = os.environ.get("NEO4J_URL", os.environ.get("NEO4J_URI", "bolt://127.0.0.1:7687"))
 NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD", "Arnish123")
+NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD", "passwordisneo4j")
 NEO4J_DATABASE = os.environ.get("NEO4J_DATABASE", "neo4j")
 
 # Every entity type carries an "id" property (P001, PH001, LOC001, ...) --
@@ -50,7 +53,7 @@ _DISPLAY_NAME_FIELD = {
 
 
 def load_from_neo4j(uri: str = NEO4J_URI, user: str = NEO4J_USER, password: str = NEO4J_PASSWORD) -> nx.MultiDiGraph:
-    driver = GraphDatabase.driver(uri, auth=(user, password))
+    driver = GraphDatabase.driver(uri, auth=(user, password), connection_timeout=2.0)
     G = nx.MultiDiGraph()
 
     try:
