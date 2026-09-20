@@ -215,6 +215,8 @@ export default function App() {
     if (result?.data) {
       setAgentResponse({
         query: queryText,
+        isLive: result.isLive,
+        source: result.source,
         ...result.data,
       });
       if (result.data.highlighted_nodes) {
