@@ -81,6 +81,15 @@ def get_risk_score_tool(entity_id: str) -> Dict[str, Any]:
         detail = build_entity_detail(G, clean_id)
 
     if detail is None:
+        try:
+            from backend.app.analytics.data_sources.mock_graph import build_mock_graph
+            from backend.app.analytics.api.schema_mapper import build_entity_detail
+            mock_g = build_mock_graph()
+            detail = build_entity_detail(mock_g, clean_id)
+        except Exception:
+            pass
+
+    if detail is None:
         return {
             "entity_id": clean_id,
             "found": False,
@@ -213,6 +222,18 @@ def get_communities_tool(entity_id: Optional[str] = None) -> Dict[str, Any]:
     if entity_id:
         clean_id = entity_id.strip()
         comm_id = communities_dict.get(clean_id)
+        if comm_id is None:
+            try:
+                from backend.app.analytics.data_sources.mock_graph import build_mock_graph
+                mock_g = build_mock_graph()
+                mock_comm = detect_communities(mock_g)
+                comm_id = mock_comm.get(clean_id)
+                if comm_id is not None:
+                    clusters = {}
+                    for node, c_id in mock_comm.items():
+                        clusters.setdefault(f"Syndicate_{c_id}", []).append(node)
+            except Exception:
+                pass
         if comm_id is None:
             return {
                 "entity_id": clean_id,
