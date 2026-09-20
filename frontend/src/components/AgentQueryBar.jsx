@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AGENT_QUERY_PRESETS } from '../data/mockIntelligenceData';
+import { useToast } from '../context/ToastContext';
 
 export default function AgentQueryBar({
   onRunAgentQuery,
@@ -10,20 +11,32 @@ export default function AgentQueryBar({
   currentUser,
   onRoleChange
 }) {
+  const { toast } = useToast();
   const [inputQuery, setInputQuery] = useState(
     'Investigate Rahul Sharma & Debasish Chatterjee connection: trace foreign crypto/hawala cash-out gateway and mule hierarchy'
   );
-  const [showSteps, setShowSteps] = useState(false);
+  const [showSteps, setShowSteps] = useState(true);
   const [showDossier, setShowDossier] = useState(false);
+
+  // Auto-expand steps when response updates
+  useEffect(() => {
+    if (agentResponse) {
+      setShowSteps(true);
+    }
+  }, [agentResponse]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!inputQuery.trim() || loadingQuery) return;
+    setShowSteps(true);
+    toast?.info('Investigation Dispatched', 'Orchestrating 7-agent LangGraph pipeline across Neo4j graph...');
     onRunAgentQuery(inputQuery);
   };
 
   const handleSelectPreset = (queryText) => {
     setInputQuery(queryText);
+    setShowSteps(true);
+    toast?.info('Investigation Dispatched', 'Dispatching autonomous agents across target entities...');
     onRunAgentQuery(queryText);
   };
 
@@ -224,6 +237,52 @@ export default function AgentQueryBar({
           </div>
         </div>
       </section>
+
+      {/* Dynamic Agent Processing Indicator */}
+      {loadingQuery && (
+        <div className="p-4 rounded-xl bg-slate-900 text-white flex flex-col gap-3 shadow-md border border-slate-700 animate-pulse">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-sky-400 animate-spin text-[22px]">sync</span>
+              <div>
+                <h3 className="font-bold text-sm">Autonomous Multi-Agent Taskforce Active</h3>
+                <p className="text-[11px] text-slate-300">Evaluating hypotheses & traversing Neo4j knowledge graph...</p>
+              </div>
+            </div>
+            <span className="px-2.5 py-1 rounded bg-sky-500/20 text-sky-300 font-mono text-[11px] font-semibold border border-sky-500/30">
+              Live StateGraph Dispatch
+            </span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono text-slate-300 pt-1 border-t border-slate-800">
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> 1. Supervisor Dispatch</div>
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-sky-400"></span> 2. Graph Traversal</div>
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400"></span> 3. Centrality / Risk</div>
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-purple-400"></span> 4. BSA §65B Audit</div>
+          </div>
+        </div>
+      )}
+
+      {/* Active Analysis Query Callout Banner */}
+      {!loadingQuery && agentResponse?.query && (
+        <div className="p-3 rounded-xl bg-slate-100/90 border border-slate-200/90 text-slate-800 text-xs flex flex-wrap items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <span className="material-symbols-outlined text-slate-600 text-[18px] flex-shrink-0">terminal</span>
+            <div className="min-w-0 flex-1">
+              <span className="text-[10px] font-mono uppercase text-slate-400 font-semibold block">Last Investigated Query</span>
+              <p className="font-medium text-slate-900 truncate">{agentResponse.query}</p>
+            </div>
+          </div>
+          {onFocusSubgraph && (
+            <button
+              onClick={() => onFocusSubgraph(agentResponse?.highlighted_nodes, agentResponse?.highlighted_edges)}
+              className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer flex-shrink-0"
+            >
+              <span className="material-symbols-outlined text-[15px] text-sky-400">hub</span>
+              <span>View On Graph Canvas</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* 2. EXECUTIVE THREAT SCORECARD */}
       <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 flex-shrink-0 min-h-fit">
