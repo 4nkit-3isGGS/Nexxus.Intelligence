@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: nexxus-intelligence-api
+    runtime: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHONPATH
+        value: .
+      - key: NEO4J_URL
+        sync: false
+      - key: NEO4J_USER
+        value: a0a75157
+      - key: NEO4J_PASSWORD
+        sync: false
+      - key: NEO4J_DATABASE
+        value: neo4j
+      - key: NEO4J_CONNECTION_TIMEOUT
+        value: "15.0"
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: "gpt-4o-mini"
+      - key: GROQ_API_KEY
+        sync: false

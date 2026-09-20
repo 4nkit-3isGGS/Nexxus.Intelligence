@@ -12,10 +12,11 @@ from neo4j import GraphDatabase, Driver
 load_dotenv()
 
 
-NEO4J_URL = os.getenv("NEO4J_URL", "bolt://127.0.0.1:7687")
-NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
+NEO4J_URL = os.getenv("NEO4J_URL") or os.getenv("NEO4J_URI", "bolt://127.0.0.1:7687")
+NEO4J_USER = os.getenv("NEO4J_USER") or os.getenv("NEO4J_USERNAME", "neo4j")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "passwordisneo4j")
-NEO4J_DATABASE = os.getenv("NEO4J_DATABASE", "neo4j")
+NEO4J_DATABASE = os.getenv("NEO4J_DATABASE", "neo4j") or "neo4j"
+
 
 
 import time
@@ -34,7 +35,7 @@ class Neo4jConnection:
 
     def connect(self) -> Driver:
         if self.driver is None:
-            conn_timeout = float(os.getenv("NEO4J_CONNECTION_TIMEOUT", "1.0"))
+            conn_timeout = float(os.getenv("NEO4J_CONNECTION_TIMEOUT", "15.0"))
             self.driver = GraphDatabase.driver(
                 self.url,
                 auth=(self.user, self.password),
@@ -67,12 +68,14 @@ class Neo4jConnection:
         """Verifies if database is reachable."""
         return self.is_available()
 
-    def query(self, cypher_query: str, parameters: dict | None = None, db: str = NEO4J_DATABASE):
+    def query(self, cypher_query: str, parameters: dict | None = None, db: str | None = None):
         """Execute a read/write Cypher query and return list of records as dicts."""
         if not self.is_available():
             raise ConnectionError("Neo4j database is offline or unreachable.")
         driver = self.connect()
-        with driver.session(database=db) as session:
+        target_db = db or os.getenv("NEO4J_DATABASE")
+        session_kwargs = {"database": target_db} if target_db else {}
+        with driver.session(**session_kwargs) as session:
             result = session.run(cypher_query, parameters or {})
             return [record.data() for record in result]
 
