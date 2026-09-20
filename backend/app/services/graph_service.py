@@ -26,10 +26,12 @@ def _load_fallback_dataset():
     # Find project root paths
     current_dir = Path(__file__).resolve().parent
     repo_root = current_dir.parent.parent.parent
-    oc_path = repo_root / "output_contract.json"
+    oc_path = repo_root / "Abhidhas_output_enriched.JSON"
+    if not oc_path.exists():
+        oc_path = repo_root / "output_contract.json"
     gt_path = current_dir.parent / "analytics" / "sample_data" / "ground_truth_case.json"
 
-    # 1. Load output_contract.json
+    # 1. Load Abhidhas_output_enriched.JSON / output_contract.json
     if oc_path.exists():
         try:
             with open(oc_path, "r", encoding="utf-8") as f:
