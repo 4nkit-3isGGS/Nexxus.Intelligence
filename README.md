@@ -61,7 +61,7 @@ Modern criminal organizations, terror cells, and cyber syndicates operate throug
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │                                       1. DATA INGESTION & NLP TIER                                     │
 │  Unstructured FIRs (101, 102, 103) ──> spaCy Transformer NER (en_core_web_trf) + Heuristics Regex      │
-│  CDRs (cdr.csv) & Bank Ledgers    ──> Relationship Extraction Contract (output_contract.json)          │
+│  CDRs (cdr.csv) & Bank Ledgers    ──> Relationship Extraction Contract (Abhidha_output_contract_enriched.json)          │
 └──────────────────────────────────────────────────┬─────────────────────────────────────────────────────┘
                                                    │
                                                    ▼
