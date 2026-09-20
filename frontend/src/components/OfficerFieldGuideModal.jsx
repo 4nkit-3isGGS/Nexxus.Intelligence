@@ -102,33 +102,21 @@ export default function OfficerFieldGuideModal({ isOpen, onClose }) {
                     <span className="material-symbols-outlined text-[20px]">person</span>
                   </div>
                   <div>
-                    <span className="font-bold text-slate-900 text-xs">Suspect (Person)</span>
+                    <span className="font-bold text-slate-900 text-xs">Suspect (Person) — Red</span>
                     <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
-                      Primary targets, syndicate operators, and victims. Node size is scaled by criminal risk score and betweenness centrality.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-sky-50/50 border border-sky-200 flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center flex-shrink-0">
-                    <span className="material-symbols-outlined text-[20px]">phone_iphone</span>
-                  </div>
-                  <div>
-                    <span className="font-bold text-slate-900 text-xs">Burner SIM / Phone</span>
-                    <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
-                      Telephony nodes extracted from CDR files. High call burst frequencies are highlighted with pulsating red energy pulses.
+                      Primary targets, syndicate operators, and victims. Scaled by criminal risk score and network betweenness.
                     </p>
                   </div>
                 </div>
 
                 <div className="p-3.5 rounded-2xl bg-amber-50/50 border border-amber-200 flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center flex-shrink-0">
-                    <span className="material-symbols-outlined text-[20px]">credit_card</span>
+                  <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
+                    <span className="material-symbols-outlined text-[20px]">phone_iphone</span>
                   </div>
                   <div>
-                    <span className="font-bold text-slate-900 text-xs">Mule Bank Account</span>
+                    <span className="font-bold text-slate-900 text-xs">Burner SIM / Phone — Yellow</span>
                     <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
-                      Financial accounts used to receive and rapidly disperse extorted capital. Circular transfers glow amber.
+                      Telephony nodes extracted from CDR files. High call burst frequencies are highlighted with call anomaly pulses.
                     </p>
                   </div>
                 </div>
@@ -138,9 +126,33 @@ export default function OfficerFieldGuideModal({ isOpen, onClose }) {
                     <span className="material-symbols-outlined text-[20px]">domain</span>
                   </div>
                   <div>
-                    <span className="font-bold text-slate-900 text-xs">Shell Organization</span>
+                    <span className="font-bold text-slate-900 text-xs">Shell Organization — Purple</span>
                     <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
-                      Corporate fronts used to layer money or disguise syndicate ownership.
+                      Corporate fronts and NBFC entities used to layer money or disguise syndicate ownership.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-emerald-50/50 border border-emerald-200 flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0">
+                    <span className="material-symbols-outlined text-[20px]">credit_card</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-slate-900 text-xs">Mule Bank Account — Green</span>
+                    <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
+                      Financial accounts used to receive and rapidly disperse extorted capital.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-sky-50/50 border border-sky-200 flex items-start gap-3 sm:col-span-2">
+                  <div className="w-9 h-9 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center flex-shrink-0">
+                    <span className="material-symbols-outlined text-[20px]">directions_car</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-slate-900 text-xs">Cloned Vehicle — Blue</span>
+                    <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
+                      Motor vehicles and fake registered license plates identified across multiple physical FIR incident locations.
                     </p>
                   </div>
                 </div>

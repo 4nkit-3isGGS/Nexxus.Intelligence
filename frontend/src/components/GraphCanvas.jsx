@@ -78,18 +78,32 @@ export default function GraphCanvas({
       const initialX = existing?.x ?? (clusterCenter.x + Math.cos(angle) * spread + (Math.random() - 0.5) * 30);
       const initialY = existing?.y ?? (clusterCenter.y + Math.sin(angle) * spread + (Math.random() - 0.5) * 30);
 
-      // Cyber Command Center Semantic Neon Colors
-      let color = '#10b981'; // Emerald Low
-      let glowColor = 'rgba(16, 185, 129, 0.35)';
+      // Semantic Colors strictly differentiated by Entity Type:
+      // Person -> Red
+      // Phone -> Yellow / Amber
+      // Organization -> Purple
+      // Account -> Green
+      // Vehicle -> Cyan / Blue
+      // Default -> Slate
+      const ENTITY_COLORS = {
+        Person: { color: '#ef4444', glowColor: 'rgba(239, 68, 68, 0.45)' },       // Crimson / Red
+        Phone: { color: '#f59e0b', glowColor: 'rgba(245, 158, 11, 0.45)' },        // Amber / Yellow
+        Organization: { color: '#8b5cf6', glowColor: 'rgba(139, 92, 246, 0.45)' }, // Purple / Violet
+        Account: { color: '#10b981', glowColor: 'rgba(16, 185, 129, 0.45)' },      // Emerald / Green
+        Vehicle: { color: '#0ea5e9', glowColor: 'rgba(14, 165, 233, 0.45)' },      // Sky / Blue
+      };
+
+      const entityStyle = ENTITY_COLORS[node.type] || { color: '#64748b', glowColor: 'rgba(100, 116, 139, 0.35)' };
+      const color = entityStyle.color;
+      const glowColor = entityStyle.glowColor;
+
+      let riskColor = '#10b981';
       if (node.risk_score >= 85) {
-        color = '#f43f5e'; // Crimson Critical
-        glowColor = 'rgba(244, 63, 94, 0.45)';
+        riskColor = '#dc2626';
       } else if (node.risk_score >= 70) {
-        color = '#fbbf24'; // Amber High
-        glowColor = 'rgba(251, 191, 36, 0.4)';
+        riskColor = '#f59e0b';
       } else if (node.risk_score >= 40) {
-        color = '#06b6d4'; // Cyan Moderate
-        glowColor = 'rgba(6, 182, 212, 0.4)';
+        riskColor = '#0284c7';
       }
 
       return {
@@ -101,7 +115,8 @@ export default function GraphCanvas({
         radius,
         color,
         glowColor,
-        isKingpin: node.id === 'P008' || node.name.includes('Debasish'),
+        riskColor,
+        isKingpin: node.id === 'P008' || node.name?.includes('Debasish'),
       };
     });
   }, [nodes]);
@@ -493,7 +508,7 @@ export default function GraphCanvas({
           const badgeY = node.y - node.radius * 0.72;
           ctx.beginPath();
           ctx.arc(badgeX, badgeY, 8.5, 0, Math.PI * 2);
-          ctx.fillStyle = node.color;
+          ctx.fillStyle = node.riskColor || '#10b981';
           ctx.fill();
           ctx.strokeStyle = '#ffffff';
           ctx.lineWidth = 1.5;
@@ -741,29 +756,33 @@ export default function GraphCanvas({
         </div>
 
         {/* Network Legend Overlay */}
-        <div className="px-3 py-1.2 rounded-lg bg-white/95 shadow-md border border-slate-200/80 backdrop-blur-md flex items-center gap-3 text-[10px] font-mono text-slate-600">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-rose-600"></span>
-            <span>Critical (&gt;85)</span>
+        <div className="px-3 py-1.5 rounded-lg bg-white/95 shadow-md border border-slate-200/80 backdrop-blur-md flex items-center gap-3 text-[10px] font-mono text-slate-600">
+          <div className="flex items-center gap-1.5 font-medium">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-xs"></span>
+            <span className="text-slate-800">Person</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-            <span>High (70-84)</span>
+          <div className="flex items-center gap-1.5 font-medium">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-xs"></span>
+            <span className="text-slate-800">Phone</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-sky-500"></span>
-            <span>Moderate</span>
+          <div className="flex items-center gap-1.5 font-medium">
+            <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-xs"></span>
+            <span className="text-slate-800">Org</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
-            <span>Low</span>
+          <div className="flex items-center gap-1.5 font-medium">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs"></span>
+            <span className="text-slate-800">Account</span>
+          </div>
+          <div className="flex items-center gap-1.5 font-medium">
+            <span className="w-2.5 h-2.5 rounded-full bg-sky-500 shadow-xs"></span>
+            <span className="text-slate-800">Vehicle</span>
           </div>
           <div className="h-3 w-px bg-slate-200"></div>
-          <div className="flex items-center gap-1 text-slate-700">
-            <span className="material-symbols-outlined text-[13px] text-amber-600">payments</span> Financial
+          <div className="flex items-center gap-1 text-slate-600">
+            <span className="material-symbols-outlined text-[13px] text-amber-600">payments</span> ₹ Hawala
           </div>
-          <div className="flex items-center gap-1 text-slate-700">
-            <span className="material-symbols-outlined text-[13px] text-sky-600">cell_tower</span> Comms
+          <div className="flex items-center gap-1 text-slate-600">
+            <span className="material-symbols-outlined text-[13px] text-sky-600">cell_tower</span> Calls
           </div>
         </div>
       </div>

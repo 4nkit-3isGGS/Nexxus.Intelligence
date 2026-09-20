@@ -38,11 +38,11 @@ export default function FilterBar({
   ];
 
   const entityTypeOptions = [
-    { id: 'Person', label: 'Suspects', icon: 'person' },
-    { id: 'Phone', label: 'Burner SIMs', icon: 'perm_phone_msg' },
-    { id: 'Organization', label: 'Shell Orgs', icon: 'domain' },
-    { id: 'Account', label: 'Mule Accounts', icon: 'credit_card' },
-    { id: 'Vehicle', label: 'Cloned Vehicles', icon: 'directions_car' },
+    { id: 'Person', label: 'Suspects (Person)', icon: 'person', dotColor: 'bg-red-500', textColor: 'text-red-600' },
+    { id: 'Phone', label: 'Burner SIMs (Phone)', icon: 'perm_phone_msg', dotColor: 'bg-amber-500', textColor: 'text-amber-600' },
+    { id: 'Organization', label: 'Shell Orgs', icon: 'domain', dotColor: 'bg-purple-500', textColor: 'text-purple-600' },
+    { id: 'Account', label: 'Mule Accounts', icon: 'credit_card', dotColor: 'bg-emerald-500', textColor: 'text-emerald-600' },
+    { id: 'Vehicle', label: 'Cloned Vehicles', icon: 'directions_car', dotColor: 'bg-sky-500', textColor: 'text-sky-600' },
   ];
 
   const timelineDates = [
@@ -185,9 +185,15 @@ export default function FilterBar({
                   className="flex items-center justify-between p-2 rounded-lg bg-slate-50/70 hover:bg-slate-100 border border-slate-200/60 cursor-pointer transition-colors group/item"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center text-slate-600 flex-shrink-0 border border-slate-200">
-                      <span className="material-symbols-outlined text-[15px]">
-                        {item.type === 'Person' ? 'person' : item.type === 'Vehicle' ? 'directions_car' : 'apartment'}
+                    <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-slate-200">
+                      <span className={`material-symbols-outlined text-[15px] ${
+                        item.type === 'Person' ? 'text-red-500' :
+                        item.type === 'Phone' ? 'text-amber-500' :
+                        item.type === 'Organization' ? 'text-purple-500' :
+                        item.type === 'Account' ? 'text-emerald-500' :
+                        item.type === 'Vehicle' ? 'text-sky-500' : 'text-slate-600'
+                      }`}>
+                        {item.type === 'Person' ? 'person' : item.type === 'Phone' ? 'phone_iphone' : item.type === 'Vehicle' ? 'directions_car' : item.type === 'Account' ? 'credit_card' : 'domain'}
                       </span>
                     </div>
                     <div className="flex flex-col min-w-0">
@@ -312,7 +318,8 @@ export default function FilterBar({
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[15px] text-slate-500">{type.icon}</span>
+                        <span className={`w-2.5 h-2.5 rounded-full ${type.dotColor} flex-shrink-0`}></span>
+                        <span className={`material-symbols-outlined text-[15px] ${type.textColor}`}>{type.icon}</span>
                         <span>{type.label}</span>
                       </div>
                       <span className="font-mono text-[10px] text-slate-400 font-medium">({count})</span>
