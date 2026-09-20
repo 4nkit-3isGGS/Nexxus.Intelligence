@@ -68,7 +68,8 @@ def generate_llm_dossier(
         "1. Only state facts directly present in the provided entities, relationships, risk analysis, and evidence.\n"
         "2. Do NOT invent phone numbers, names, crypto wallets, or criminal offenses not in the data.\n"
         "3. Cite verified document IDs (e.g. FIR numbers, CDR records) for all evidentiary findings.\n"
-        "4. Format in professional Markdown with clear section headers, bullet points, and high-impact executive summaries."
+        "4. Format in professional Markdown with clear section headers, bullet points, and high-impact executive summaries.\n"
+        "5. The document title MUST be '# 🚨 CRIMINAL NETWORK INTELLIGENCE DOSSIER' at the very top."
     )
 
     facts_payload = {
@@ -108,7 +109,18 @@ def generate_llm_dossier(
         response = llm.invoke(messages)
         content = response.content
         if content and len(content.strip()) > 100:
-            return content.strip()
+            cleaned = content.strip().replace("\u202f", " ").replace("\u00a0", " ")
+            # Standardize top header for legal and system consistency
+            if not cleaned.startswith("# 🚨 CRIMINAL NETWORK INTELLIGENCE DOSSIER"):
+                if cleaned.startswith("#"):
+                    first_nl = cleaned.find("\n")
+                    if first_nl != -1:
+                        cleaned = "# 🚨 CRIMINAL NETWORK INTELLIGENCE DOSSIER\n" + cleaned[first_nl+1:].lstrip()
+                    else:
+                        cleaned = "# 🚨 CRIMINAL NETWORK INTELLIGENCE DOSSIER\n\n" + cleaned
+                else:
+                    cleaned = "# 🚨 CRIMINAL NETWORK INTELLIGENCE DOSSIER\n\n" + cleaned
+            return cleaned
     except Exception as exc:
         print(f"[NexxusDB LLM] Warning: LLM dossier synthesis failed ({exc}), falling back to deterministic template.")
 
