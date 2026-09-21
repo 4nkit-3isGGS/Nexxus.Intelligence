@@ -1099,7 +1099,34 @@ export const apiService = {
     };
   },
 
-  // 17. POST /api/graph/ingest — Ingest NLP Output Payload
+  // 17. POST /api/ingest/document — Upload Evidence Document (.txt, .pdf, .docx, .json)
+  async uploadDocument(file) {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch(`${BASE_URL}/ingest/document`, {
+        method: 'POST',
+        headers: {
+          ...getOfficerHeaders(),
+        },
+        body: formData,
+        signal: AbortSignal.timeout(30000),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        return { success: true, isLive: true, data };
+      }
+      const err = await res.json().catch(() => ({ detail: 'Upload failed' }));
+      return { success: false, error: err.detail || err.message || 'Document ingestion failed' };
+    } catch (e) {
+      console.error('Upload document error:', e);
+      return { success: false, error: e.message || 'Network error during upload' };
+    }
+  },
+
+  // 17b. POST /api/graph/ingest — Ingest NLP Output Payload
   async ingestPayload(payload) {
     try {
       const res = await fetch(`${BASE_URL}/graph/ingest`, {

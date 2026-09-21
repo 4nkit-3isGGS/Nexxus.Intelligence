@@ -26,8 +26,8 @@ export default function GraphCanvas({
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
 
-  // Simulation & Viewport State
-  const [zoom, setZoom] = useState(1);
+  // Simulation & Viewport State (default zoom enlarged by 10%)
+  const [zoom, setZoom] = useState(1.1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDraggingCanvas, setIsDraggingCanvas] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -121,11 +121,12 @@ export default function GraphCanvas({
     });
   }, [nodes]);
 
-  // Center initial view
+  // Center initial view with 10% magnification
   useEffect(() => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
-      const fitZoom = rect.height < 600 ? 0.75 : rect.height < 750 ? 0.85 : 1;
+      const baseFitZoom = rect.height < 600 ? 0.75 : rect.height < 750 ? 0.85 : 1;
+      const fitZoom = Number((baseFitZoom * 1.10).toFixed(3));
       setPan({ x: rect.width / 2, y: rect.height / 2 - 30 });
       setZoom(fitZoom);
     }
@@ -649,7 +650,8 @@ export default function GraphCanvas({
   const resetView = () => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
-      const fitZoom = rect.height < 600 ? 0.75 : rect.height < 750 ? 0.85 : 1;
+      const baseFitZoom = rect.height < 600 ? 0.75 : rect.height < 750 ? 0.85 : 1;
+      const fitZoom = Number((baseFitZoom * 1.10).toFixed(3));
       setPan({ x: rect.width / 2, y: rect.height / 2 - 30 });
       setZoom(fitZoom);
     }

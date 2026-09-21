@@ -24,9 +24,9 @@ import os
 import networkx as nx
 from neo4j import GraphDatabase
 try:
-    from graph.data_sources.case_utils import derive_case_ids
-except ImportError:
     from backend.app.analytics.data_sources.case_utils import derive_case_ids
+except ImportError:
+    from graph.data_sources.case_utils import derive_case_ids
 
 NEO4J_URI = os.environ.get("NEO4J_URL", os.environ.get("NEO4J_URI", "bolt://127.0.0.1:7687"))
 NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")

@@ -1,10 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { apiService, DEMO_OFFICERS } from '../services/api';
 
 export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab = 'login' }) {
   const [activeTab, setActiveTab] = useState(initialTab); // 'login' | 'register'
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Close on Escape key press
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose?.();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   // Login form state
   const [loginIdent, setLoginIdent] = useState('');
@@ -104,8 +116,14 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white border border-slate-200/80 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl animate-fade-in text-slate-900 flex flex-col max-h-[92vh]">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 cursor-pointer"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white border border-slate-200/80 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl animate-fade-in text-slate-900 flex flex-col max-h-[92vh] cursor-default"
+      >
         {/* Header */}
         <div className="px-6 py-4 bg-slate-50/80 border-b border-slate-200/80 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
