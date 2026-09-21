@@ -24,9 +24,17 @@ Usage in Person 4's FastAPI app:
         return result
 """
 
-from graph.data_sources.graph_loader import load_graph
-from graph.api.schema_mapper import build_graph_response, build_entity_detail
-from graph.contracts.schemas import GraphResponse, EntityDetailResponse
+import sys
+from pathlib import Path
+
+# Ensure workspace root is in sys.path when executed directly
+WORKSPACE_ROOT = str(Path(__file__).resolve().parent.parent.parent.parent.parent)
+if WORKSPACE_ROOT not in sys.path:
+    sys.path.insert(0, WORKSPACE_ROOT)
+
+from backend.app.analytics.data_sources.graph_loader import load_graph
+from backend.app.analytics.api.schema_mapper import build_graph_response, build_entity_detail
+from backend.app.analytics.contracts.schemas import GraphResponse, EntityDetailResponse
 
 
 def get_full_analysis() -> GraphResponse:

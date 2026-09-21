@@ -869,6 +869,36 @@ def ingest_rel_accessed_via(rel: dict, id_map: dict):
     db.query(cypher, params)
 
 
+def ingest_rel_associated_with(rel: dict, id_map: dict):
+    """Handles ASSOCIATED_WITH: Person → Person (co-conspirators, spouses, associates)."""
+    source_doc = rel.get("source_doc", "UNKNOWN")
+    timestamp = rel.get("timestamp") or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+    src_id = id_map.get(rel["source"], {}).get("_neo4j_id", rel["source"])
+    tgt_id = id_map.get(rel["target"], {}).get("_neo4j_id", rel["target"])
+
+    prop_parts = ["r.source_doc_id = $src", "r.timestamp = $ts"]
+    params = {"src_id": src_id, "tgt_id": tgt_id, "src": source_doc, "ts": timestamp}
+
+    if rel.get("confidence") is not None:
+        prop_parts.append("r.confidence = $conf")
+        params["conf"] = rel["confidence"]
+    if rel.get("description"):
+        prop_parts.append("r.description = $desc")
+        params["desc"] = rel["description"]
+    if rel.get("evidence"):
+        prop_parts.append("r.evidence = $evidence")
+        params["evidence"] = rel["evidence"]
+
+    prop_set = ", ".join(prop_parts)
+    cypher = f"""
+    MATCH (p1 {{id: $src_id}}), (p2 {{id: $tgt_id}})
+    MERGE (p1)-[r:ASSOCIATED_WITH]->(p2)
+    SET {prop_set}
+    """
+    db.query(cypher, params)
+
+
 # Relationship handler dispatch table
 _REL_HANDLERS = {
     "CALLED": ingest_rel_called,
@@ -881,6 +911,7 @@ _REL_HANDLERS = {
     "TRANSFERRED_FUNDS": ingest_rel_transferred_funds,
     "BOUND_TO_IMEI": ingest_rel_bound_to_imei,
     "ACCESSED_VIA": ingest_rel_accessed_via,
+    "ASSOCIATED_WITH": ingest_rel_associated_with,
 }
 
 
@@ -937,6 +968,46 @@ def ingest_nlp_payload(payload: dict) -> dict:
     wallets = [e for e in entities if e.get("type") == "CryptoWallet"]
     ips = [e for e in entities if e.get("type") == "IPAddress"]
     imeis = [e for e in entities if e.get("type") == "IMEI"]
+
+    # ── Offline Demo Fallback if Neo4j is unreachable ──
+    if not db.is_available():
+        print("[NexxusDB Ingestion] Neo4j is offline. Recording BSA §65B audit block and completing in offline demo mode.")
+        try:
+            from backend.app.audit.audit_logger import audit_ledger
+            payload_bytes = json.dumps(payload, sort_keys=True).encode("utf-8")
+            payload_hash = hashlib.sha256(payload_bytes).hexdigest()
+            audit_ledger.log_event(
+                user_id="INGESTION_ENGINE",
+                badge_number="SYSTEM-AUTO",
+                role="SYSTEM",
+                action="INGEST_PAYLOAD",
+                resource_type="GRAPH_PAYLOAD",
+                resource_id=payload_hash[:16],
+                details={
+                    "payload_sha256": payload_hash,
+                    "entities_count": len(entities),
+                    "relationships_count": len(relationships),
+                    "cyber_entities": len(wallets) + len(ips) + len(imeis),
+                    "mode": "offline_demo",
+                },
+            )
+        except Exception as e:
+            print(f"[Audit Warning] Could not record offline ingestion block: {e}")
+
+        return {
+            "mode": "offline_demo",
+            "is_live": False,
+            "persons_ingested": len(persons),
+            "phones_ingested": len(phones),
+            "locations_ingested": len(locations),
+            "vehicles_ingested": len(vehicles),
+            "organizations_ingested": len(organizations),
+            "wallets_ingested": len(wallets),
+            "ip_addresses_ingested": len(ips),
+            "imeis_ingested": len(imeis),
+            "relationships_ingested": len(relationships),
+            "relationships_skipped": 0,
+        }
 
     # ── 1. Ingest Person entities (with entity resolution) ──
     for person in persons:

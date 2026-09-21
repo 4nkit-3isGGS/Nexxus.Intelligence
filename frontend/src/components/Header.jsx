@@ -43,9 +43,11 @@ export default function Header({
     };
 
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('pointerdown', handleClickOutside);
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('pointerdown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
@@ -222,14 +224,14 @@ export default function Header({
             <span>Export</span>
           </button>
 
-          {/* Import Evidence Button */}
+          {/* Upload Evidence Button */}
           <button 
             onClick={onOpenIngest}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer active:scale-95"
-            title="Import case documents, FIRs, and files"
+            title="Upload case documents, FIRs, and files"
           >
             <span className="material-symbols-outlined text-[17px]">cloud_upload</span>
-            <span className="hidden sm:inline">Import</span>
+            <span className="hidden sm:inline">Upload</span>
           </button>
 
           {/* User Profile Avatar */}

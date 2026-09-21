@@ -102,7 +102,7 @@ export default function FilterBar({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Click outside to close dropdowns
+  // Click outside or ESC key to close dropdowns
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
@@ -118,8 +118,24 @@ export default function FilterBar({
         setShowTimeline(false);
       }
     };
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowSuggestions(false);
+        setShowHighRisk(false);
+        setShowTypeFilter(false);
+        setShowTimeline(false);
+      }
+    };
+
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('pointerdown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('pointerdown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   // Timeline playback loop
