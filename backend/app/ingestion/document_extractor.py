@@ -11,9 +11,12 @@ directly into the Neo4j knowledge graph.
 
 import io
 import re
+import csv
+import sys
 import json
 import hashlib
 import zipfile
+from pathlib import Path
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from typing import Any, Tuple, Optional, List, Dict, Set
@@ -272,11 +275,93 @@ def extract_text_from_file(filename: str, content: bytes) -> Tuple[str, dict | N
             except Exception as zip_err:
                 print(f"[DocumentExtractor] docx fallback error: {docx_err}; {zip_err}")
 
-    # Default: Plain text (.txt, .md, .csv, etc.)
+    if ext == "csv":
+        try:
+            raw_str = content.decode("utf-8", errors="replace")
+            text_stream = io.StringIO(raw_str)
+            reader_list = list(csv.reader(text_stream))
+            if not reader_list:
+                return "", None
+            headers = [h.strip().lower() for h in reader_list[0]]
+            doc_id = filename.rsplit(".", 1)[0].replace(" ", "_").upper()
+
+            # 1. CDR Format (caller_phone, receiver_phone, timestamp, duration)
+            if any("caller" in h for h in headers) and any("receiver" in h for h in headers):
+                entities = []
+                relationships = []
+                dict_reader = csv.DictReader(io.StringIO(raw_str))
+                seen_phones = set()
+                for row in dict_reader:
+                    c_phone = normalize_phone_number(row.get("caller_phone") or row.get("caller") or "")
+                    r_phone = normalize_phone_number(row.get("receiver_phone") or row.get("receiver") or "")
+                    dur_val = row.get("duration", "60")
+                    dur = int(dur_val) if str(dur_val).isdigit() else 60
+                    ts = row.get("timestamp") or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+                    if c_phone and c_phone not in seen_phones:
+                        entities.append({"id": f"PH_{c_phone}", "type": "Phone", "number": c_phone, "source_doc": doc_id})
+                        seen_phones.add(c_phone)
+                    if r_phone and r_phone not in seen_phones:
+                        entities.append({"id": f"PH_{r_phone}", "type": "Phone", "number": r_phone, "source_doc": doc_id})
+                        seen_phones.add(r_phone)
+                    if c_phone and r_phone:
+                        relationships.append({
+                            "source": f"PH_{c_phone}",
+                            "type": "CALLED",
+                            "target": f"PH_{r_phone}",
+                            "confidence": 0.99,
+                            "timestamp": ts,
+                            "duration": dur,
+                            "source_doc": doc_id,
+                        })
+                return "", {"entities": entities, "relationships": relationships}
+
+            # 2. Bank Transfer Format (sender_acct, receiver_acct, amount, timestamp)
+            if any("sender" in h for h in headers) and any("receiver" in h for h in headers):
+                entities = []
+                relationships = []
+                dict_reader = csv.DictReader(io.StringIO(raw_str))
+                seen_accts = set()
+                for row in dict_reader:
+                    s_acct = (row.get("sender_acct") or row.get("sender") or "").strip()
+                    r_acct = (row.get("receiver_acct") or row.get("receiver") or "").strip()
+                    amt_val = row.get("amount", "0.0")
+                    try:
+                        amt = float(amt_val)
+                    except ValueError:
+                        amt = 0.0
+                    ts = row.get("timestamp") or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+                    if s_acct and s_acct not in seen_accts:
+                        entities.append({"id": f"ACC_{s_acct}", "type": "Account", "account_number": s_acct, "source_doc": doc_id})
+                        seen_accts.add(s_acct)
+                    if r_acct and r_acct not in seen_accts:
+                        entities.append({"id": f"ACC_{r_acct}", "type": "Account", "account_number": r_acct, "source_doc": doc_id})
+                        seen_accts.add(r_acct)
+                    if s_acct and r_acct:
+                        relationships.append({
+                            "source": f"ACC_{s_acct}",
+                            "type": "TRANSFERRED_FUNDS",
+                            "target": f"ACC_{r_acct}",
+                            "confidence": 0.99,
+                            "amount": amt,
+                            "timestamp": ts,
+                            "source_doc": doc_id,
+                        })
+                return "", {"entities": entities, "relationships": relationships}
+
+            # 3. Generic CSV: synthesize rows into structured text statements
+            row_texts = []
+            for row in reader_list:
+                row_texts.append(", ".join(cell.strip() for cell in row if cell.strip()))
+            return "\n".join(row_texts), None
+        except Exception as csv_err:
+            print(f"[DocumentExtractor] CSV parser error: {csv_err}")
+
+    # Default: Plain text (.txt, .md, etc.)
     try:
         return content.decode("utf-8"), None
     except UnicodeDecodeError:
         return content.decode("latin-1", errors="replace"), None
+
 
 
 # =====================================================================
@@ -823,6 +908,9 @@ def ingest_document_file(
         node_counts["wallets"]
     )
 
+    # ── 6. Run Arnish's Risk Analytics Engine on the updated graph ──
+    risk_assessment = run_risk_analytics_on_graph()
+
     return {
         "status": "success",
         "filename": filename,
@@ -830,4 +918,105 @@ def ingest_document_file(
         "text_preview": raw_text[:250] if raw_text else "Pre-structured case contract",
         "node_counts": node_counts,
         "summary": ingestion_summary,
+        "risk_assessment": risk_assessment,
     }
+
+
+# =====================================================================
+# Post-Ingestion Risk Analytics Engine Hook (Arnish Engine Integration)
+# =====================================================================
+
+def run_risk_analytics_on_graph() -> dict:
+    """
+    Executes Arnish's Graph Analytics & Risk Scoring Engine on the network graph
+    and persists updated risk scores onto Person nodes in Neo4j.
+    """
+    try:
+        from backend.app.analytics.data_sources.graph_loader import load_graph
+        from backend.app.analytics.engine.risk_engine import compute_risk_breakdown
+        from backend.app.neo4j_driver import db
+
+        G = load_graph()
+        if not G or len(G.nodes) == 0:
+            return {"status": "skipped", "message": "Graph is empty."}
+
+        risk_results = compute_risk_breakdown(G)
+
+        updated_count = 0
+        if db.is_available():
+            for node_id, data in risk_results.items():
+                overall_score = data.get("overall_risk_score", 0.0)
+                risk_level = "HIGH" if overall_score >= 70 else "MEDIUM" if overall_score >= 40 else "LOW"
+                tags = data.get("tags", [])
+                ts = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+                cypher = """
+                MATCH (p:Person)
+                WHERE p.id = $id OR p.name = $id
+                SET p.risk_score = $score,
+                    p.risk_level = $risk_level,
+                    p.risk_tags = $tags,
+                    p.risk_updated_at = $ts
+                """
+                db.query(cypher, {
+                    "id": str(node_id),
+                    "score": overall_score,
+                    "risk_level": risk_level,
+                    "tags": tags,
+                    "ts": ts,
+                })
+                updated_count += 1
+
+        top_risks = sorted(
+            [
+                {
+                    "entity_id": str(k),
+                    "score": v.get("overall_risk_score", 0),
+                    "risk_level": "HIGH" if v.get("overall_risk_score", 0) >= 70 else "MEDIUM" if v.get("overall_risk_score", 0) >= 40 else "LOW",
+                    "tags": v.get("tags", []),
+                }
+                for k, v in risk_results.items()
+            ],
+            key=lambda x: x["score"],
+            reverse=True,
+        )[:5]
+
+        return {
+            "status": "completed",
+            "nodes_scored": len(risk_results),
+            "nodes_updated_in_neo4j": updated_count,
+            "top_high_risk_suspects": top_risks,
+        }
+    except Exception as e:
+        print(f"[DocumentExtractor] Risk analytics error: {e}")
+        return {"status": "error", "message": str(e)}
+
+
+# =====================================================================
+# CLI Runner Parity (Unified Command Line Runner)
+# =====================================================================
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Nexxus.Intelligence Case Evidence Extractor & Ingestion Engine")
+    parser.add_argument("input_path", help="Path to evidence document (.txt, .pdf, .docx, .csv, .json)")
+    parser.add_argument("--export", help="Optional output JSON path to save extracted contract payload", default=None)
+    args = parser.parse_args()
+
+    input_file = Path(args.input_path)
+    if not input_file.exists():
+        print(f"Error: File not found at {input_file}")
+        sys.exit(1)
+
+    with open(input_file, "rb") as f:
+        file_bytes = f.read()
+
+    print(f"=== Processing Evidence File: {input_file.name} ({len(file_bytes)} bytes) ===")
+    result = ingest_document_file(input_file.name, file_bytes)
+    print(json.dumps(result, indent=2))
+
+    if args.export:
+        out_path = Path(args.export)
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(result, f, indent=2)
+        print(f"Exported result to {out_path}")
+

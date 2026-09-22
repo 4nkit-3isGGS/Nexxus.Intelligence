@@ -5,7 +5,7 @@ Validates incoming NLP payloads before entity resolution and graph ingestion.
 Guarantees schema correctness, referential integrity, and field boundaries.
 """
 
-ALLOWED_ENTITY_TYPES = {"Person", "Phone", "Location", "Vehicle", "Organization","CryptoWallet", "IPAddress", "IMEI"}
+ALLOWED_ENTITY_TYPES = {"Person", "Phone", "Location", "Vehicle", "Organization", "CryptoWallet", "IPAddress", "IMEI", "Account"}
 ALLOWED_REL_TYPES = {
     "CALLED",
     "MEMBER_OF",

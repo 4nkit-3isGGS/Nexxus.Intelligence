@@ -504,6 +504,24 @@ def ingest_imei(imei_entity: dict, source_doc: str = "UNKNOWN") -> str:
     return res[0]["id"] if res else imei_id
 
 
+def ingest_account(account_entity: dict, source_doc: str) -> str:
+    """Ingests an Account (bank account) node into Neo4j."""
+    acct_num = account_entity.get("account_number") or account_entity.get("name")
+    acct_id = account_entity.get("id") or f"ACC_{acct_num}"
+    timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+    cypher = """
+    MERGE (a:Account {id: $id})
+    SET a.account_number = $num,
+        a.source_doc_id = $src,
+        a.created_at = COALESCE(a.created_at, $ts),
+        a.updated_at = $ts
+    RETURN a.id AS id
+    """
+    res = db.query(cypher, {"id": acct_id, "num": str(acct_num), "src": source_doc, "ts": timestamp})
+    return res[0]["id"] if res else acct_id
+
+
 # ─── Orchestrator Functions ──────────────────────────────────────────────────
 
 
@@ -968,6 +986,7 @@ def ingest_nlp_payload(payload: dict) -> dict:
     wallets = [e for e in entities if e.get("type") == "CryptoWallet"]
     ips = [e for e in entities if e.get("type") == "IPAddress"]
     imeis = [e for e in entities if e.get("type") == "IMEI"]
+    accounts = [e for e in entities if e.get("type") == "Account"]
 
     # ── Offline Demo Fallback if Neo4j is unreachable ──
     if not db.is_available():
@@ -1005,6 +1024,7 @@ def ingest_nlp_payload(payload: dict) -> dict:
             "wallets_ingested": len(wallets),
             "ip_addresses_ingested": len(ips),
             "imeis_ingested": len(imeis),
+            "accounts_ingested": len(accounts),
             "relationships_ingested": len(relationships),
             "relationships_skipped": 0,
         }
@@ -1077,6 +1097,13 @@ def ingest_nlp_payload(payload: dict) -> dict:
             source_doc=imei_item.get("source_doc", "UNKNOWN"),
         )
         id_map[imei_item["id"]]["_neo4j_id"] = im_id
+
+    for acc_item in accounts:
+        acc_id = ingest_account(
+            account_entity=acc_item,
+            source_doc=acc_item.get("source_doc", "UNKNOWN"),
+        )
+        id_map[acc_item["id"]]["_neo4j_id"] = acc_id
 
     # ── 7. Process relationships ──
     rel_count = 0

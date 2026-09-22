@@ -44,7 +44,7 @@ Modern criminal organizations, terror cells, and cyber syndicates operate throug
 
 | Subsystem | Description | Key Modules |
 | :--- | :--- | :--- |
-| **🧠 NLP Extraction Pipeline** | Parses unstructured FIR text documents, extracts entities (People, Locations, Orgs, Phones, Vehicles, Bank Accounts, IPC sections), and formats validated relationship contracts. | `src/extract.py`, `data/raw/` |
+| **🧠 NLP Extraction Pipeline** | Parses unstructured FIR text documents, extracts entities (People, Locations, Orgs, Phones, Vehicles, Bank Accounts, IPC sections), and formats validated relationship contracts. | `backend/app/ingestion/document_extractor.py`, `data/raw/` |
 | **🗄️ Knowledge Graph Engine** | Enterprise Neo4j graph model supporting both live Neo4j database connections and in-memory offline mock fallback with index constraints. | `backend/app/neo4j_driver.py`, `cypher/` |
 | **🔍 Multi-Stage Entity Resolution** | `RapidFuzz` token sort/set fuzzy matching with alias boosting, Aadhaar/PAN cross-referencing, and cloned vehicle plate fraud detection. | `backend/app/resolution/` |
 | **📊 Graph & Cyber Analytics** | Computes PageRank (kingpin identification), Betweenness Centrality (brokers/bridges), Louvain community clusters, circular transaction detection, and call burst analysis. | `backend/app/analytics/` |
@@ -337,8 +337,9 @@ Nexxus.Intelligence/
 │   ├── tailwind.config.js                # Tailwind theme configuration
 │   └── vite.config.js                    # Vite bundler configuration
 │
-├── src/                                  # NLP Information Extraction Engine
-│   └── extract.py                        # spaCy transformer NER, regex heuristics & contract builder
+├── backend/app/ingestion/                # Unified Case Ingestion & Risk Scoring Engine
+│   ├── document_extractor.py             # Multi-format NLP extraction, BSA §65B hashing & Arnish risk hook
+│   └── graph_ingestor.py                 # Entity resolution, PII encryption & Neo4j persistence
 │
 ├── cypher/                               # Graph Database Scripts
 │   ├── schema.cypher                     # Constraints, indexes & uniqueness rules
@@ -457,10 +458,10 @@ http://localhost:5173
 
 ---
 
-### Step 7: (Optional) Run the NLP Extraction Pipeline
-To re-process raw FIRs (`data/raw/fir_*.txt`) and generate `output_contract.json`:
+### Step 7: (Optional) Run the Unified Document Extraction & Risk Engine
+To re-process raw FIRs, PDFs, Word docs, or CSVs and run extraction directly:
 ```bash
-python src/extract.py
+python -m backend.app.ingestion.document_extractor data/raw/fir_101.txt --export output_contract.json
 ```
 
 ---

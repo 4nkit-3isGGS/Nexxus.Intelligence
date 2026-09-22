@@ -96,3 +96,31 @@ def test_api_ingest_document_endpoint():
     assert data["evidence_hash"] == hashlib.sha256(sample_content).hexdigest()
     assert "node_counts" in data
     assert data["node_counts"]["total_nodes"] >= 1
+    assert "risk_assessment" in data
+    assert data["risk_assessment"]["status"] in ("completed", "skipped")
+
+
+def test_extract_from_cdr_csv():
+    csv_content = b"caller_phone,receiver_phone,timestamp,duration\n9830112233,9830445566,2026-03-01T10:00:00Z,120"
+    raw_text, direct_payload = extract_text_from_file("cdr_log.csv", csv_content)
+    assert direct_payload is not None
+    assert "entities" in direct_payload
+    assert "relationships" in direct_payload
+
+    phones = [e["number"] for e in direct_payload["entities"] if e["type"] == "Phone"]
+    assert "9830112233" in phones
+    assert "9830445566" in phones
+    assert len(direct_payload["relationships"]) == 1
+    assert direct_payload["relationships"][0]["type"] == "CALLED"
+
+
+def test_extract_from_bank_csv():
+    csv_content = b"sender_acct,receiver_acct,amount,timestamp\n100029384756,100099887766,50000,2026-03-01T11:00:00Z"
+    raw_text, direct_payload = extract_text_from_file("bank_transfers.csv", csv_content)
+    assert direct_payload is not None
+    accts = [e["account_number"] for e in direct_payload["entities"] if e["type"] == "Account"]
+    assert "100029384756" in accts
+    assert "100099887766" in accts
+    assert len(direct_payload["relationships"]) == 1
+    assert direct_payload["relationships"][0]["type"] == "TRANSFERRED_FUNDS"
+
