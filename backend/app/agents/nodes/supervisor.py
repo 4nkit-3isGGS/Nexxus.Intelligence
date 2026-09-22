@@ -36,9 +36,15 @@ def extract_potential_names_or_ids(query: str) -> List[str]:
     """Extracts candidate names, entity IDs, registration numbers or phone numbers from query."""
     candidates: List[str] = []
     
-    # 1. Check for standard entity IDs (e.g. P001, PH001, V001, ORG001, FIR-102)
-    id_patterns = re.findall(r"\b(P\d{3,4}|PH\d{3,4}|V\d{3,4}|ORG\d{3,4}|FIR-\d{3,4})\b", query, re.IGNORECASE)
-    candidates.extend(id_patterns)
+    # 1. Check for standard entity IDs (e.g. P001, PH001, V001, ORG001, FIR-102, FIR_101)
+    id_patterns = re.findall(r"\b(P\d{3,4}|PH\d{3,4}|V\d{3,4}|ORG\d{3,4}|FIR[-_\s]?\d{3,4})\b", query, re.IGNORECASE)
+    for pat in id_patterns:
+        raw = pat.strip()
+        candidates.append(raw)
+        if raw.upper().startswith("FIR"):
+            norm = re.sub(r"[\s-]+", "_", raw.upper())
+            if norm not in candidates:
+                candidates.append(norm)
 
     # 2. Check for vehicle numbers (e.g. DL01AB1234, MH-12-CD-5678)
     plate_patterns = re.findall(r"\b[A-Z]{2}[-\s]?\d{1,2}[-\s]?[A-Z]{1,2}[-\s]?\d{4}\b", query, re.IGNORECASE)
@@ -67,14 +73,36 @@ def resolve_subject_entity(
     # If explicit subject ID is provided, verify it directly
     if explicit_id:
         clean_id = explicit_id.strip()
+        if clean_id.upper().startswith("FIR"):
+            norm_id = re.sub(r"[\s-]+", "_", clean_id.upper())
+            return norm_id, {"id": norm_id, "name": f"First Information Report ({norm_id})", "type": "FIR"}
         lookup = get_entity_tool.invoke({"entity_id": clean_id})
         if lookup.get("found") and lookup.get("result"):
             return clean_id, lookup.get("result")
         return clean_id, {"id": clean_id, "name": f"Subject ({clean_id})"}
 
+    # Check if query directly references an FIR (e.g. FIR_101, FIR 102, FIR-101)
+    fir_match = re.search(r"\b(FIR[-_\s]?\d{3,4})\b", query, re.IGNORECASE)
+    if fir_match:
+        norm_fir = re.sub(r"[\s-]+", "_", fir_match.group(1).upper())
+        return norm_fir, {
+            "id": norm_fir,
+            "name": f"First Information Report ({norm_fir})",
+            "type": "FIR",
+            "labels": ["FIR", "CrimeIncident"],
+        }
+
     # Search for candidates in query
     candidates = extract_potential_names_or_ids(query)
     for candidate in candidates:
+        if candidate.upper().startswith("FIR"):
+            norm_fir = re.sub(r"[\s-]+", "_", candidate.upper())
+            return norm_fir, {
+                "id": norm_fir,
+                "name": f"First Information Report ({norm_fir})",
+                "type": "FIR",
+                "labels": ["FIR", "CrimeIncident"],
+            }
         search_res = search_entities_tool.invoke({"query": candidate, "limit": 5})
         matches = search_res.get("result", search_res.get("results", []))
         if matches:
@@ -147,29 +175,47 @@ def supervisor_plan_node(state: InvestigationState) -> Dict[str, Any]:
         }
 
     # 3. Formulate 3-5 step investigation plan
-    plan: List[str] = [
-        f"Step 1: Map 2-hop criminal network perimeter around {target_name} ({subject_id}) using Graph Investigator.",
-        f"Step 2: Profile behavioral threat and network centrality (PageRank kingpin, Betweenness broker) with Risk Analyst.",
-        f"Step 3: Retrieve FIR records, CDR logs, and audit cryptographic SHA-256 custody under BSA §65B with Evidence Verifier.",
-    ]
+    if subject_id.upper().startswith("FIR"):
+        plan: List[str] = [
+            f"Step 1: Extract and map all entities, suspects, phones, and accounts linked to {subject_id} using Graph Investigator.",
+            f"Step 2: Profile threat severity and network centrality for all {subject_id} entities with Risk Analyst.",
+            f"Step 3: Retrieve FIR records, CDR logs, and audit cryptographic SHA-256 custody under BSA §65B with Evidence Verifier.",
+            f"Step 4: Trace financial conduits and cyber infrastructure identified in {subject_id} with Financial & Cyber Analyst.",
+            f"Step 5: Synthesize complete node catalog and cross-source dossier with grounded legal proofs.",
+        ]
+        hypotheses: List[Hypothesis] = [
+            {
+                "id": "H-001",
+                "claim": f"All entities, communication endpoints, and assets indexed under {subject_id} constitute an organized criminal conspiracy.",
+                "status": "WEAK",
+                "rationale": f"Extracted from {subject_id} records and telemetry for syndicate mapping.",
+                "supported_evidence_id": [subject_id],
+            }
+        ]
+    else:
+        plan: List[str] = [
+            f"Step 1: Map 2-hop criminal network perimeter around {target_name} ({subject_id}) using Graph Investigator.",
+            f"Step 2: Profile behavioral threat and network centrality (PageRank kingpin, Betweenness broker) with Risk Analyst.",
+            f"Step 3: Retrieve FIR records, CDR logs, and audit cryptographic SHA-256 custody under BSA §65B with Evidence Verifier.",
+        ]
 
-    if has_fin_focus:
-        plan.append(f"Step 4: Trace circular fund routing and mule accounts with Financial & Cyber Analyst.")
-    elif has_phone_focus or has_vehicle_focus:
-        plan.append(f"Step 4: Correlate burner phone bursts and cloned vehicle registration flags.")
-    
-    plan.append(f"Step {len(plan) + 1}: Synthesize cross-source intelligence dossier with grounded legal proofs.")
+        if has_fin_focus:
+            plan.append(f"Step 4: Trace circular fund routing and mule accounts with Financial & Cyber Analyst.")
+        elif has_phone_focus or has_vehicle_focus:
+            plan.append(f"Step 4: Correlate burner phone bursts and cloned vehicle registration flags.")
+        
+        plan.append(f"Step {len(plan) + 1}: Synthesize cross-source intelligence dossier with grounded legal proofs.")
 
-    # 4. Formulate testable initial hypotheses
-    hypotheses: List[Hypothesis] = [
-        {
-            "id": "H-001",
-            "claim": f"{target_name} ({subject_id}) operates as a central coordinating node or syndicate affiliate in criminal operations.",
-            "status": "WEAK",
-            "rationale": "Initial query allegation pending structural topological and risk validation.",
-            "supported_evidence_id": [],
-        }
-    ]
+        # 4. Formulate testable initial hypotheses
+        hypotheses: List[Hypothesis] = [
+            {
+                "id": "H-001",
+                "claim": f"{target_name} ({subject_id}) operates as a central coordinating node or syndicate affiliate in criminal operations.",
+                "status": "WEAK",
+                "rationale": "Initial query allegation pending structural topological and risk validation.",
+                "supported_evidence_id": [],
+            }
+        ]
 
     if has_phone_focus:
         hypotheses.append({
@@ -388,19 +434,29 @@ def stub_graph_investigator_node(state: InvestigationState) -> Dict[str, Any]:
     relationships: List[Dict[str, Any]] = list(state.get("discovered_relationships", []))
     
     # Run tools to populate state with real or mock data
-    ent_res = get_entity_tool.invoke({"entity_id": subject_id})
-    if ent_res.get("found") and ent_res.get("result"):
-        node = ent_res["result"]
-        if not any(e.get("id") == subject_id for e in entities):
-            entities.append(node)
+    if subject_id.upper().startswith("FIR"):
+        from backend.app.agents.tools.graph_tools import get_nodes_by_fir_tool
+        fir_res = get_nodes_by_fir_tool.invoke({"fir_id": subject_id})
+        if fir_res.get("found"):
+            for n in fir_res.get("nodes", []):
+                if not any(e.get("id") == n.get("id") for e in entities):
+                    entities.append(n)
+            for edge in fir_res.get("edges", []):
+                relationships.append(edge)
     else:
-        if not any(e.get("id") == subject_id for e in entities):
-            entities.append({"id": subject_id, "name": f"Suspect {subject_id}", "label": "Person", "risk_score": 65})
+        ent_res = get_entity_tool.invoke({"entity_id": subject_id})
+        if ent_res.get("found") and ent_res.get("result"):
+            node = ent_res["result"]
+            if not any(e.get("id") == subject_id for e in entities):
+                entities.append(node)
+        else:
+            if not any(e.get("id") == subject_id for e in entities):
+                entities.append({"id": subject_id, "name": f"Suspect {subject_id}", "label": "Person", "risk_score": 65})
 
-    # Add mock associate for testing if none found
-    if len(entities) == 1:
-        entities.append({"id": "PH001", "number": "+91-9876543210", "label": "Phone"})
-        relationships.append({"source": subject_id, "target": "PH001", "type": "USES_PHONE"})
+        # Add mock associate for testing if none found
+        if len(entities) == 1:
+            entities.append({"id": "PH001", "number": "+91-9876543210", "label": "Phone"})
+            relationships.append({"source": subject_id, "target": "PH001", "type": "USES_PHONE"})
 
     new_history = list(state.get("tool_history", []))
     new_history.append({
