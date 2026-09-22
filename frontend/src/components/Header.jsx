@@ -6,8 +6,8 @@ export default function Header({
   backendStatus, 
   refreshData, 
   caseInfo, 
-  kpiStats = { totalNodes: 31 },
-  pendingReviewCount = 3,
+  kpiStats = { totalNodes: 0 },
+  pendingReviewCount = 0,
   onOpenIngest,
   officerRole = 'LEAD_INVESTIGATOR',
   onRoleChange,
@@ -67,9 +67,9 @@ export default function Header({
   const currentTab = activeTab || getTabFromPath();
 
   const tabMetadata = {
-    graph: { label: 'Knowledge Graph', icon: 'hub', badge: `${kpiStats?.totalNodes || 31} Nodes`, badgeColor: 'bg-slate-100 text-slate-700 border border-slate-200' },
+    graph: { label: 'Knowledge Graph', icon: 'hub', badge: kpiStats?.totalNodes ? `${kpiStats.totalNodes} Nodes` : null, badgeColor: 'bg-slate-100 text-slate-700 border border-slate-200' },
     agent: { label: 'AI Investigation Team', icon: 'psychology', badge: 'ACTIVE', badgeColor: 'bg-purple-50 text-purple-700 border border-purple-200' },
-    resolution: { label: 'Duplicate & Mule Detection', icon: 'fingerprint', badge: `${pendingReviewCount} Pending`, badgeColor: 'bg-amber-50 text-amber-800 border border-amber-200' },
+    resolution: { label: 'Duplicate & Mule Detection', icon: 'fingerprint', badge: pendingReviewCount ? `${pendingReviewCount} Pending` : null, badgeColor: 'bg-amber-50 text-amber-800 border border-amber-200' },
     financial: { label: 'Money Trail & Hawala Ledger', icon: 'account_balance' },
     cdr: { label: 'Call Records & Cell Towers', icon: 'phone_in_talk' },
     fir: { label: 'FIR Case Documents', icon: 'policy' },
@@ -148,11 +148,11 @@ export default function Header({
         {/* Right Actions & RBAC Clearance */}
         <div className="flex items-center gap-2.5 flex-shrink-0">
           {/* Status Indicator */}
-          <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs font-mono">
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs font-mono">
+            <span className={`w-2 h-2 rounded-full ${backendStatus?.isLive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}></span>
             <span className="text-slate-500">DB:</span>
-            <span className="text-emerald-700 font-semibold">
-              {backendStatus?.isLive ? 'LIVE' : 'DEMO'}
+            <span className={`font-semibold ${backendStatus?.isLive ? 'text-emerald-700' : 'text-slate-500'}`}>
+              {backendStatus?.isLive ? 'LIVE' : (backendStatus?.status === 'CHECKING' ? 'CONNECTING...' : 'OFFLINE')}
             </span>
           </div>
 

@@ -12,29 +12,31 @@ export default function InvestigationPlaybook({
   const { toast } = useToast();
 
   const handleTraceApexLeader = () => {
-    // P008 is Debasish Chatterjee
-    onSelectNodeById?.('P008');
-    onHighlightSubgraph?.(['P008', 'P003', 'P002', 'O001'], ['E008', 'E012', 'E001', 'E002']);
-    toast.success('Apex Leader Traced', 'Debasish Chatterjee (P008) highlighted with 3-hop operational bridge.');
+    if (!Array.isArray(nodes) || nodes.length === 0) {
+      toast.info('Knowledge Graph Empty', 'Ingest case data or run query to identify apex entities.');
+      return;
+    }
+    const apexNode = [...nodes].sort((a, b) => (b.risk_score || 0) - (a.risk_score || 0))[0];
+    if (apexNode) {
+      onSelectNodeById?.(apexNode.id);
+      onHighlightSubgraph?.([apexNode.id]);
+      toast.success('Apex Target Focused', `High-risk entity ${apexNode.name || apexNode.id} (Risk: ${apexNode.risk_score || 0}) centered on graph.`);
+    }
   };
 
   const handleExposeHawalaLoop = () => {
-    // A001, A002, O001, P002
-    onHighlightSubgraph?.(['A001', 'A002', 'O001', 'P002'], ['E003', 'E004', 'E005']);
-    onSelectNodeById?.('A001');
-    toast.warning('Circular Hawala Loop Isolated', '₹500,000 mule layering loop detected between A001, A002 & Shubh Laxmi Finance.');
+    navigate('/workspace/financial');
+    toast.info('Financial Investigation', 'Navigating to live Money Trail & Hawala transactions view.');
   };
 
   const handleExtortionCallSpike = () => {
-    onSetTimelineDate?.('2026-03-05');
-    onHighlightSubgraph?.(['P003', 'P001', 'T001', 'T002'], ['E001', 'E007']);
-    onSelectNodeById?.('P003');
-    toast.error('22-Call Extortion Spike', 'Timeline jumped to March 5, 2026 (22 calls in 3h from Rajesh to Manoj).');
+    navigate('/workspace/cdr');
+    toast.info('Telecommunications Telemetry', 'Navigating to live CDR Call Records & Tower anchors view.');
   };
 
   const handleOpenDuplicateQueue = () => {
     navigate('/workspace/resolution');
-    toast.info('Suspect Disambiguation', '3 duplicate identity clusters queued for manual biometric review.');
+    toast.info('Suspect Disambiguation', 'Opening Entity Resolution review queue.');
   };
 
   const handleOpenAuditVault = () => {
@@ -47,49 +49,49 @@ export default function InvestigationPlaybook({
       <div className="flex items-center gap-1.5 flex-shrink-0">
         <span className="material-symbols-outlined text-[15px] text-slate-400">bolt</span>
         <span className="text-[11px] font-mono font-medium uppercase tracking-wider text-slate-500">
-          Forensic Leads:
+          Investigation Playbooks:
         </span>
       </div>
 
       <div className="flex items-center gap-1.5 flex-nowrap flex-shrink-0 text-xs">
-        {/* Playbook 1: Trace Apex Syndicate Leader */}
+        {/* Playbook 1: Trace Apex Target */}
         <button
           onClick={handleTraceApexLeader}
           className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 shadow-2xs font-medium transition-all cursor-pointer"
-          title="Highlight Debasish Chatterjee & Mastermind Subgraph"
+          title="Highlight Highest-Risk Entity on Canvas"
         >
           <span className="material-symbols-outlined text-[15px] text-purple-600">crown</span>
-          <span>Trace Apex Leader</span>
+          <span>Trace High-Risk Target</span>
         </button>
 
-        {/* Playbook 2: Expose ₹500k Hawala Loop */}
+        {/* Playbook 2: Expose Hawala Money Trail */}
         <button
           onClick={handleExposeHawalaLoop}
           className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 shadow-2xs font-medium transition-all cursor-pointer"
-          title="Isolate ₹500,000 Circular Hawala Transfer Loop"
+          title="Analyze Money Trail & Suspicious Bank Transfers"
         >
           <span className="material-symbols-outlined text-[15px] text-amber-600">cached</span>
-          <span>₹500k Hawala Loop</span>
+          <span>Money Trail & Hawala</span>
         </button>
 
-        {/* Playbook 3: 22-Call Extortion Burst */}
+        {/* Playbook 3: Call Spikes & Towers */}
         <button
           onClick={handleExtortionCallSpike}
           className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 shadow-2xs font-medium transition-all cursor-pointer"
-          title="Jump to 22-Call Extortion Burst on March 5"
+          title="Inspect Call Telemetry & Cell Towers"
         >
           <span className="material-symbols-outlined text-[15px] text-rose-600">crisis_alert</span>
-          <span>Call Spike (Mar 5)</span>
+          <span>Call Spikes & Towers</span>
         </button>
 
         {/* Playbook 4: Suspect Disambiguation */}
         <button
           onClick={handleOpenDuplicateQueue}
           className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 shadow-2xs font-medium transition-all cursor-pointer"
-          title="Review 3 Duplicate Suspect & Mule Disambiguation Records"
+          title="Review Duplicate Suspect & Mule Disambiguation Records"
         >
           <span className="material-symbols-outlined text-[15px] text-sky-600">fingerprint</span>
-          <span>Duplicates (3)</span>
+          <span>Entity Resolution</span>
         </button>
 
         {/* Playbook 5: Audit Digital Custody */}
