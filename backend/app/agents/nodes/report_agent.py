@@ -42,34 +42,62 @@ def report_agent_node(state: InvestigationState) -> Dict[str, Any]:
 
     # 1. Header & Executive Threat Assessment
     threat_tier = "HIGH CRITICAL" if risk_score >= 70 else "MODERATE" if risk_score >= 40 else "LOW/MONITORING"
-    dossier: List[str] = [
-        f"# 🚨 CRIMINAL NETWORK INTELLIGENCE DOSSIER",
-        f"**Case Reference:** NX-INV-{subject_id}-2026",
-        f"**Target Subject:** {subject_name} (`{subject_id}`)",
-        f"**Overall Threat Assessment:** {threat_tier} (Risk Score: {risk_score}/100)",
-        f"**Investigative Query:** *\"{user_query}\"*",
-        "",
-        "---",
-        "",
-        "## 1. 👤 Target Subject Profile",
-        f"- **Primary Identifier:** `{subject_id}`",
-        f"- **Name / Aliases:** {subject_name}{alias_str}",
-        f"- **Aadhaar / PAN:** {subject_node.get('aadhaar', 'UNSPECIFIED')} / {subject_node.get('pan', 'UNSPECIFIED')}",
-        f"- **Father's Name:** {subject_node.get('father_name', 'Not Listed')}",
-        f"- **Gender / Age:** {subject_node.get('gender', 'N/A')} / {subject_node.get('age', 'N/A')}",
-        "",
-        "## 2. 🕸️ Discovered Network & Asset Perimeter",
-        f"The autonomous investigation mapped **{len(entities)} connected entities** and **{len(relationships)} direct relationships**:",
-    ]
-
-    # Itemize discovered nodes
-    if entities:
-        for idx, ent in enumerate(entities[:8], 1):
-            ent_type = ent.get("label") or ent.get("type") or "Entity"
-            ent_name = ent.get("name") or ent.get("number") or ent.get("registration_number") or ent.get("id")
-            dossier.append(f"  {idx}. `[{ent_type}]` **{ent_name}** (`{ent.get('id', 'N/A')}`)")
+    is_fir = subject_id.upper().startswith("FIR")
+    if is_fir:
+        dossier: List[str] = [
+            f"# 🚨 CRIMINAL NETWORK INTELLIGENCE DOSSIER",
+            f"**Case Reference:** NX-FIR-{subject_id}-2026",
+            f"**Target Document:** {subject_name} (`{subject_id}`)",
+            f"**Overall Case Threat Assessment:** {threat_tier} (Risk Score: {risk_score}/100)",
+            f"**Investigative Query:** *\"{user_query}\"*",
+            "",
+            "---",
+            "",
+            f"## 1. 📋 FIR Incident Overview",
+            f"- **Case Identifier:** `{subject_id}`",
+            f"- **Scope:** Complete case perimeter traversal and multi-hop network discovery",
+            f"- **Total Nodes Mapped:** **{len(entities)} unique nodes**",
+            f"- **Total Relationships Mapped:** **{len(relationships)} direct links**",
+            "",
+            f"## 2. 🕸️ All Nodes Related to {subject_id}",
+            f"The autonomous investigation extracted **{len(entities)} unique nodes** and **{len(relationships)} direct relationships** linked to **{subject_id}**:",
+        ]
     else:
-        dossier.append("  - No secondary network nodes discovered.")
+        dossier: List[str] = [
+            f"# 🚨 CRIMINAL NETWORK INTELLIGENCE DOSSIER",
+            f"**Case Reference:** NX-INV-{subject_id}-2026",
+            f"**Target Subject:** {subject_name} (`{subject_id}`)",
+            f"**Overall Threat Assessment:** {threat_tier} (Risk Score: {risk_score}/100)",
+            f"**Investigative Query:** *\"{user_query}\"*",
+            "",
+            "---",
+            "",
+            "## 1. 👤 Target Subject Profile",
+            f"- **Primary Identifier:** `{subject_id}`",
+            f"- **Name / Aliases:** {subject_name}{alias_str}",
+            f"- **Aadhaar / PAN:** {subject_node.get('aadhaar', 'UNSPECIFIED')} / {subject_node.get('pan', 'UNSPECIFIED')}",
+            f"- **Father's Name:** {subject_node.get('father_name', 'Not Listed')}",
+            f"- **Gender / Age:** {subject_node.get('gender', 'N/A')} / {subject_node.get('age', 'N/A')}",
+            "",
+            "## 2. 🕸️ Discovered Network & Asset Perimeter",
+            f"The autonomous investigation mapped **{len(entities)} connected entities** and **{len(relationships)} direct relationships**:",
+        ]
+
+    # Itemize all discovered nodes categorized by entity type
+    if entities:
+        by_type: Dict[str, List[Dict[str, Any]]] = {}
+        for ent in entities:
+            t = ent.get("label") or ent.get("type") or (ent.get("labels")[0] if isinstance(ent.get("labels"), list) and ent.get("labels") else "Entity")
+            by_type.setdefault(t, []).append(ent)
+
+        for ent_type, group in sorted(by_type.items()):
+            dossier.append(f"\n### {ent_type} ({len(group)} nodes)")
+            for idx, ent in enumerate(group, 1):
+                ent_name = ent.get("name") or ent.get("number") or ent.get("registration_number") or ent.get("address") or ent.get("id")
+                risk_val = f" | Risk: {ent.get('risk_score')}/100" if ent.get('risk_score') is not None else ""
+                dossier.append(f"  {idx}. `[{ent_type}]` **{ent_name}** (`{ent.get('id', 'N/A')}`){risk_val}")
+    else:
+        dossier.append("  - No network nodes discovered.")
 
     # 2. Algorithmic Threat & Role Profiling
     role_desc = "Kingpin / Central Hub" if centrality.get("degree", 0) > 3 or centrality.get("pagerank", 0) > 0.3 else "Operational Cut-Out / Broker"
