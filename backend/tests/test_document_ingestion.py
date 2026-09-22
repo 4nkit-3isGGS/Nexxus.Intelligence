@@ -124,3 +124,12 @@ def test_extract_from_bank_csv():
     assert len(direct_payload["relationships"]) == 1
     assert direct_payload["relationships"][0]["type"] == "TRANSFERRED_FUNDS"
 
+
+def test_ingest_fir_103_with_amounts():
+    with open("data/raw/fir_103.txt", "rb") as f:
+        fir_content = f.read()
+    res = ingest_document_file("fir_103.txt", fir_content)
+    assert res["status"] == "success"
+    assert res["node_counts"]["persons"] >= 2
+    assert res["risk_assessment"]["status"] in ("completed", "skipped")
+

@@ -85,7 +85,7 @@ CRYPTO_PATTERN = re.compile(r"\b(?:0x[a-fA-F0-9]{40}|[13][a-km-zA-HJ-NP-Z1-9]{25
 DATE_PATTERN = re.compile(r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b")
 
 # Monetary amounts in INR: e.g. Rs. 45,000 or ₹5,00,000
-AMOUNT_PATTERN = re.compile(r"(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{2})?)", re.IGNORECASE)
+AMOUNT_PATTERN = re.compile(r"(?:\bRs\.?|\bINR|₹)\s*(\d[\d,]*(?:\.\d{2})?)", re.IGNORECASE)
 
 # Structural organization suffix recognition (works for any company name)
 ORG_SUFFIXES = (
@@ -759,8 +759,10 @@ def extract_entities_from_raw_text(text: str, doc_id: str = "DOC_UPLOAD") -> dic
                     amt_m = AMOUNT_PATTERN.search(sent_text)
                     if amt_m:
                         try:
-                            extra_args["amount"] = float(amt_m.group(1).replace(",", ""))
-                        except ValueError:
+                            clean_amt_str = amt_m.group(1).replace(",", "").strip()
+                            if clean_amt_str:
+                                extra_args["amount"] = float(clean_amt_str)
+                        except (ValueError, TypeError):
                             pass
 
                 add_relationship(source_id, target_id, rel_type, 0.90, sent_text, **extra_args)
@@ -779,8 +781,9 @@ def extract_entities_from_raw_text(text: str, doc_id: str = "DOC_UPLOAD") -> dic
         if pid and phid:
             add_relationship(pid, phid, "OWNS_PHONE", 0.99, "Complainant mobile registered in FIR header")
 
-    # Sentence-level link resolutions
-    for sent in re.split(r"(?<=[.!?])\s+", cleaned):
+    # Sentence-level link resolutions (normalize abbreviations so sentences don't split at 'Rs.')
+    norm_cleaned = re.sub(r"\bRs\.\s*", "Rs ", cleaned)
+    for sent in re.split(r"(?<!\bRs)(?<!\bNo)(?<!\bPS)(?<!\bPvt)(?<!\bLtd)(?<=[.!?])\s+", norm_cleaned):
         found_persons = [e["id"] for e in deduped_entities if e["type"] == "Person" and e["name"] in sent]
         found_phones = [e["id"] for e in deduped_entities if e["type"] == "Phone" and e["number"] in sent]
         found_vehs = [e["id"] for e in deduped_entities if e["type"] == "Vehicle" and e["registration_number"] in sent]
@@ -817,9 +820,17 @@ def extract_entities_from_raw_text(text: str, doc_id: str = "DOC_UPLOAD") -> dic
                 add_relationship(found_phones[0], found_phones[1], "CALLED", 0.92, sent, duration=180)
 
         # Person / Account Transfer
-        if any(w in sent.lower() for w in ("transfer", "paid", "loan", "duress", "amount")):
+        if any(w in sent.lower() for w in ("transfer", "transferred", "paid", "loan", "duress", "amount")):
             amt_match = AMOUNT_PATTERN.search(sent)
-            amt_val = float(amt_match.group(1).replace(",", "")) if amt_match else 45000.0
+            amt_val = 45000.0
+            if amt_match:
+                try:
+                    clean_amt_str = amt_match.group(1).replace(",", "").strip()
+                    if clean_amt_str:
+                        amt_val = float(clean_amt_str)
+                except (ValueError, TypeError):
+                    amt_val = 45000.0
+
             if len(found_persons) >= 2:
                 add_relationship(found_persons[0], found_persons[1], "TRANSACTED_WITH", 0.90, sent, amount=amt_val)
             elif len(found_persons) >= 1 and len(found_accts) >= 1:
