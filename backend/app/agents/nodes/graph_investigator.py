@@ -16,6 +16,7 @@ from backend.app.agents.tools.graph_tools import (
     get_neighbors_tool,
     get_subgraph_tool,
     search_entities_tool,
+    get_nodes_by_fir_tool,
 )
 
 
@@ -24,6 +25,7 @@ def graph_investigator_node(state: InvestigationState) -> Dict[str, Any]:
     
     Traverses the local graph perimeter around subject_entity_id,
     deduplicating and appending all newly discovered nodes and edges.
+    Supports individual suspect investigation as well as FIR/case-level mapping.
     
     Mutates:
         - discovered_entities
@@ -48,77 +50,96 @@ def graph_investigator_node(state: InvestigationState) -> Dict[str, Any]:
     discovered_new_count = 0
     tools_called = []
 
-    # 1. Fetch complete profile for the target subject
-    if subject_id not in known_entity_ids:
-        ent_res = get_entity_tool.invoke({"entity_id": subject_id})
-        tools_called.append("get_entity")
-        if ent_res.get("found") and ent_res.get("result"):
-            subj_node = ent_res["result"]
-            existing_entities.append(subj_node)
-            known_entity_ids.add(subject_id)
-            discovered_new_count += 1
-        else:
-            # Fallback stub when subject is newly flagged
-            subj_stub = {
-                "id": subject_id,
-                "name": f"Suspect {subject_id}",
-                "label": "Person",
-                "risk_score": 65,
-            }
-            existing_entities.append(subj_stub)
-            known_entity_ids.add(subject_id)
-            discovered_new_count += 1
-
-    # 2. Fetch direct 1-hop neighbors and connections
-    neighbors_res = get_neighbors_tool.invoke({"entity_id": subject_id})
-    tools_called.append("get_neighbors")
-    
-    if neighbors_res.get("found") and "neighbors" in neighbors_res:
-        for n in neighbors_res["neighbors"]:
-            n_id = n.get("id")
-            if n_id and n_id not in known_entity_ids:
-                existing_entities.append(n)
-                known_entity_ids.add(n_id)
-                discovered_new_count += 1
-
-    if neighbors_res.get("found") and "relationships" in neighbors_res:
-        for rel in neighbors_res["relationships"]:
-            edge_key = (rel.get("source"), rel.get("target"), rel.get("type"))
-            if edge_key not in known_edge_keys:
-                existing_relationships.append(rel)
-                known_edge_keys.add(edge_key)
-
-    # 3. If neighbor count is small (<= 2), expand to 2-hop bounded subgraph
-    if len(known_entity_ids) <= 3:
-        subgraph_res = get_subgraph_tool.invoke({"entity_id": subject_id, "depth": 2})
-        tools_called.append("get_subgraph")
-        if subgraph_res.get("found") and "nodes" in subgraph_res:
-            for node in subgraph_res["nodes"]:
-                node_id = node.get("id")
-                if node_id and node_id not in known_entity_ids:
-                    existing_entities.append(node)
-                    known_entity_ids.add(node_id)
+    # Case A: FIR / Document-level Case Investigation
+    if subject_id.upper().startswith("FIR"):
+        fir_res = get_nodes_by_fir_tool.invoke({"fir_id": subject_id})
+        tools_called.append("get_nodes_by_fir")
+        if fir_res.get("found"):
+            for n in fir_res.get("nodes", []):
+                n_id = n.get("id")
+                if n_id and n_id not in known_entity_ids:
+                    existing_entities.append(n)
+                    known_entity_ids.add(n_id)
                     discovered_new_count += 1
-
-            for edge in subgraph_res.get("edges", []):
+            for edge in fir_res.get("edges", []):
                 edge_key = (edge.get("source"), edge.get("target"), edge.get("type"))
                 if edge_key not in known_edge_keys:
                     existing_relationships.append(edge)
                     known_edge_keys.add(edge_key)
 
-    # 4. Fallback associate if live database returned 0 connections (e.g. offline during tests)
-    if not existing_relationships:
-        phone_id = f"PH_{subject_id}"
-        if phone_id not in known_entity_ids:
-            assoc_phone = {"id": phone_id, "number": "+91-9876543210", "label": "Phone", "carrier": "Airtel"}
-            existing_entities.append(assoc_phone)
-            known_entity_ids.add(phone_id)
-            discovered_new_count += 1
-            existing_relationships.append({
-                "source": subject_id,
-                "target": phone_id,
-                "type": "USES_PHONE",
-            })
+    # Case B: Individual Suspect Entity Investigation
+    else:
+        # 1. Fetch complete profile for the target subject
+        if subject_id not in known_entity_ids:
+            ent_res = get_entity_tool.invoke({"entity_id": subject_id})
+            tools_called.append("get_entity")
+            if ent_res.get("found") and ent_res.get("result"):
+                subj_node = ent_res["result"]
+                existing_entities.append(subj_node)
+                known_entity_ids.add(subject_id)
+                discovered_new_count += 1
+            else:
+                # Fallback stub when subject is newly flagged
+                subj_stub = {
+                    "id": subject_id,
+                    "name": f"Suspect {subject_id}",
+                    "label": "Person",
+                    "risk_score": 65,
+                }
+                existing_entities.append(subj_stub)
+                known_entity_ids.add(subject_id)
+                discovered_new_count += 1
+
+        # 2. Fetch direct 1-hop neighbors and connections
+        neighbors_res = get_neighbors_tool.invoke({"entity_id": subject_id})
+        tools_called.append("get_neighbors")
+        
+        if neighbors_res.get("found") and "neighbors" in neighbors_res:
+            for n in neighbors_res["neighbors"]:
+                n_id = n.get("id")
+                if n_id and n_id not in known_entity_ids:
+                    existing_entities.append(n)
+                    known_entity_ids.add(n_id)
+                    discovered_new_count += 1
+
+        if neighbors_res.get("found") and "relationships" in neighbors_res:
+            for rel in neighbors_res["relationships"]:
+                edge_key = (rel.get("source"), rel.get("target"), rel.get("type"))
+                if edge_key not in known_edge_keys:
+                    existing_relationships.append(rel)
+                    known_edge_keys.add(edge_key)
+
+        # 3. If neighbor count is small (<= 2), expand to 2-hop bounded subgraph
+        if len(known_entity_ids) <= 3:
+            subgraph_res = get_subgraph_tool.invoke({"entity_id": subject_id, "depth": 2})
+            tools_called.append("get_subgraph")
+            if subgraph_res.get("found") and "nodes" in subgraph_res:
+                for node in subgraph_res["nodes"]:
+                    node_id = node.get("id")
+                    if node_id and node_id not in known_entity_ids:
+                        existing_entities.append(node)
+                        known_entity_ids.add(node_id)
+                        discovered_new_count += 1
+
+                for edge in subgraph_res.get("edges", []):
+                    edge_key = (edge.get("source"), edge.get("target"), edge.get("type"))
+                    if edge_key not in known_edge_keys:
+                        existing_relationships.append(edge)
+                        known_edge_keys.add(edge_key)
+
+        # 4. Fallback associate if live database returned 0 connections (e.g. offline during tests)
+        if not existing_relationships:
+            phone_id = f"PH_{subject_id}"
+            if phone_id not in known_entity_ids:
+                assoc_phone = {"id": phone_id, "number": "+91-9876543210", "label": "Phone", "carrier": "Airtel"}
+                existing_entities.append(assoc_phone)
+                known_entity_ids.add(phone_id)
+                discovered_new_count += 1
+                existing_relationships.append({
+                    "source": subject_id,
+                    "target": phone_id,
+                    "type": "USES_PHONE",
+                })
 
     # 5. Record tool invocation audit entry
     new_history = list(state.get("tool_history", []))
