@@ -19,6 +19,7 @@ from backend.app.services.graph_service import (
     get_shortest_path,
     get_subgraph,
     search_entities,
+    get_nodes_by_fir,
 )
 
 class GetEntityInput(BaseModel):
@@ -316,6 +317,53 @@ def search_entities_tool(query: str, limit: int = 10) -> Dict[str, Any]:
         "result": result
     }
 
+
+
+class GetNodesByFirInput(BaseModel):
+    """Input schema for fetching all nodes and edges related to an FIR document."""
+    fir_id: str = Field(
+        ...,
+        description="The FIR or case document identifier (e.g., 'FIR_101', 'FIR_102', 'FIR-101').",
+        min_length=1,
+    )
+
+
+@tool("get_nodes_by_fir", args_schema=GetNodesByFirInput)
+def get_nodes_by_fir_tool(fir_id: str) -> Dict[str, Any]:
+    """Retrieves all entities, suspects, phones, vehicles, and transaction accounts linked to a specific FIR.
+
+    Use this tool when an investigator or case query focuses on an entire case incident or FIR
+    (e.g., 'show me all nodes related to FIR_101') to map out the entire case perimeter at once.
+
+    Args:
+        fir_id: The FIR identifier (e.g. 'FIR_101', 'FIR_102').
+
+    Returns:
+        A dictionary containing:
+            - 'found': Boolean indicating if any nodes were linked to the FIR.
+            - 'fir_id': Normalized FIR identifier.
+            - 'node_count': Total number of nodes in the case.
+            - 'edge_count': Total number of relationships in the case.
+            - 'nodes': List of all matching nodes.
+            - 'edges': List of connecting edges between the nodes.
+    """
+    clean_fir = fir_id.strip()
+    if not clean_fir:
+        return {"found": False, "error": "fir_id cannot be empty."}
+
+    data = get_nodes_by_fir(clean_fir)
+    nodes = data.get("nodes", [])
+    edges = data.get("edges", [])
+
+    return {
+        "fir_id": clean_fir,
+        "found": bool(nodes),
+        "node_count": len(nodes),
+        "edge_count": len(edges),
+        "nodes": nodes,
+        "edges": edges,
+        "result": data,
+    }
 
 
 # Exported Tool Registry for LangGraph Multi-Agent Workflows
