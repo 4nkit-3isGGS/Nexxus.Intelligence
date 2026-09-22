@@ -324,6 +324,80 @@ def get_graph_stats() -> list[dict]:
     return stats
 
 
+def get_nodes_by_fir(fir_id: str) -> dict:
+    """Retrieves all nodes and connecting relationships associated with a given FIR document ID."""
+    clean_fir = fir_id.strip().upper().replace("-", "_").replace(" ", "_")
+    
+    if db.is_available():
+        cypher = """
+        MATCH (e)
+        WHERE (e.source_doc_id IS NOT NULL AND toLower(toString(e.source_doc_id)) CONTAINS toLower($query))
+           OR (e.source_doc IS NOT NULL AND toLower(toString(e.source_doc)) CONTAINS toLower($query))
+           OR (e.doc_id IS NOT NULL AND toLower(toString(e.doc_id)) CONTAINS toLower($query))
+           OR EXISTS {
+               MATCH (e)-[r]-()
+               WHERE toLower(toString(r.source_doc_id)) CONTAINS toLower($query)
+                  OR toLower(toString(r.source_doc)) CONTAINS toLower($query)
+                  OR toLower(toString(r.doc_id)) CONTAINS toLower($query)
+           }
+        OPTIONAL MATCH (e)-[r]-(other)
+        WHERE (toLower(toString(r.source_doc_id)) CONTAINS toLower($query)
+            OR toLower(toString(r.source_doc)) CONTAINS toLower($query)
+            OR toLower(toString(r.doc_id)) CONTAINS toLower($query))
+        WITH collect(DISTINCT e {.*, labels: labels(e)}) AS raw_nodes,
+             collect(DISTINCT CASE WHEN r IS NOT NULL THEN {
+                 source: startNode(r).id,
+                 target: endNode(r).id,
+                 type: type(r),
+                 properties: properties(r)
+             } END) AS raw_edges
+        RETURN [node IN raw_nodes WHERE node IS NOT NULL] AS nodes,
+               [edge IN raw_edges WHERE edge IS NOT NULL] AS edges
+        """
+        try:
+            result = db.query(cypher, {"query": clean_fir})
+            if result and result[0].get("nodes"):
+                return result[0]
+        except Exception as e:
+            print(f"[Neo4j Error] get_nodes_by_fir failed: {e}")
+
+    # Fallback to local dataset
+    _load_fallback_dataset()
+    matched_nodes = []
+    matched_node_ids = set()
+    collected_edges = []
+    seen_edge_keys = set()
+
+    clean_lower = clean_fir.lower()
+    for rel in _FALLBACK_RELATIONSHIPS:
+        doc = str(rel.get("source_doc") or rel.get("source_doc_id") or rel.get("doc_id") or "").lower()
+        if clean_lower in doc or doc in clean_lower:
+            src = str(rel.get("source"))
+            tgt = str(rel.get("target"))
+            edge_key = f"{src}->{tgt}:{rel.get('type')}"
+            if edge_key not in seen_edge_keys:
+                seen_edge_keys.add(edge_key)
+                collected_edges.append({
+                    "source": src,
+                    "target": tgt,
+                    "type": rel.get("type", "CONNECTED_TO"),
+                    "properties": rel,
+                })
+            matched_node_ids.add(src)
+            matched_node_ids.add(tgt)
+
+    for ent_id, ent in _FALLBACK_ENTITIES.items():
+        doc = str(ent.get("source_doc") or ent.get("source_doc_id") or "").lower()
+        if clean_lower in doc or ent_id in matched_node_ids:
+            ent_copy = dict(ent)
+            if "labels" not in ent_copy:
+                ent_copy["labels"] = [ent.get("type", "Entity")]
+            matched_nodes.append(ent_copy)
+            matched_node_ids.add(ent_id)
+
+    return {"nodes": matched_nodes, "edges": collected_edges}
+
+
 LABEL_MAP = {
     "person": "Person",
     "phone": "Phone",
@@ -374,11 +448,18 @@ def search_entities(
            OR (e.address IS NOT NULL AND toLower(toString(e.address)) CONTAINS toLower($query))
            OR (e.city IS NOT NULL AND toLower(toString(e.city)) CONTAINS toLower($query))
            OR (e.fir_number IS NOT NULL AND toLower(toString(e.fir_number)) CONTAINS toLower($query))
+           OR (e.source_doc_id IS NOT NULL AND toLower(toString(e.source_doc_id)) CONTAINS toLower($query))
+           OR (e.source_doc IS NOT NULL AND toLower(toString(e.source_doc)) CONTAINS toLower($query))
            OR (e.ip IS NOT NULL AND toLower(toString(e.ip)) CONTAINS toLower($query))
            OR (e.imei IS NOT NULL AND toLower(toString(e.imei)) CONTAINS toLower($query))
            OR (e.exchange_tag IS NOT NULL AND toLower(toString(e.exchange_tag)) CONTAINS toLower($query))
            OR any(alias IN COALESCE(e.aliases, []) WHERE toLower(toString(alias)) CONTAINS toLower($query))
            OR any(ph IN [(e)-[:OWNS_PHONE|USES_PHONE]->(p:Phone) | p.number] WHERE toLower(toString(ph)) CONTAINS toLower($query))
+           OR EXISTS {{
+               MATCH (e)-[r]-()
+               WHERE toLower(toString(r.source_doc_id)) CONTAINS toLower($query)
+                  OR toLower(toString(r.source_doc)) CONTAINS toLower($query)
+           }}
         OPTIONAL MATCH (e)-[:OWNS_PHONE|USES_PHONE]->(ph:Phone)
         WITH e, labels(e) AS lbls, collect(DISTINCT ph.number) AS phones
         RETURN e {{.*, labels: lbls, phones: phones}} AS person
@@ -406,6 +487,8 @@ def search_entities(
             str(ent.get("number") or ""),
             str(ent.get("registration_number") or ""),
             str(ent.get("address") or ""),
+            str(ent.get("source_doc") or ""),
+            str(ent.get("source_doc_id") or ""),
             " ".join(ent.get("aliases", []) if isinstance(ent.get("aliases"), list) else []),
         ]).lower()
         if q in ent_str:
