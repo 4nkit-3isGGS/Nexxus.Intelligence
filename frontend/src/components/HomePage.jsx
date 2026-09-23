@@ -7,16 +7,20 @@ export default function HomePage({
   currentUser,
   onQuickRoleSelect,
   onInvestigate,
-  stats = { totalNodes: 31, totalEdges: 42, totalAmount: '₹14,85,000' }
+  stats = { totalNodes: 0, totalEdges: 0, totalAmount: '₹0' }
 }) {
   const [heroQuery, setHeroQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleHeroSubmit = (e) => {
     e.preventDefault();
-    const q = heroQuery.trim() || 'Investigate Rahul Sharma P001 and map his criminal network';
-    if (onInvestigate) {
-      onInvestigate(q, 'P001');
+    const q = heroQuery.trim();
+    if (q) {
+      if (onInvestigate) {
+        onInvestigate(q);
+      } else {
+        onLaunchWorkspace?.();
+      }
     } else {
       onLaunchWorkspace?.();
     }

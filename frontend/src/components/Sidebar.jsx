@@ -2,13 +2,15 @@ import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
 
 export default function Sidebar({
-  nodeCount = 31,
-  pendingReviewCount = 3,
+  nodeCount = 0,
+  pendingReviewCount = 0, // always passed from App.jsx — scoped to active investigation subgraph
   backendStatus = { isLive: true },
   officerRole = 'LEAD_INVESTIGATOR',
   onGoHome
 }) {
   const isAuditRestricted = officerRole === 'INVESTIGATOR' || officerRole === 'ANALYST';
+
+  const resolvedReviewCount = pendingReviewCount;
 
   const navItems = [
     {
@@ -17,6 +19,7 @@ export default function Sidebar({
       label: 'Knowledge Graph',
       icon: 'hub',
       badge: nodeCount,
+      badgeClassName: 'px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-mono font-medium',
     },
     {
       id: 'agent',
@@ -31,7 +34,7 @@ export default function Sidebar({
       path: '/workspace/resolution',
       label: 'Entity Resolution',
       icon: 'fingerprint',
-      badge: pendingReviewCount ? `${pendingReviewCount}` : null,
+      badge: resolvedReviewCount ? `${resolvedReviewCount}` : null,
     },
     {
       id: 'financial',
@@ -85,10 +88,9 @@ export default function Sidebar({
               key={item.id}
               to={item.path}
               className={({ isActive }) =>
-                `w-full flex items-center justify-between px-2.5 py-2 rounded-lg transition-all text-left group cursor-pointer ${
-                  isActive
-                    ? 'bg-slate-100 text-slate-900 font-semibold shadow-2xs'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                `w-full flex items-center justify-between px-2.5 py-2 rounded-lg transition-all text-left group cursor-pointer ${isActive
+                  ? 'bg-slate-100 text-slate-900 font-semibold shadow-2xs'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 }`
               }
             >
@@ -96,25 +98,27 @@ export default function Sidebar({
                 <>
                   <div className="flex items-center gap-2.5 min-w-0">
                     <span
-                      className={`material-symbols-outlined text-[18px] transition-colors ${
-                        isActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
-                      }`}
+                      className={`material-symbols-outlined text-[18px] transition-colors ${isActive ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'
+                        }`}
                     >
                       {item.icon}
                     </span>
                     <span className="text-[13px] truncate">{item.label}</span>
                   </div>
-                  {item.badge && (
+                  {item.badge !== null && item.badge !== undefined && (
                     <span
-                      className={`text-[10px] font-mono px-1.5 py-0.2 rounded font-medium shrink-0 ${
-                        item.badgeHighlight
-                          ? 'bg-purple-50 text-purple-700 border border-purple-200/60'
-                          : item.badgeRestricted
-                          ? 'bg-slate-100 text-slate-500'
-                          : isActive
-                          ? 'bg-white text-slate-700 shadow-2xs border border-slate-200/60'
-                          : 'bg-slate-100 text-slate-500'
-                      }`}
+                      className={`shrink-0 ${item.badgeClassName
+                          ? item.badgeClassName
+                          : item.id === 'graph'
+                            ? 'px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-mono font-medium'
+                            : item.badgeHighlight
+                              ? 'text-[10px] font-mono px-1.5 py-0.2 rounded font-medium bg-purple-50 text-purple-700 border border-purple-200/60'
+                              : item.badgeRestricted
+                                ? 'text-[10px] font-mono px-1.5 py-0.2 rounded font-medium bg-slate-100 text-slate-500'
+                                : isActive
+                                  ? 'text-[10px] font-mono px-1.5 py-0.2 rounded font-medium bg-white text-slate-700 shadow-2xs border border-slate-200/60'
+                                  : 'text-[10px] font-mono px-1.5 py-0.2 rounded font-medium bg-slate-100 text-slate-500'
+                        }`}
                     >
                       {item.badge}
                     </span>

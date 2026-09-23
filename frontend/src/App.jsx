@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
@@ -19,9 +19,9 @@ import NotFoundPage from './components/NotFoundPage';
 import ExportDossierModal from './components/ExportDossierModal';
 import OfficerFieldGuideModal from './components/OfficerFieldGuideModal';
 import InvestigationPlaybook from './components/InvestigationPlaybook';
+import AwaitingDirective from './components/AwaitingDirective';
 import { ToastProvider } from './context/ToastContext';
 import { apiService } from './services/api';
-import { MOCK_GRAPH_DATA, AGENT_QUERY_PRESETS } from './data/mockIntelligenceData';
 
 export default function App() {
   const navigate = useNavigate();
@@ -41,11 +41,13 @@ export default function App() {
   }, [location.pathname]);
 
   // Core Data
-  const [rawGraphData, setRawGraphData] = useState(MOCK_GRAPH_DATA);
-  const [backendStatus, setBackendStatus] = useState({ isLive: false, source: 'AUTONOMOUS_DATASET' });
-  const [graphStats, setGraphStats] = useState({ total_nodes: 16, total_relationships: 28 });
+  const [rawGraphData, setRawGraphData] = useState({ case_info: {}, nodes: [], edges: [] });
+  const [backendStatus, setBackendStatus] = useState({ isLive: false, source: 'DISCONNECTED', status: 'OFFLINE' });
+  const [graphStats, setGraphStats] = useState({ total_nodes: 0, total_relationships: 0 });
   const [loading, setLoading] = useState(false);
   const [showIngestModal, setShowIngestModal] = useState(false);
+  // Sidebar Entity-Resolution badge — scoped to the active investigation subgraph
+  const [scopedReviewCount, setScopedReviewCount] = useState(0);
 
   // Authentication & Law Enforcement RBAC State
   const [currentUser, setCurrentUser] = useState(() => apiService.getCurrentUser());
@@ -77,33 +79,73 @@ export default function App() {
     }
   }, [activeTab, selectedNode]);
 
-  // Agent State
-  const [agentResponse, setAgentResponse] = useState(AGENT_QUERY_PRESETS[0].response);
+  // Agent State & Investigation Session Persistence
+  const [agentResponse, setAgentResponse] = useState(() => {
+    try {
+      const stored = sessionStorage.getItem('nexxus_investigation_response');
+      return stored ? JSON.parse(stored) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+  const [investigationQuery, setInvestigationQuery] = useState(() => {
+    try {
+      return sessionStorage.getItem('nexxus_investigation_query') || '';
+    } catch (e) {
+      return '';
+    }
+  });
   const [loadingQuery, setLoadingQuery] = useState(false);
+  const investigationAbortRef = useRef(null);
 
-  // Fetch / Refresh Data on Mount
+  // Clear / Cancel Investigation Query & Results — full global state reset
+  const handleClearAgentQuery = useCallback(() => {
+    if (investigationAbortRef.current) {
+      investigationAbortRef.current.abort();
+      investigationAbortRef.current = null;
+    }
+    setLoadingQuery(false);
+    setAgentResponse(null);
+    setInvestigationQuery('');
+    // Reset global graph data to pristine empty state
+    setRawGraphData({ case_info: {}, nodes: [], edges: [] });
+    setGraphStats({ total_nodes: 0, total_relationships: 0 });
+    setHighlightedNodeIds([]);
+    setHighlightedEdgeIds([]);
+    setSelectedNode(null);
+    setSelectedEdge(null);
+    setScopedReviewCount(0);
+    try {
+      sessionStorage.removeItem('nexxus_investigation_response');
+      sessionStorage.removeItem('nexxus_investigation_query');
+    } catch (e) {}
+  }, []);
+
+  // Health-only check on mount — NO automatic graph data fetch
+  // Graph data is populated exclusively from investigation queries
   const loadData = useCallback(async () => {
     setLoading(true);
     const health = await apiService.checkHealth();
-    const result = await apiService.getGraph();
-    const stats = await apiService.getStats();
-
-    if (result?.data) {
-      setRawGraphData(result.data);
-      setBackendStatus({
-        isLive: health.isLive || result.source === 'LIVE_FASTAPI',
-        source: result.source
-      });
-    }
-
-    if (stats?.data) {
-      setGraphStats(stats.data);
-    }
+    const isLive = Boolean(health?.isLive);
+    setBackendStatus({
+      isLive,
+      source: isLive ? 'LIVE_FASTAPI' : 'OFFLINE',
+      status: isLive ? 'LIVE' : (health?.status || 'OFFLINE')
+    });
     setLoading(false);
   }, []);
 
   useEffect(() => {
     loadData();
+    const interval = setInterval(async () => {
+      const health = await apiService.checkHealth();
+      setBackendStatus(prev => ({
+        ...prev,
+        isLive: Boolean(health?.isLive),
+        status: health?.isLive ? 'LIVE' : 'OFFLINE'
+      }));
+    }, 20000);
+    return () => clearInterval(interval);
   }, [loadData]);
 
   // Handle RBAC Officer Role Change
@@ -119,6 +161,7 @@ export default function App() {
     setCurrentUser(user);
     setOfficerRole(user.role);
     apiService.setOfficerClearance(user.role);
+    handleClearAgentQuery();
     navigate('/workspace/graph');
     loadData();
   };
@@ -135,6 +178,7 @@ export default function App() {
   const handleLogout = () => {
     apiService.logout();
     setCurrentUser(null);
+    handleClearAgentQuery();
     navigate('/');
   };
 
@@ -146,6 +190,43 @@ export default function App() {
     });
     return counts;
   }, [rawGraphData]);
+
+  // Whether the workspace has active investigation data
+  const hasGraphData = (rawGraphData?.nodes?.length || 0) > 0;
+
+  // Compute Entity Resolution badge count scoped to the active subgraph
+  // Runs after each investigation completes (rawGraphData update)
+  useEffect(() => {
+    if (!hasGraphData) {
+      setScopedReviewCount(0);
+      return;
+    }
+    let cancelled = false;
+    const graphNodeIds = new Set((rawGraphData.nodes || []).map(n => n.id));
+    const graphNodeNames = new Set((rawGraphData.nodes || []).map(n => (n.name || '').toLowerCase()));
+    const activeCaseId = rawGraphData.case_info?.id || rawGraphData.case_info?.case_id || null;
+
+    apiService.getReviewQueue().then(result => {
+      if (cancelled) return;
+      const queue = (result && Array.isArray(result.data)) ? result.data : [];
+      const scoped = queue.filter(item => {
+        if (graphNodeIds.has(item.entity1_id) || graphNodeIds.has(item.entity2_id)) return true;
+        const name1 = (item.entity1_name || '').toLowerCase();
+        const name2 = (item.entity2_name || '').toLowerCase();
+        for (const gName of graphNodeNames) {
+          if (gName && name1.length > 2 && (name1.includes(gName) || gName.includes(name1))) return true;
+          if (gName && name2.length > 2 && (name2.includes(gName) || gName.includes(name2))) return true;
+        }
+        const caseRef = (item.case_id || item.case_ref || '').toLowerCase();
+        if (activeCaseId && caseRef && caseRef.includes(activeCaseId.toLowerCase())) return true;
+        return false;
+      });
+      setScopedReviewCount(scoped.length);
+    }).catch(() => {
+      if (!cancelled) setScopedReviewCount(0);
+    });
+    return () => { cancelled = true; };
+  }, [rawGraphData, hasGraphData]);
 
   // Toggle Type Selection
   const toggleType = (typeId) => {
@@ -210,15 +291,44 @@ export default function App() {
 
   // Run LangGraph Agent Investigation (POST /api/investigate)
   const handleRunAgentQuery = async (queryText, subjectId = null) => {
+    if (!queryText || !queryText.trim()) return;
+
+    // Abort any existing in-flight investigation request
+    if (investigationAbortRef.current) {
+      investigationAbortRef.current.abort();
+    }
+    const controller = new AbortController();
+    investigationAbortRef.current = controller;
+
+    setInvestigationQuery(queryText);
+    try {
+      sessionStorage.setItem('nexxus_investigation_query', queryText);
+    } catch (e) {}
+
     setLoadingQuery(true);
-    const result = await apiService.runInvestigation({ query: queryText, subjectId });
+    const result = await apiService.runInvestigation({
+      query: queryText,
+      subjectId,
+      signal: controller.signal
+    });
+
+    // If cancelled by user, do not overwrite or error out
+    if (result?.aborted) {
+      return;
+    }
+
     if (result?.data) {
-      setAgentResponse({
+      const resPayload = {
         query: queryText,
         isLive: result.isLive,
         source: result.source,
         ...result.data,
-      });
+      };
+      setAgentResponse(resPayload);
+      try {
+        sessionStorage.setItem('nexxus_investigation_response', JSON.stringify(resPayload));
+      } catch (e) {}
+
       if (result.data.highlighted_nodes) {
         setHighlightedNodeIds(result.data.highlighted_nodes);
       }
@@ -226,39 +336,30 @@ export default function App() {
         setHighlightedEdgeIds(result.data.highlighted_edges);
       }
 
-      // Merge newly discovered nodes & edges into active canvas graph
-      if (result.data.graph_data?.nodes?.length) {
-        setRawGraphData((prev) => {
-          const existingNodeIds = new Set(prev.nodes.map((n) => n.id));
-          const existingEdgeKeys = new Set(prev.edges.map((e) => `${e.source}->${e.target}:${e.type || e.label || ''}`));
-
-          const newNodes = [...prev.nodes];
-          result.data.graph_data.nodes.forEach((n) => {
-            if (!existingNodeIds.has(n.id)) {
-              newNodes.push(n);
-              existingNodeIds.add(n.id);
-            }
-          });
-
-          const newEdges = [...prev.edges];
-          result.data.graph_data.edges.forEach((e) => {
-            const k = `${e.source}->${e.target}:${e.type || e.label || ''}`;
-            if (!existingEdgeKeys.has(k)) {
-              newEdges.push(e);
-              existingEdgeKeys.add(k);
-            }
-          });
-
-          return { ...prev, nodes: newNodes, edges: newEdges };
+      // Replace the global graph data with investigation results (not merge)
+      if (result.data.graph_data) {
+        const investigationGraph = {
+          case_info: result.data.case_info || result.data.graph_data.case_info || {},
+          nodes: result.data.graph_data.nodes || [],
+          edges: result.data.graph_data.edges || [],
+        };
+        setRawGraphData(investigationGraph);
+        setGraphStats({
+          total_nodes: investigationGraph.nodes.length,
+          total_relationships: investigationGraph.edges.length,
         });
       }
     } else if (result?.error) {
-      setAgentResponse({
+      const errPayload = {
         query: queryText,
         error: result.error,
         hypotheses: [],
         tool_history: [],
-      });
+      };
+      setAgentResponse(errPayload);
+      try {
+        sessionStorage.setItem('nexxus_investigation_response', JSON.stringify(errPayload));
+      } catch (e) {}
     }
     setLoadingQuery(false);
   };
@@ -379,9 +480,9 @@ export default function App() {
                 onQuickRoleSelect={handleQuickRoleSelect}
                 onInvestigate={(query, subjectId) => handleTriggerInvestigation(query, subjectId)}
                 stats={{
-                  totalNodes: graphStats.total_nodes || rawGraphData?.nodes?.length || 31,
-                  totalEdges: graphStats.total_relationships || rawGraphData?.edges?.length || 42,
-                  totalAmount: '₹14,85,000'
+                  totalNodes: graphStats.total_nodes || rawGraphData?.nodes?.length || 0,
+                  totalEdges: graphStats.total_relationships || rawGraphData?.edges?.length || 0,
+                  totalAmount: '₹0'
                 }}
               />
             </div>
@@ -406,8 +507,8 @@ export default function App() {
                 refreshData={loadData}
                 caseInfo={rawGraphData?.case_info}
                 kpiStats={{
-                  totalNodes: graphStats.total_nodes || rawGraphData?.nodes?.length || 0,
-                  totalEdges: graphStats.total_relationships || rawGraphData?.edges?.length || 0,
+                  totalNodes: rawGraphData?.nodes?.length || 0,
+                  totalEdges: rawGraphData?.edges?.length || 0,
                 }}
                 pendingReviewCount={3}
                 onOpenIngest={() => setShowIngestModal(true)}
@@ -429,8 +530,8 @@ export default function App() {
                 {/* 2. Tactical Ops Left Sidebar */}
                 <Sidebar
                   activeTab={activeTab}
-                  nodeCount={graphStats.total_nodes || rawGraphData?.nodes?.length || 31}
-                  pendingReviewCount={3}
+                  nodeCount={rawGraphData?.nodes?.length || 0}
+                  pendingReviewCount={scopedReviewCount}
                   backendStatus={backendStatus}
                   officerRole={officerRole}
                   onGoHome={() => navigate('/')}
@@ -449,6 +550,7 @@ export default function App() {
                       <Route
                         path="graph"
                         element={
+                          hasGraphData ? (
                           <div className="flex-1 flex flex-col overflow-hidden min-h-0">
                             {/* 1-Click Tactical Forensic Playbook Leads */}
                             <InvestigationPlaybook
@@ -510,6 +612,14 @@ export default function App() {
                               />
                             </div>
                           </div>
+                          ) : (
+                            <AwaitingDirective
+                              icon="hub"
+                              title="Knowledge Graph — Awaiting Directive"
+                              subtitle="No active investigation query. Navigate to the AI Investigation tab and enter a case directive to populate the knowledge graph with live entity-relationship data."
+                              context="Graph canvas will render nodes, edges, and cluster topology from investigation results."
+                            />
+                          )
                         }
                       />
 
@@ -519,6 +629,10 @@ export default function App() {
                         element={
                           <AgentQueryBar
                             onRunAgentQuery={handleRunAgentQuery}
+                            onClearQuery={handleClearAgentQuery}
+                            query={investigationQuery}
+                            onQueryChange={setInvestigationQuery}
+                            nodes={rawGraphData?.nodes || []}
                             agentResponse={agentResponse}
                             loadingQuery={loadingQuery}
                             officerRole={officerRole}
@@ -537,7 +651,9 @@ export default function App() {
                       <Route
                         path="resolution"
                         element={
+                          hasGraphData ? (
                           <EntityResolutionView
+                            graphData={rawGraphData}
                             officerRole={officerRole}
                             currentUser={currentUser}
                             onRoleChange={handleRoleChange}
@@ -550,6 +666,14 @@ export default function App() {
                               handleTriggerInvestigation(`Perform graph entity resolution and investigate network for ${node.name} (${node.id})`, node.id);
                             }}
                           />
+                          ) : (
+                            <AwaitingDirective
+                              icon="fingerprint"
+                              title="Entity Resolution — Awaiting Directive"
+                              subtitle="No entity resolution queue available. Run an investigation query to populate the entity deduplication and merge review queue."
+                              context="Duplicate entity pairs will appear here after investigation results are processed."
+                            />
+                          )
                         }
                       />
 
@@ -557,7 +681,9 @@ export default function App() {
                       <Route
                         path="financial"
                         element={
+                          hasGraphData ? (
                           <FinancialFlowView
+                            graphData={rawGraphData}
                             onSelectEntity={(nodeId) => {
                               const found = rawGraphData.nodes.find((n) => n.id === nodeId);
                               if (found) {
@@ -566,20 +692,41 @@ export default function App() {
                               }
                             }}
                           />
+                          ) : (
+                            <AwaitingDirective
+                              icon="account_balance"
+                              title="Money Trail & Hawala — Awaiting Directive"
+                              subtitle="No financial transaction data loaded. Execute an investigation directive to extract money flow trails, circular transfers, and AML flags."
+                              context="Hawala corridors, mule accounts, and circular transaction chains will be visualized here."
+                            />
+                          )
                         }
                       />
 
                       {/* VIEW 5: CDR TELEMETRY & CALL SPIKE MATRIX */}
                       <Route
                         path="cdr"
-                        element={<CdrTelemetryView />}
+                        element={
+                          hasGraphData ? (
+                            <CdrTelemetryView graphData={rawGraphData} />
+                          ) : (
+                            <AwaitingDirective
+                              icon="cell_tower"
+                              title="CDR Telemetry — Awaiting Directive"
+                              subtitle="No call detail records loaded. Run an investigation to extract CDR telemetry, tower triangulation data, and call-spike analysis."
+                              context="Call frequency heatmaps and mastermind communication patterns will populate here."
+                            />
+                          )
+                        }
                       />
 
                       {/* VIEW 6: FIR CORPUS & IN-TEXT NER HIGHLIGHTER */}
                       <Route
                         path="fir"
                         element={
+                          hasGraphData ? (
                           <FirCorpusView
+                            graphData={rawGraphData}
                             onSelectEntity={(entityName) => {
                               const found = rawGraphData.nodes.find((n) => n.name.includes(entityName));
                               if (found) {
@@ -592,6 +739,14 @@ export default function App() {
                               handleTriggerInvestigation(`Investigate FIR ${fir.fir_no} (${fir.doc_id}) involving ${fir.accused.join(', ')}`);
                             }}
                           />
+                          ) : (
+                            <AwaitingDirective
+                              icon="policy"
+                              title="FIR Documents — Awaiting Directive"
+                              subtitle="No FIR corpus loaded. Execute an investigation query to retrieve digitized police First Information Reports and perform NER entity extraction."
+                              context="FIR documents with highlighted named entities will appear in the reader pane."
+                            />
+                          )
                         }
                       />
 
@@ -599,6 +754,7 @@ export default function App() {
                       <Route
                         path="audit"
                         element={
+                          hasGraphData ? (
                           <RbacRoute
                             allowedRoles={['LEAD_INVESTIGATOR', 'AUDITOR']}
                             currentRole={officerRole}
@@ -615,6 +771,14 @@ export default function App() {
                               onRoleChange={handleRoleChange}
                             />
                           </RbacRoute>
+                          ) : (
+                            <AwaitingDirective
+                              icon="verified_user"
+                              title="Legal Audit Vault — Awaiting Directive"
+                              subtitle="No audit ledger entries available. Run an investigation to generate cryptographic chain-of-custody audit logs for court admissibility under BSA §65B."
+                              context="Immutable hash-chain ledger entries will be displayed after investigation operations are logged."
+                            />
+                          )
                         }
                       />
 

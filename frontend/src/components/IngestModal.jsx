@@ -369,7 +369,7 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
               result ? 'bg-emerald-50 border-emerald-200 text-emerald-900 font-semibold' : 'bg-slate-50 border-slate-200/80 text-slate-600'
             }`}>
               <div className="text-[10px] font-mono font-bold">4. INGEST</div>
-              <div className="text-[10px] truncate">Neo4j Graph</div>
+              <div className="text-[10px] truncate">Knowledge Graph</div>
             </div>
           </div>
 
