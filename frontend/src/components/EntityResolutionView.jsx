@@ -20,6 +20,13 @@ export default function EntityResolutionView({
 
   const isLead = officerRole === 'LEAD_INVESTIGATOR' || officerRole === 'ADMIN';
 
+  // Truncate long UUID/hash IDs to show only the trailing 8 chars
+  const formatEntityId = (id) => {
+    if (!id) return '';
+    const cleanId = String(id).replace(/^(P-|E-|O-|V-|A-|ENT-)/i, '');
+    return cleanId.length >= 9 ? `\u2026${cleanId.slice(-8)}` : cleanId;
+  };
+
   // Build subgraph entity identity sets from the active investigation graph
   const graphNodeIds = useMemo(() => new Set((graphData.nodes || []).map(n => n.id)), [graphData.nodes]);
   const graphNodeNames = useMemo(() => new Set((graphData.nodes || []).map(n => (n.name || '').toLowerCase())), [graphData.nodes]);
@@ -360,7 +367,12 @@ export default function EntityResolutionView({
                     </div>
                     <div className="flex items-baseline gap-2">
                       <h4 className="font-display font-semibold text-slate-900 text-sm">{item.entity1_name}</h4>
-                      <span className="text-slate-400 font-mono text-xs">[{item.entity1_id}]</span>
+                      <span
+                        className="text-slate-400 font-mono text-xs cursor-default"
+                        title={item.entity1_id}
+                      >
+                        [{formatEntityId(item.entity1_id)}]
+                      </span>
                     </div>
                     <div className="text-xs text-slate-700 flex flex-col gap-1 mt-1 font-mono">
                       <div><span className="text-slate-500 font-normal font-sans">Phone/Tag:</span> {entity1Phone}</div>
@@ -377,7 +389,12 @@ export default function EntityResolutionView({
                     </div>
                     <div className="flex items-baseline gap-2">
                       <h4 className="font-display font-semibold text-slate-900 text-sm">{item.entity2_name}</h4>
-                      <span className="text-slate-400 font-mono text-xs">[{item.entity2_id}]</span>
+                      <span
+                        className="text-slate-400 font-mono text-xs cursor-default"
+                        title={item.entity2_id}
+                      >
+                        [{formatEntityId(item.entity2_id)}]
+                      </span>
                     </div>
                     <div className="text-xs text-slate-700 flex flex-col gap-1 mt-1 font-mono">
                       <div><span className="text-slate-500 font-normal font-sans">Phone/Tag:</span> {entity2Phone}</div>
