@@ -1,14 +1,39 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { 
-  ZoomIn, 
-  ZoomOut, 
-  Maximize2, 
-  Pause, 
-  Play, 
+import {
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Pause,
+  Play,
   Sparkles,
   Layers,
   Crosshair
 } from 'lucide-react';
+
+// Category-aware label resolver helper
+const getNodeDisplayLabel = (node) => {
+  if (!node) return '';
+  const p = node.properties || {};
+  const type = String(node.type || node.label || p.type || '').toUpperCase();
+
+  if (type.includes('PERSON')) {
+    return node.name || p.name || node.full_name || p.full_name || node.label_text || `Person (${node.id ? String(node.id).slice(-6) : 'N/A'})`;
+  }
+  if (type.includes('PHONE')) {
+    return node.phone || p.phone || node.msisdn || p.msisdn || node.number || p.number || node.name || p.name || `Phone (${node.id ? String(node.id).slice(-6) : 'N/A'})`;
+  }
+  if (type.includes('VEHICLE')) {
+    return node.model || p.model || node.vehicle_number || p.vehicle_number || node.plate || p.plate || node.name || p.name || `Vehicle (${node.id ? String(node.id).slice(-6) : 'N/A'})`;
+  }
+  if (type.includes('ORG') || type.includes('COMPANY')) {
+    return node.name || p.name || node.company_name || p.company_name || `Org (${node.id ? String(node.id).slice(-6) : 'N/A'})`;
+  }
+  if (type.includes('ACCOUNT') || type.includes('BANK')) {
+    return node.account_number || p.account_number || node.bank_name || p.bank_name || node.name || p.name || `Account (${node.id ? String(node.id).slice(-6) : 'N/A'})`;
+  }
+  return node.name || p.name || node.label || (node.id ? `(${String(node.id).slice(0, 4)}...)${String(node.id).slice(-6)}` : 'Entity');
+};
+
 
 export default function GraphCanvas({
   nodes,
@@ -524,7 +549,7 @@ export default function GraphCanvas({
 
         // Clean Modern Light Name Label (100% Legible)
         if (showLabels || isSelected || isHighlighted) {
-          const safeName = node.name || node.id || 'Unknown';
+          const safeName = getNodeDisplayLabel(node) || 'Unknown';
           const displayName = safeName.length > 22 ? safeName.substring(0, 20) + '...' : safeName;
           ctx.font = `${node.isKingpin ? 'bold 11px' : '600 10.5px'} Inter, sans-serif`;
           const textMetrics = ctx.measureText(displayName);
@@ -799,7 +824,7 @@ export default function GraphCanvas({
           }}
         >
           <div className="flex items-center justify-between gap-2">
-            <span className="font-semibold text-slate-900 text-xs truncate font-display">{hoveredNode.name || hoveredNode.id}</span>
+            <span className="font-semibold text-slate-900 text-xs truncate font-display">{getNodeDisplayLabel(hoveredNode)}</span>
             <span
               className={`px-1.5 py-0.2 rounded font-mono text-[10px] font-medium ${
                 hoveredNode.risk_score >= 85
@@ -823,7 +848,9 @@ export default function GraphCanvas({
           )}
           <div className="pt-1 mt-0.5 border-t border-slate-100 flex items-center justify-between text-[9px] font-mono text-slate-400">
             <span>Click to inspect</span>
-            <span>{hoveredNode.id}</span>
+            <span title={`Full ID / Hash: ${hoveredNode.id}`} className="cursor-help">
+              [...{String(hoveredNode.id || '').slice(-10)}]
+            </span>
           </div>
         </div>
       )}

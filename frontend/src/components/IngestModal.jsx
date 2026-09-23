@@ -1,9 +1,47 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { apiService } from '../services/api';
-import { openGoogleDrivePicker, isGoogleDriveConfigured } from '../services/googleDriveService';
+import { openGoogleDrivePicker, isGoogleDriveConfigured, loadGoogleScripts } from '../services/googleDriveService';
+import { useToast } from '../context/ToastContext';
+
+const PIPELINE_STAGES = [
+  {
+    step: 1,
+    key: 'READ',
+    label: '1. READ',
+    sublabel: 'Document Text',
+    title: 'Reading & Normalizing Document Text...',
+    subtitle: 'Parsing raw evidentiary text, OCR sanitization, and character encoding validation',
+  },
+  {
+    step: 2,
+    key: 'HASH',
+    label: '2. HASH',
+    sublabel: 'BSA §65B SHA-256',
+    title: 'Generating BSA §65B SHA-256 Tamper-Proof Cryptographic Hash...',
+    subtitle: 'Computing cryptographic evidence certificate and logging immutable audit ledger',
+  },
+  {
+    step: 3,
+    key: 'EXTRACT',
+    label: '3. EXTRACT',
+    sublabel: 'Entities & Edges',
+    title: 'Extracting Case Entities & Deduplicating Intelligence Nodes...',
+    subtitle: 'Executing NLP entity recognition, phone/vehicle parsing, and resolving identity links',
+  },
+  {
+    step: 4,
+    key: 'INGEST',
+    label: '4. INGEST',
+    sublabel: 'Knowledge Graph',
+    title: 'Committing Graph Topology & Ingesting into Knowledge Graph...',
+    subtitle: 'Persisting network graph nodes, relational edges, and spatial-temporal associations',
+  }
+];
 
 export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [pipelineStage, setPipelineStage] = useState(1);
   const [selectedFile, setSelectedFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const [result, setResult] = useState(null);
@@ -11,7 +49,26 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
   const [copiedHash, setCopiedHash] = useState(false);
   const [driveNotice, setDriveNotice] = useState(null);
   const [driveLoading, setDriveLoading] = useState(false);
+  // Compact credential-missing tooltip (replaces the intrusive amber banner)
+  const [driveMissingCreds, setDriveMissingCreds] = useState(false);
   const fileInputRef = useRef(null);
+  const stageTimersRef = useRef([]);
+
+  const clearStageTimers = () => {
+    stageTimersRef.current.forEach((t) => clearTimeout(t));
+    stageTimersRef.current = [];
+  };
+
+  useEffect(() => {
+    return () => clearStageTimers();
+  }, []);
+
+  // Dynamically load Google Picker and GIS scripts on mount if not already loaded
+  useEffect(() => {
+    if (!window.google?.accounts?.oauth2 || !window.gapi) {
+      loadGoogleScripts().catch(() => {});
+    }
+  }, []);
 
   // Close on Escape key press
   useEffect(() => {
@@ -66,31 +123,33 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
 
   const handleBrowseGoogleDrive = () => {
     if (!isGoogleDriveConfigured()) {
-      setDriveNotice({
-        type: 'warning',
-        message: 'Google Drive API credentials not configured. Please set VITE_GOOGLE_CLIENT_ID and VITE_GOOGLE_API_KEY in frontend/.env, or use local file upload.'
-      });
+      // Show compact credential badge & dismissible warning toast
+      setDriveMissingCreds(true);
+      toast?.warning?.('Google Drive', 'Google Drive API credentials not configured.');
+      setTimeout(() => setDriveMissingCreds(false), 3500);
       return;
     }
 
     setDriveNotice(null);
+    setDriveMissingCreds(false);
     setError(null);
     setDriveLoading(true);
 
     openGoogleDrivePicker({
-      onFilePicked: async (file) => {
+      onFilePicked: (file) => {
         setDriveLoading(false);
         setDriveNotice(null);
+        // Stage file only — activates "Upload Case Evidence" button
         setSelectedFile(file);
-        await handleUpload(file);
+        setError(null);
+        setResult(null);
       },
       onError: (err) => {
         setDriveLoading(false);
         if (err.code === 'CREDENTIALS_MISSING') {
-          setDriveNotice({
-            type: 'warning',
-            message: err.message
-          });
+          setDriveMissingCreds(true);
+          toast?.warning?.('Google Drive', 'Google Drive API credentials not configured.');
+          setTimeout(() => setDriveMissingCreds(false), 3500);
         } else {
           setError(`Google Drive error: ${err.message}`);
         }
@@ -113,12 +172,21 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
     }
 
     setLoading(true);
+    setPipelineStage(1);
     setError(null);
     setResult(null);
+    clearStageTimers();
+
+    // Dynamically advance through pipeline stages to visually mirror real processing
+    stageTimersRef.current.push(setTimeout(() => setPipelineStage(2), 650));
+    stageTimersRef.current.push(setTimeout(() => setPipelineStage(3), 1400));
+    stageTimersRef.current.push(setTimeout(() => setPipelineStage(4), 2300));
 
     try {
       const res = await apiService.uploadDocument(file);
+      clearStageTimers();
       if (res.success && res.data) {
+        setPipelineStage(4);
         setResult(res.data);
         if (onIngestSuccess) {
           onIngestSuccess();
@@ -127,6 +195,7 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
         setError(res.error || 'Document ingestion failed');
       }
     } catch (e) {
+      clearStageTimers();
       setError(e.message || 'An unexpected error occurred during upload.');
     } finally {
       setLoading(false);
@@ -134,26 +203,20 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
   };
 
   // Quick helper for loading built-in FIR sample files
-  const handleLoadSampleFIR = async (firNum) => {
-    setLoading(true);
+  // Selection-only: stages the file without triggering upload
+  const handleLoadSampleFIR = (firNum) => {
+    let sampleContent = '';
+    if (firNum === 101) {
+      sampleContent = `FIRST INFORMATION REPORT\n\nFIR No: 101/2026\nDate: 12/03/2026\nPolice Station: Bidhannagar (Salt Lake) PS, Kolkata\nDistrict: North 24 Parganas\nComplainant: Manoj Tiwari, S/o Ram Tiwari, R/o Salt Lake Sector V, Kolkata, Mobile: 9434567123\n\nSTATEMENT OF THE COMPLAINANT:\n1. I, Manoj Tiwari, state that I had taken a personal loan of Rs. 2,00,000 from "Shubh Laxmi Finance" in January 2026.\n2. I state that one Rajesh Kumar Sharma, representing himself as a recovery agent of Shubh Laxmi Finance, began calling me repeatedly on my mobile number 9434567123 from his number 9832145678, threatening dire consequences if I did not repay the amount immediately.\n3. I state that on 05/03/2026 I received a large number of such threatening calls from Rajesh Kumar Sharma throughout the day.\n4. I further state that on the same date, Rajesh Kumar Sharma, along with an associate identified as Bimal Das (mobile number 9748123456), came to my residence at Salt Lake Sector V in a white Maruti Swift bearing registration number WB02CD5678 and threatened me in person.\n5. I state that Bimal Das works for Shubh Laxmi Finance as a field collection agent in the Salt Lake area.\n6. I state that under duress, I was forced to transfer Rs. 45,000 from my account to an account bearing number 30123456789, which I later learned belongs to Rajesh Kumar Sharma.\n7. I state that Rajesh Kumar Sharma warned me that further "installments" would need to be transferred in the same manner.\n8. I identify Bimal Das as a known associate of Rajesh Kumar Sharma who frequently accompanies him during collection visits.\n9. I request the police to register a case and take strict action against Rajesh Kumar Sharma and Bimal Das for extortion and criminal intimidation.`;
+    } else {
+      sampleContent = `FIRST INFORMATION REPORT\n\nFIR No: ${firNum}/2026\nDate: 15/03/2026\nPolice Station: Bidhannagar Cyber PS, Kolkata\nComplainant: Debjani Sen, Mobile: 9007123456\nAccused: Sunita Roy, Bimal Das\nAssociated Phone: 8967234561\nVehicle: WB01EF9988\nOrganization: Shubh Laxmi Finance\n\nExtortion and intimidation case regarding cyber recovery fraud.`;
+    }
+    const sampleBlob = new Blob([sampleContent], { type: 'text/plain' });
+    const sampleFile = new File([sampleBlob], `fir_${firNum}.txt`, { type: 'text/plain' });
+    // Stage file only — ingestion fires when user clicks "Upload Case Evidence"
+    setSelectedFile(sampleFile);
     setError(null);
     setResult(null);
-    try {
-      // Create a virtual File object for the FIR sample
-      let sampleContent = '';
-      if (firNum === 101) {
-        sampleContent = `FIRST INFORMATION REPORT\n\nFIR No: 101/2026\nDate: 12/03/2026\nPolice Station: Bidhannagar (Salt Lake) PS, Kolkata\nDistrict: North 24 Parganas\nComplainant: Manoj Tiwari, S/o Ram Tiwari, R/o Salt Lake Sector V, Kolkata, Mobile: 9434567123\n\nSTATEMENT OF THE COMPLAINANT:\n1. I, Manoj Tiwari, state that I had taken a personal loan of Rs. 2,00,000 from "Shubh Laxmi Finance" in January 2026.\n2. I state that one Rajesh Kumar Sharma, representing himself as a recovery agent of Shubh Laxmi Finance, began calling me repeatedly on my mobile number 9434567123 from his number 9832145678, threatening dire consequences if I did not repay the amount immediately.\n3. I state that on 05/03/2026 I received a large number of such threatening calls from Rajesh Kumar Sharma throughout the day.\n4. I further state that on the same date, Rajesh Kumar Sharma, along with an associate identified as Bimal Das (mobile number 9748123456), came to my residence at Salt Lake Sector V in a white Maruti Swift bearing registration number WB02CD5678 and threatened me in person.\n5. I state that Bimal Das works for Shubh Laxmi Finance as a field collection agent in the Salt Lake area.\n6. I state that under duress, I was forced to transfer Rs. 45,000 from my account to an account bearing number 30123456789, which I later learned belongs to Rajesh Kumar Sharma.\n7. I state that Rajesh Kumar Sharma warned me that further "installments" would need to be transferred in the same manner.\n8. I identify Bimal Das as a known associate of Rajesh Kumar Sharma who frequently accompanies him during collection visits.\n9. I request the police to register a case and take strict action against Rajesh Kumar Sharma and Bimal Das for extortion and criminal intimidation.`;
-      } else {
-        sampleContent = `FIRST INFORMATION REPORT\n\nFIR No: ${firNum}/2026\nDate: 15/03/2026\nPolice Station: Bidhannagar Cyber PS, Kolkata\nComplainant: Debjani Sen, Mobile: 9007123456\nAccused: Sunita Roy, Bimal Das\nAssociated Phone: 8967234561\nVehicle: WB01EF9988\nOrganization: Shubh Laxmi Finance\n\nExtortion and intimidation case regarding cyber recovery fraud.`;
-      }
-      const sampleBlob = new Blob([sampleContent], { type: 'text/plain' });
-      const sampleFile = new File([sampleBlob], `fir_${firNum}.txt`, { type: 'text/plain' });
-      setSelectedFile(sampleFile);
-      await handleUpload(sampleFile);
-    } catch (e) {
-      setError(e.message);
-      setLoading(false);
-    }
   };
 
   const copyHashToClipboard = (hash) => {
@@ -162,6 +225,8 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
     setCopiedHash(true);
     setTimeout(() => setCopiedHash(false), 2000);
   };
+
+  const activeStageData = PIPELINE_STAGES.find((s) => s.step === pipelineStage) || PIPELINE_STAGES[0];
 
   return (
     <div 
@@ -285,34 +350,37 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
               id="browse-google-drive-action-btn"
               onClick={handleBrowseGoogleDrive}
               disabled={loading || driveLoading}
-              className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-sky-50 hover:bg-sky-100/70 text-sky-800 font-semibold border border-sky-200/80 transition-colors cursor-pointer text-xs"
-              title="Import case document from Google Drive"
+              className="relative flex items-center justify-center gap-2 p-2.5 rounded-xl bg-sky-50 hover:bg-sky-100/70 text-sky-800 font-semibold border border-sky-200/80 transition-colors cursor-pointer text-xs"
+              title={driveMissingCreds ? 'Google Drive API credentials not configured' : 'Import case document from Google Drive'}
             >
               <span className="material-symbols-outlined text-[18px] text-sky-600">add_to_drive</span>
               <span>Browse Google Drive</span>
+              {driveMissingCreds && (
+                <span className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-slate-800 text-white text-[9px] font-mono font-medium whitespace-nowrap shadow-md">
+                  Credentials not configured
+                </span>
+              )}
             </button>
           </div>
 
-          {/* Google Drive Status / Fallback Notice */}
-          {driveNotice && driveNotice.type === 'warning' && (
-            <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start justify-between gap-3 animate-fade-in">
-              <div className="flex items-start gap-2 min-w-0">
-                <span className="material-symbols-outlined text-[20px] text-amber-600 mt-0.5 shrink-0">info</span>
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <span className="font-semibold text-xs">Google Drive Setup Notice</span>
-                  <span className="text-[11px] text-amber-800 leading-relaxed">{driveNotice.message}</span>
-                </div>
+          {/* Inline tooltip message if Google Drive clicked without credentials */}
+          {driveMissingCreds && (
+            <div className="p-2.5 rounded-xl bg-slate-100 border border-slate-300 text-slate-700 text-xs flex items-center justify-between animate-fade-in">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[16px] text-slate-500">info</span>
+                <span className="text-[11px] font-medium">Google Drive API credentials not configured</span>
               </div>
               <button
                 type="button"
-                onClick={() => { setDriveNotice(null); triggerFilePicker(); }}
-                className="px-2.5 py-1 rounded-lg bg-amber-200/80 hover:bg-amber-300 text-amber-950 font-medium text-xs whitespace-nowrap cursor-pointer transition-colors shrink-0"
+                onClick={() => setDriveMissingCreds(false)}
+                className="text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
               >
-                Use Local File
+                ✕
               </button>
             </div>
           )}
 
+          {/* Google Drive status: info spinner only (no amber warning banner) */}
           {driveNotice && driveNotice.type === 'info' && (
             <div className="p-3 rounded-2xl bg-sky-50 border border-sky-200 text-sky-900 flex items-center gap-2.5 animate-pulse">
               <span className="material-symbols-outlined text-[18px] text-sky-600 animate-spin">sync</span>
@@ -347,41 +415,55 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
 
           {/* Pipeline Stepper Indicators */}
           <div className="grid grid-cols-4 gap-1.5 pt-1">
-            <div className={`p-2 rounded-xl border text-center transition-all ${
-              loading ? 'bg-amber-50 border-amber-200 text-amber-900 font-semibold' : 'bg-slate-50 border-slate-200/80 text-slate-600'
-            }`}>
-              <div className="text-[10px] font-mono font-bold">1. READ</div>
-              <div className="text-[10px] truncate">Document Text</div>
-            </div>
-            <div className={`p-2 rounded-xl border text-center transition-all ${
-              loading ? 'bg-sky-50 border-sky-200 text-sky-900 font-semibold' : 'bg-slate-50 border-slate-200/80 text-slate-600'
-            }`}>
-              <div className="text-[10px] font-mono font-bold">2. HASH</div>
-              <div className="text-[10px] truncate">BSA §65B SHA-256</div>
-            </div>
-            <div className={`p-2 rounded-xl border text-center transition-all ${
-              result ? 'bg-emerald-50 border-emerald-200 text-emerald-900 font-semibold' : 'bg-slate-50 border-slate-200/80 text-slate-600'
-            }`}>
-              <div className="text-[10px] font-mono font-bold">3. EXTRACT</div>
-              <div className="text-[10px] truncate">Entities & Edges</div>
-            </div>
-            <div className={`p-2 rounded-xl border text-center transition-all ${
-              result ? 'bg-emerald-50 border-emerald-200 text-emerald-900 font-semibold' : 'bg-slate-50 border-slate-200/80 text-slate-600'
-            }`}>
-              <div className="text-[10px] font-mono font-bold">4. INGEST</div>
-              <div className="text-[10px] truncate">Knowledge Graph</div>
-            </div>
+            {PIPELINE_STAGES.map((s) => {
+              const isCurrentActive = loading && pipelineStage === s.step;
+              const isCompleted = Boolean(result) || (loading && pipelineStage > s.step);
+
+              let pillStyle = 'bg-slate-50 border-slate-200/80 text-slate-500';
+              if (isCurrentActive) {
+                pillStyle = 'border-cyan-500 bg-cyan-50 text-cyan-900 font-semibold ring-2 ring-cyan-400/20 shadow-xs animate-pulse';
+              } else if (isCompleted) {
+                pillStyle = 'bg-emerald-50 border-emerald-300 text-emerald-900 font-semibold shadow-2xs';
+              }
+
+              return (
+                <div
+                  key={s.step}
+                  className={`p-2 rounded-xl border text-center transition-all ${pillStyle}`}
+                >
+                  <div className="text-[10px] font-mono font-bold flex items-center justify-center gap-1">
+                    <span>{s.label}</span>
+                    {isCompleted && (
+                      <span className="material-symbols-outlined text-[12px] text-emerald-600 font-bold leading-none">
+                        check
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[10px] truncate">{s.sublabel}</div>
+                </div>
+              );
+            })}
           </div>
 
-          {/* Loading Indicator */}
+          {/* Loading Indicator - Refined Dark Slate Intelligence Theme */}
           {loading && (
-            <div className="p-4 rounded-2xl bg-slate-900 text-white flex items-center gap-3 shadow-lg animate-pulse">
-              <span className="material-symbols-outlined animate-spin text-[22px] text-sky-400">autorenew</span>
-              <div className="flex flex-col min-w-0">
-                <span className="font-semibold text-xs">Extracting Case Entities & Building Network...</span>
-                <span className="text-[10px] text-slate-300 font-mono truncate">
-                  Executing NLP parsing, deduplication, and BSA §65B cryptographic hashing
+            <div className="bg-slate-900 border border-slate-800 shadow-xl rounded-xl p-4 text-slate-100 flex items-center gap-3.5 transition-all animate-fade-in relative overflow-hidden">
+              {/* Subtle ambient cyan glow backdrop */}
+              <div className="absolute -top-10 -right-10 w-28 h-28 bg-cyan-500/10 rounded-full blur-xl pointer-events-none"></div>
+
+              <div className="w-10 h-10 rounded-xl bg-slate-800/90 border border-slate-700/80 flex items-center justify-center shrink-0 shadow-inner">
+                <span className="material-symbols-outlined text-cyan-400 animate-spin w-5 h-5 text-[20px] flex items-center justify-center">
+                  progress_activity
                 </span>
+              </div>
+              <div className="flex flex-col min-w-0 flex-1">
+                <div className="text-sm font-semibold text-white tracking-wide flex items-center gap-2">
+                  <span>{activeStageData?.title || 'Extracting Case Entities & Building Network...'}</span>
+                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping shrink-0"></span>
+                </div>
+                <div className="text-xs font-mono text-cyan-300/80 mt-1 truncate">
+                  {activeStageData?.subtitle || 'Executing NLP parsing, deduplication, and BSA §65B cryptographic hashing'}
+                </div>
               </div>
             </div>
           )}
@@ -477,8 +559,8 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess }) {
             type="button"
             id="upload-case-evidence-btn"
             onClick={() => handleUpload()}
-            disabled={loading}
-            className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-50"
+            disabled={loading || !selectedFile}
+            className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span className="material-symbols-outlined text-[16px]">
               {loading ? 'autorenew' : 'cloud_upload'}

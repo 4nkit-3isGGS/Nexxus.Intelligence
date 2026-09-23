@@ -1,6 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
 import { useToast } from '../context/ToastContext';
+import { maskHash } from '../utils/formatters';
+
+// Properties-aware title resolver — never emits type-prefix hash fallbacks
+const getEntityDisplayTitle = (node) => {
+  if (!node) return 'Entity';
+  const p = node.properties || {};
+
+  // 1. Named entities: person, org, etc.
+  const directName =
+    node.name ||
+    p.name ||
+    node.full_name ||
+    p.full_name ||
+    node.label_text ||
+    node.title ||
+    p.title;
+  if (directName && String(directName).trim()) return String(directName).trim();
+
+  // 2. Telecom: phone / MSISDN
+  const phone = node.phone || p.phone || node.msisdn || p.msisdn || node.number || p.number;
+  if (phone && String(phone).trim()) return String(phone).trim();
+
+  // 3. Vehicle: plate / model
+  const vehicle = node.vehicle_number || p.vehicle_number || node.plate || p.plate || node.model || p.model;
+  if (vehicle && String(vehicle).trim()) return String(vehicle).trim();
+
+  // 4. Financial account
+  const account = node.account_number || p.account_number || node.bank_name || p.bank_name;
+  if (account && String(account).trim()) return String(account).trim();
+
+  // 5. Last resort: bare label or trailing-8 ID token
+  return node.label || (node.id ? String(node.id).slice(-8) : 'Entity');
+};
 
 export default function EvidenceDrawer({
   selectedNode,
@@ -85,6 +118,11 @@ export default function EvidenceDrawer({
     setTimeout(() => setCopiedField(null), 1800);
   };
 
+  // Resolved human-readable primary title for this entity
+  const entityDisplayTitle = getEntityDisplayTitle(selectedNode);
+  // Truncated raw ID for forensic badge (trailing 10 chars)
+  const rawIdBadge = selectedNode.id ? maskHash(selectedNode.id, 10) : '';
+
   const handleExportDossier = () => {
     if (onOpenDossierModal) {
       onOpenDossierModal(selectedNode);
@@ -115,16 +153,20 @@ export default function EvidenceDrawer({
   const isAuditor = officerRole === 'AUDITOR';
 
   // Dynamic PII Redaction matching Bharat Sakshya Adhiniyam standards
-  const rawPhone = selectedNode.phone || '9832145678';
+  const nodeProps = selectedNode.properties || {};
+  const rawPhone = selectedNode.phone || nodeProps.phone || selectedNode.msisdn || nodeProps.msisdn || selectedNode.number || nodeProps.number || '9832145678';
   const displayPhone = (isLead || isInvestigator)
     ? rawPhone
-    : `+91-XXXXX-XX${rawPhone.slice(-3)}`;
+    : `+91-XXXXX-XX${String(rawPhone).slice(-3)}`;
 
-  const rawAadhaar = '4892-1204-5829';
+  const rawAadhaar = selectedNode.aadhaar || nodeProps.aadhaar || '4892-1204-5829';
   const displayAadhaar = isLead ? rawAadhaar : 'XXXX-XXXX-5829';
 
-  const rawAccount = selectedNode.account || '30123456789';
-  const displayAccount = isLead ? rawAccount : `*******${rawAccount.slice(-4)}`;
+  const rawAccount = selectedNode.account_number || nodeProps.account_number || selectedNode.account || nodeProps.account || '30123456789';
+  const displayAccount = isLead ? rawAccount : `*******${String(rawAccount).slice(-4)}`;
+
+  const rawVehicle = selectedNode.vehicle_number || nodeProps.vehicle_number || selectedNode.vehicle || nodeProps.vehicle || selectedNode.plate || nodeProps.plate || selectedNode.model || nodeProps.model || 'WB01AB1234 (Toyota Fortuner)';
+
 
   const clearanceBadge = isLead
     ? { label: 'TIER 1 // UNMASKED PII', style: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
@@ -151,13 +193,25 @@ export default function EvidenceDrawer({
           <span className="material-symbols-outlined text-rose-600 text-[18px]">
             security
           </span>
-          <div className="flex flex-col">
-            <span className="font-display text-[12px] text-slate-900 font-bold uppercase tracking-wider leading-tight">
-              Target Dossier
+          <div className="flex flex-col min-w-0">
+            <span className="font-display text-[12px] text-slate-900 font-bold uppercase tracking-wider leading-tight truncate max-w-[200px]">
+              {entityDisplayTitle}
             </span>
-            <span className="text-[10px] text-slate-400 font-mono">
-              ID: {selectedNode.id}
-            </span>
+            <div className="flex items-center gap-1 mt-0.5">
+              <span className="font-mono text-[10px] text-slate-400 truncate" title={selectedNode.id}>
+                {rawIdBadge}
+              </span>
+              <button
+                onClick={() => handleCopy(selectedNode.id, 'Entity ID')}
+                className="material-symbols-outlined text-[11px] text-slate-300 hover:text-slate-600 transition-colors cursor-pointer leading-none"
+                title={`Copy full ID: ${selectedNode.id}`}
+              >
+                content_copy
+              </button>
+              {copiedField === 'Entity ID' && (
+                <span className="text-[9px] text-emerald-600 font-mono font-semibold">✓</span>
+              )}
+            </div>
           </div>
           {isCritical && (
             <span className="ml-1 px-1.5 py-0.2 rounded bg-rose-50 text-rose-800 border border-rose-200/60 text-[10px] font-medium font-mono">
@@ -207,8 +261,11 @@ export default function EvidenceDrawer({
                 <h3 className="font-display text-base text-slate-900 font-bold truncate">
                   {selectedNode.name}
                 </h3>
-                <span className="px-1.5 py-0.2 rounded bg-slate-100 font-mono text-[10px] text-slate-600 font-medium border border-slate-200">
-                  {selectedNode.id}
+                <span 
+                  className="px-1.5 py-0.2 rounded bg-slate-100 font-mono text-[10px] text-slate-600 font-medium border border-slate-200"
+                  title={selectedNode.id}
+                >
+                  {maskHash(selectedNode.id, 10)}
                 </span>
               </div>
 
@@ -351,14 +408,14 @@ export default function EvidenceDrawer({
         {/* TAB 1: PROFILE TAB */}
         {activeTab === 'profile' && (
           <div className="flex flex-col gap-3.5 flex-shrink-0 min-h-fit">
-            {/* Algorithmic Threat Score Meter Card */}
-            <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col flex-shrink-0 min-h-fit gap-3">
+            {/* Algorithmic Threat Score Meter Card - Harmonized Slate Theme */}
+            <div className="p-3.5 rounded-2xl bg-slate-900/95 border border-slate-800 text-slate-100 shadow-md flex flex-col flex-shrink-0 min-h-fit gap-3">
               <div className="flex items-center justify-between">
-                <span className="text-slate-700 text-xs font-mono uppercase font-semibold">
+                <span className="text-slate-300 text-xs font-mono uppercase font-semibold">
                   Algorithmic Threat Score
                 </span>
-                <span className="text-rose-600 font-mono font-bold text-lg">
-                  {selectedNode.risk_score || 91} <span className="text-[12px] text-slate-400 font-normal">/ 100</span>
+                <span className="text-rose-400 font-mono font-bold text-lg">
+                  {selectedNode.risk_score || 91} <span className="text-[12px] text-slate-500 font-normal">/ 100</span>
                 </span>
               </div>
 
@@ -367,7 +424,7 @@ export default function EvidenceDrawer({
                 <div className="relative w-16 h-16 flex-shrink-0 flex items-center justify-center">
                   <svg className="w-16 h-16 -rotate-90" viewBox="0 0 36 36">
                     <path
-                      className="text-slate-200"
+                      className="text-slate-800"
                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                       fill="none"
                       stroke="currentColor"
@@ -383,7 +440,7 @@ export default function EvidenceDrawer({
                     />
                   </svg>
                   <div className="absolute flex flex-col items-center justify-center">
-                    <span className="text-[13px] font-bold text-slate-900 font-mono">
+                    <span className="text-[13px] font-bold text-slate-100 font-mono">
                       {selectedNode.risk_score || 91}%
                     </span>
                   </div>
@@ -393,41 +450,41 @@ export default function EvidenceDrawer({
                 <div className="flex-1 flex flex-col gap-1.5">
                   <div className="flex flex-col gap-0.5">
                     <div className="flex justify-between text-[11px] font-mono">
-                      <span className="text-slate-600 font-medium">Centrality Influence</span>
-                      <span className="text-rose-600 font-bold">88%</span>
+                      <span className="text-slate-300 font-medium">Centrality Influence</span>
+                      <span className="text-rose-400 font-bold">88%</span>
                     </div>
-                    <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                    <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                       <div className="bg-rose-500 h-full w-[88%]"></div>
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-0.5">
                     <div className="flex justify-between text-[11px] font-mono">
-                      <span className="text-slate-600 font-medium">Cross-Case Links (FIR 101 & 103)</span>
-                      <span className="text-rose-600 font-bold">94%</span>
+                      <span className="text-slate-300 font-medium">Cross-Case Links (FIR 101 & 103)</span>
+                      <span className="text-rose-400 font-bold">94%</span>
                     </div>
-                    <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                    <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                       <div className="bg-rose-500 h-full w-[94%]"></div>
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-0.5">
                     <div className="flex justify-between text-[11px] font-mono">
-                      <span className="text-slate-600 font-medium">Extortion Call Spikes</span>
-                      <span className="text-amber-600 font-bold">92% (22/day)</span>
+                      <span className="text-slate-300 font-medium">Extortion Call Spikes</span>
+                      <span className="text-amber-400 font-bold">92% (22/day)</span>
                     </div>
-                    <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-amber-500 h-full w-[92%]"></div>
+                    <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-amber-400 h-full w-[92%]"></div>
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-0.5">
                     <div className="flex justify-between text-[11px] font-mono">
-                      <span className="text-slate-600 font-medium">Financial Layering Anomalies</span>
-                      <span className="text-purple-600 font-bold">82%</span>
+                      <span className="text-slate-300 font-medium">Financial Layering Anomalies</span>
+                      <span className="text-purple-400 font-bold">82%</span>
                     </div>
-                    <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-purple-600 h-full w-[82%]"></div>
+                    <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-purple-400 h-full w-[82%]"></div>
                     </div>
                   </div>
                 </div>
@@ -446,19 +503,46 @@ export default function EvidenceDrawer({
               </div>
 
               <div className="grid grid-cols-1 gap-2 text-xs">
+                {/* Full Name */}
                 <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                   <div className="flex flex-col">
                     <span className="text-slate-500 text-[10px] font-mono font-medium">FULL NAME</span>
-                    <span className="text-slate-900 font-bold">{selectedNode.name}</span>
+                    <span className="text-slate-900 font-bold">
+                      {selectedNode.name || nodeProps.name || selectedNode.full_name || nodeProps.full_name || selectedNode.label_text || '—'}
+                    </span>
                   </div>
                   <button 
-                    onClick={() => handleCopy(selectedNode.name, 'name')}
+                    onClick={() => handleCopy(selectedNode.name || nodeProps.name || selectedNode.full_name || '', 'name')}
                     className="material-symbols-outlined text-[15px] text-slate-400 hover:text-sky-600 transition-colors cursor-pointer"
+                    title="Copy Name"
                   >
                     content_copy
                   </button>
                 </div>
 
+                {/* Phone / MSISDN */}
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-slate-500 text-[10px] font-mono font-medium">PHONE / MSISDN</span>
+                      <span className={`px-1 py-0.2 rounded text-[9px] font-mono font-bold ${
+                        isLead || isInvestigator ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200'
+                      }`}>
+                        {isLead || isInvestigator ? 'VERIFIED' : 'MASKED'}
+                      </span>
+                    </div>
+                    <span className="text-slate-900 font-mono font-bold">{displayPhone}</span>
+                  </div>
+                  <button 
+                    onClick={() => handleCopy(displayPhone, 'phone')}
+                    className="material-symbols-outlined text-[15px] text-slate-400 hover:text-sky-600 transition-colors cursor-pointer"
+                    title="Copy Phone"
+                  >
+                    content_copy
+                  </button>
+                </div>
+
+                {/* Aadhaar / Blind Index */}
                 <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                   <div className="flex flex-col">
                     <div className="flex items-center gap-1.5">
@@ -480,6 +564,7 @@ export default function EvidenceDrawer({
                   )}
                 </div>
 
+                {/* Mule Bank Account */}
                 <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                   <div className="flex flex-col">
                     <div className="flex items-center gap-1.5">
@@ -489,12 +574,13 @@ export default function EvidenceDrawer({
                       </span>
                     </div>
                     <span className="text-slate-900 font-mono font-bold">
-                      Kolkata Comm. Bank #{displayAccount}
+                      {selectedNode.bank_name || nodeProps.bank_name || 'Kolkata Comm. Bank'} #{displayAccount}
                     </span>
                   </div>
                   <span className="material-symbols-outlined text-[16px] text-slate-500">account_balance</span>
                 </div>
 
+                {/* Escort Vehicle Plate */}
                 <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                   <div className="flex flex-col">
                     <div className="flex items-center gap-1.5">
@@ -504,19 +590,22 @@ export default function EvidenceDrawer({
                       </span>
                     </div>
                     <span className="text-slate-900 font-mono font-bold">
-                      {selectedNode.vehicle || 'WB01AB1234 (Toyota Fortuner)'}
+                      {rawVehicle}
                     </span>
                     <span className="text-[9px] text-rose-600 font-medium">Fastag Mismatch: Salt Lake Sector V Toll</span>
                   </div>
                   <span className="material-symbols-outlined text-[16px] text-amber-600">directions_car</span>
                 </div>
 
+                {/* Last Known Cell Tower */}
                 <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                   <div className="flex flex-col">
                     <span className="text-slate-500 text-[10px] font-mono font-medium">LAST KNOWN CELL TOWER</span>
                     <div className="flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                      <span className="text-slate-900 font-bold">Salt Lake Sector V, Bidhannagar</span>
+                      <span className="text-slate-900 font-bold">
+                        {selectedNode.cell_tower || nodeProps.cell_tower || selectedNode.location || nodeProps.location || 'Salt Lake Sector V, Bidhannagar'}
+                      </span>
                     </div>
                     <span className="text-[9px] text-emerald-700 font-mono font-medium">Ping recorded 14m ago (BTS ID: #KOL-SL-04)</span>
                   </div>
@@ -547,15 +636,21 @@ export default function EvidenceDrawer({
                   onClick={() => handleInspectEvidence(otherId)}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-sky-600 text-[16px]">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="material-symbols-outlined text-sky-600 text-[16px] shrink-0">
                         {isOutgoing ? 'call_made' : 'call_received'}
                       </span>
-                      <span className="text-xs text-slate-900 font-bold">
-                        {edge.target_name || otherId}
-                      </span>
+                      {edge.target_name || edge.name || edge.label || edge.plate || edge.vehicle ? (
+                        <span className="text-xs text-slate-900 font-bold truncate">
+                          {edge.target_name || edge.name || edge.label || edge.plate || edge.vehicle}
+                        </span>
+                      ) : (
+                        <span className="font-mono text-slate-500 text-xs font-semibold" title={otherId}>
+                          {maskHash(otherId, 10)}
+                        </span>
+                      )}
                     </div>
-                    <span className="px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-mono font-bold">
+                    <span className="px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-mono font-bold shrink-0">
                       {Math.round((edge.confidence || 0.95) * 100)}% Conf.
                     </span>
                   </div>
@@ -582,8 +677,17 @@ export default function EvidenceDrawer({
                 <p className="text-[11px] text-slate-700">
                   Source: {selectedEdgeEvidence.source_doc || 'CDR Telemetry / Bank Ingestion'}
                 </p>
-                <div className="font-mono text-[9px] text-slate-600 truncate select-all bg-slate-50 p-1.5 rounded border border-slate-200">
-                  Hash: {selectedEdgeEvidence.sha256 || '7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069'}
+                <div className="font-mono text-[9px] text-slate-600 bg-slate-50 p-1.5 rounded border border-slate-200 flex items-center justify-between">
+                  <span title={`sha256:${selectedEdgeEvidence.sha256 || '7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069'}`}>
+                    sha256:...{String(selectedEdgeEvidence.sha256 || '7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069').replace(/^sha256:/i, '').slice(-10)}
+                  </span>
+                  <button 
+                    onClick={() => handleCopy(selectedEdgeEvidence.sha256 || '7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069', 'Evidence Hash')}
+                    className="material-symbols-outlined text-[13px] text-slate-400 hover:text-sky-600 transition-colors ml-1 cursor-pointer"
+                    title="Copy full SHA-256 hash"
+                  >
+                    content_copy
+                  </button>
                 </div>
               </div>
             )}
@@ -662,11 +766,14 @@ export default function EvidenceDrawer({
                 <span>IO: Sub-Insp. B. Banerjee</span>
                 <span>Bidhannagar Cyber PS</span>
               </div>
-              <div className="p-2 rounded bg-slate-50 border border-slate-200 font-mono text-[9px] text-sky-700 truncate select-all flex items-center justify-between">
-                <span>sha256:7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069</span>
+              <div className="p-2 rounded bg-slate-50 border border-slate-200 font-mono text-[9px] text-sky-700 flex items-center justify-between">
+                <span title="sha256:7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069">
+                  sha256:...{String('7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069').replace(/^sha256:/i, '').slice(-10)}
+                </span>
                 <button 
-                  onClick={() => handleCopy('7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069', 'fir101')}
+                  onClick={() => handleCopy('7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069', 'FIR 101 SHA-256')}
                   className="material-symbols-outlined text-[13px] text-slate-400 hover:text-sky-600 transition-colors ml-1 cursor-pointer"
+                  title="Copy full SHA-256 hash"
                 >
                   content_copy
                 </button>
@@ -690,8 +797,17 @@ export default function EvidenceDrawer({
                 <span>Kolkata Cyber Crime PS</span>
                 <span className="text-emerald-700 font-bold">Hash Certified</span>
               </div>
-              <div className="p-2 rounded bg-slate-50 border border-slate-200 font-mono text-[9px] text-slate-600 truncate select-all">
-                sha256:3a1e948c267bca90432f8910e19ac9001b...d431
+              <div className="p-2 rounded bg-slate-50 border border-slate-200 font-mono text-[9px] text-slate-600 flex items-center justify-between">
+                <span title="sha256:3a1e948c267bca90432f8910e19ac9001bd4312019ab3847f9810427845ad431">
+                  sha256:...{String('3a1e948c267bca90432f8910e19ac9001bd4312019ab3847f9810427845ad431').replace(/^sha256:/i, '').slice(-10)}
+                </span>
+                <button 
+                  onClick={() => handleCopy('3a1e948c267bca90432f8910e19ac9001bd4312019ab3847f9810427845ad431', 'FIR 103 SHA-256')}
+                  className="material-symbols-outlined text-[13px] text-slate-400 hover:text-sky-600 transition-colors ml-1 cursor-pointer"
+                  title="Copy full SHA-256 hash"
+                >
+                  content_copy
+                </button>
               </div>
             </div>
           </div>

@@ -84,7 +84,8 @@ export async function loadGoogleScripts() {
  * Checks whether Google Drive credentials are configured in the environment.
  */
 export function isGoogleDriveConfigured() {
-  return Boolean(CLIENT_ID && CLIENT_ID.trim() && API_KEY && API_KEY.trim());
+  const isPlaceholder = (val) => !val || String(val).includes('your_google_client_id_here') || String(val).includes('your_google_api_key_here');
+  return Boolean(CLIENT_ID && CLIENT_ID.trim() && !isPlaceholder(CLIENT_ID) && API_KEY && API_KEY.trim() && !isPlaceholder(API_KEY));
 }
 
 /**
@@ -120,10 +121,10 @@ export async function openGoogleDrivePicker({
 
     onStatusChange?.('Requesting Google Drive authorization...');
 
-    // Initialize GIS Token Client
+    // Initialize GIS Token Client with readonly scope
     const tokenClient = window.google.accounts.oauth2.initTokenClient({
       client_id: CLIENT_ID,
-      scope: 'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file',
+      scope: 'https://www.googleapis.com/auth/drive.readonly',
       error_callback: (error) => {
         onStatusChange?.('');
         if (error.type === 'popup_closed') {
