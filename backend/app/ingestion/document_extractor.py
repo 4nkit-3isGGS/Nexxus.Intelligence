@@ -21,8 +21,12 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from typing import Any, Tuple, Optional, List, Dict, Set
 
-from backend.app.ingestion.graph_ingestor import ingest_nlp_payload
-from backend.app.audit.audit_logger import audit_ledger
+try:
+    from backend.app.ingestion.graph_ingestor import ingest_nlp_payload  # type: ignore
+    from backend.app.audit.audit_logger import audit_ledger  # type: ignore
+except ImportError:
+    from app.ingestion.graph_ingestor import ingest_nlp_payload  # type: ignore
+    from app.audit.audit_logger import audit_ledger  # type: ignore
 
 
 # =====================================================================
@@ -46,7 +50,7 @@ def get_spacy_nlp():
 
     _nlp_initialized = True
     try:
-        import spacy
+        import spacy  # type: ignore
         try:
             _nlp_instance = spacy.load("en_core_web_trf")
             print("[DocumentExtractor] Initialized spaCy transformer model: en_core_web_trf")
@@ -216,7 +220,7 @@ def extract_vehicle_type(full_text: str, plate: str) -> str:
 # Multi-Format Document Text Extractor
 # =====================================================================
 
-def extract_text_from_file(filename: str, content: bytes) -> Tuple[str, dict | None]:
+def extract_text_from_file(filename: str, content: bytes) -> Tuple[str, Optional[Dict[str, Any]]]:
     """
     Extracts plain text from .txt, .pdf, .docx, or .json files.
     If the JSON is already a valid contract payload, returns ("", json_dict).
@@ -236,7 +240,7 @@ def extract_text_from_file(filename: str, content: bytes) -> Tuple[str, dict | N
 
     if ext == "pdf":
         try:
-            from pypdf import PdfReader
+            from pypdf import PdfReader  # type: ignore
             reader = PdfReader(io.BytesIO(content))
             pages_text = []
             for page in reader.pages:
@@ -252,7 +256,7 @@ def extract_text_from_file(filename: str, content: bytes) -> Tuple[str, dict | N
 
     if ext in ("docx", "doc"):
         try:
-            import docx
+            import docx  # type: ignore
             doc = docx.Document(io.BytesIO(content))
             paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
             for table in doc.tables:
@@ -467,7 +471,7 @@ def _find_target(token, expected_prep=None):
 # Main Entity & Relationship Extraction Engine
 # =====================================================================
 
-def extract_entities_from_raw_text(text: str, doc_id: str = "DOC_UPLOAD") -> dict:
+def extract_entities_from_raw_text(text: str, doc_id: str = "DOC_UPLOAD") -> Dict[str, Any]:
     """
     Consolidated extraction engine:
     1. Runs spaCy NER for PERSON, GPE/LOC, ORG (with R/o location override).
@@ -490,7 +494,6 @@ def extract_entities_from_raw_text(text: str, doc_id: str = "DOC_UPLOAD") -> dic
 
     # Track roles identified in FIR text
     person_roles: Dict[str, str] = {}
-    person_aliases: Dict[str, List[str]] = {}
 
     alias_match = re.search(
         r"alias(?:es)?\s*(?:of|known\s+as|identified\s+as)?\s*[\"']?([A-Za-z0-9\.\s]+)[\"']?",
@@ -687,7 +690,14 @@ def extract_entities_from_raw_text(text: str, doc_id: str = "DOC_UPLOAD") -> dic
     # -------------------------------------------------------------
     seen_rel_keys: Set[Tuple[str, str, str]] = set()
 
-    def add_relationship(source_id: str, target_id: str, rel_type: str, confidence: float, evidence_str: str, **kwargs):
+    def add_relationship(
+        source_id: Optional[str],
+        target_id: Optional[str],
+        rel_type: str,
+        confidence: float,
+        evidence_str: str,
+        **kwargs: Any,
+    ):
         if not source_id or not target_id or source_id == target_id:
             return
         rel_key = (source_id, target_id, rel_type)
@@ -753,6 +763,9 @@ def extract_entities_from_raw_text(text: str, doc_id: str = "DOC_UPLOAD") -> dic
 
                 source_id = entity_id_lookup.get(source_name) or entity_id_lookup.get(source_name.lower())
                 target_id = entity_id_lookup.get(target_name) or entity_id_lookup.get(target_name.lower())
+
+                if not source_id or not target_id:
+                    continue
 
                 extra_args = {}
                 if rel_type == "TRANSACTED_WITH":
@@ -852,7 +865,7 @@ def ingest_document_file(
     user_id: str = "OFFICER_FIELD_01",
     badge_number: str = "WB-CID-0941",
     role: str = "LEAD_INVESTIGATOR",
-) -> dict:
+) -> Dict[str, Any]:
     """
     Main entry point for document ingestion:
     1. Computes SHA-256 evidence hash under BSA §65B.
@@ -937,15 +950,20 @@ def ingest_document_file(
 # Post-Ingestion Risk Analytics Engine Hook (Arnish Engine Integration)
 # =====================================================================
 
-def run_risk_analytics_on_graph() -> dict:
+def run_risk_analytics_on_graph() -> Dict[str, Any]:
     """
     Executes Arnish's Graph Analytics & Risk Scoring Engine on the network graph
     and persists updated risk scores onto Person nodes in Neo4j.
     """
     try:
-        from backend.app.analytics.data_sources.graph_loader import load_graph
-        from backend.app.analytics.engine.risk_engine import compute_risk_breakdown
-        from backend.app.neo4j_driver import db
+        try:
+            from backend.app.analytics.data_sources.graph_loader import load_graph  # type: ignore
+            from backend.app.analytics.engine.risk_engine import compute_risk_breakdown  # type: ignore
+            from backend.app.neo4j_driver import db  # type: ignore
+        except ImportError:
+            from app.analytics.data_sources.graph_loader import load_graph  # type: ignore
+            from app.analytics.engine.risk_engine import compute_risk_breakdown  # type: ignore
+            from app.neo4j_driver import db  # type: ignore
 
         G = load_graph()
         if not G or len(G.nodes) == 0:
