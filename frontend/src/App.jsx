@@ -98,7 +98,22 @@ export default function App() {
   const [loadingQuery, setLoadingQuery] = useState(false);
   const investigationAbortRef = useRef(null);
 
-  // Clear / Cancel Investigation Query & Results — full global state reset
+  // Cancel in-flight request and clear the query text field ONLY.
+  // Does NOT reset rawGraphData, graphStats, agentResponse, or any workspace tab.
+  // Used exclusively by the × button inside the search input.
+  const handleCancelAgentQuery = useCallback(() => {
+    if (investigationAbortRef.current) {
+      investigationAbortRef.current.abort();
+      investigationAbortRef.current = null;
+    }
+    setLoadingQuery(false);
+    setInvestigationQuery('');
+    try {
+      sessionStorage.removeItem('nexxus_investigation_query');
+    } catch (e) {}
+  }, []);
+
+  // Full global state reset — called ONLY on login and logout to wipe the workspace.
   const handleClearAgentQuery = useCallback(() => {
     if (investigationAbortRef.current) {
       investigationAbortRef.current.abort();
@@ -629,6 +644,7 @@ export default function App() {
                         element={
                           <AgentQueryBar
                             onRunAgentQuery={handleRunAgentQuery}
+                            onCancelQuery={handleCancelAgentQuery}
                             onClearQuery={handleClearAgentQuery}
                             query={investigationQuery}
                             onQueryChange={setInvestigationQuery}

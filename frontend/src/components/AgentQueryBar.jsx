@@ -3,6 +3,7 @@ import { useToast } from '../context/ToastContext';
 
 export default function AgentQueryBar({
   onRunAgentQuery,
+  onCancelQuery,
   onClearQuery,
   query = '',
   onQueryChange,
@@ -39,6 +40,15 @@ export default function AgentQueryBar({
     }
   };
 
+  // Cancel: abort in-flight request + clear input text ONLY.
+  // Does NOT touch rawGraphData, agentResponse, or any workspace tab.
+  const handleCancel = () => {
+    setLocalQuery('');
+    if (onQueryChange) onQueryChange('');
+    if (onCancelQuery) onCancelQuery();
+  };
+
+  // Full clear: used by the RBAC error Dismiss button only.
   const handleClear = () => {
     setLocalQuery('');
     if (onQueryChange) onQueryChange('');
@@ -199,12 +209,12 @@ export default function AgentQueryBar({
                 disabled={officerRole === 'AUDITOR'}
                 className="w-full bg-transparent border-none outline-none text-xs text-slate-900 placeholder:text-slate-400 font-normal disabled:opacity-60 pr-6"
               />
-              {/* Interactive Clear / Cancel Cross Button */}
-              {(localQuery || hasActiveResults || loadingQuery) && (
+              {/* Interactive × Button: cancels in-flight request and clears input ONLY — workspace data is preserved */}
+              {(localQuery || loadingQuery) && (
                 <button
                   type="button"
-                  onClick={handleClear}
-                  title={loadingQuery ? "Cancel active investigation" : "Clear directive and reset"}
+                  onClick={handleCancel}
+                  title={loadingQuery ? 'Cancel active investigation' : 'Clear search input'}
                   className="p-1 rounded-md hover:bg-slate-200/80 text-slate-400 hover:text-slate-700 transition-colors flex items-center justify-center cursor-pointer shrink-0"
                 >
                   <span className="material-symbols-outlined text-[16px]">close</span>
