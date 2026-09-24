@@ -23,10 +23,34 @@ export function ToastProvider({ children }) {
   }, []);
 
   const toast = {
-    info: (title, message) => addToast({ title, message, type: 'info' }),
-    success: (title, message) => addToast({ title, message, type: 'success' }),
-    warning: (title, message) => addToast({ title, message, type: 'warning' }),
-    error: (title, message) => addToast({ title, message, type: 'error' }),
+    info: (title, message) => {
+      if (message === undefined) {
+        addToast({ title: 'Authentication Required', message: title, type: 'info' });
+      } else {
+        addToast({ title, message, type: 'info' });
+      }
+    },
+    success: (title, message) => {
+      if (message === undefined) {
+        addToast({ title: 'Success', message: title, type: 'success' });
+      } else {
+        addToast({ title, message, type: 'success' });
+      }
+    },
+    warning: (title, message) => {
+      if (message === undefined) {
+        addToast({ title: 'Warning', message: title, type: 'warning' });
+      } else {
+        addToast({ title, message, type: 'warning' });
+      }
+    },
+    error: (title, message) => {
+      if (message === undefined) {
+        addToast({ title: 'Error', message: title, type: 'error' });
+      } else {
+        addToast({ title, message, type: 'error' });
+      }
+    },
   };
 
   const getToastStyle = (type) => {

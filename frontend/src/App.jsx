@@ -65,7 +65,7 @@ export default function App() {
     if (path.includes('/workspace/financial')) return 'financial';
     if (path.includes('/workspace/cdr')) return 'cdr';
     if (path.includes('/workspace/fir')) return 'fir';
-    if (path.includes('/workspace/audit')) return 'audit';
+    if (path.includes('/workspace/audit') || path.includes('/workspace/vault')) return 'audit';
     if (path.includes('/workspace/graph')) return 'graph';
     return null;
   }, [location.pathname]);
@@ -852,6 +852,36 @@ export default function App() {
                       {/* VIEW 7: BSA SECTION 65B LEGAL AUDIT VAULT */}
                       <Route
                         path="audit"
+                        element={
+                          hasGraphData ? (
+                          <RbacRoute
+                            allowedRoles={['LEAD_INVESTIGATOR', 'AUDITOR']}
+                            currentRole={officerRole}
+                            currentUser={currentUser}
+                            onRoleChange={handleRoleChange}
+                            pageTitle="Legal Audit Vault (BSA §65B)"
+                          >
+                            <LegalAuditVault
+                              caseInfo={rawGraphData.case_info}
+                              nodes={rawGraphData.nodes}
+                              edges={rawGraphData.edges}
+                              officerRole={officerRole}
+                              currentUser={currentUser}
+                              onRoleChange={handleRoleChange}
+                            />
+                          </RbacRoute>
+                          ) : (
+                            <AwaitingDirective
+                              icon="verified_user"
+                              title="Legal Audit Vault — Awaiting Directive"
+                              subtitle="No audit ledger entries available. Run an investigation to generate cryptographic chain-of-custody audit logs for court admissibility under BSA §65B."
+                              context="Immutable hash-chain ledger entries will be displayed after investigation operations are logged."
+                            />
+                          )
+                        }
+                      />
+                      <Route
+                        path="vault"
                         element={
                           hasGraphData ? (
                           <RbacRoute

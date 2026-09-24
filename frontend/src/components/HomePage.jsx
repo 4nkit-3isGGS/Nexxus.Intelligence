@@ -1,21 +1,48 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
 export default function HomePage({
   onLaunchWorkspace,
   onOpenAuth,
   onOpenFieldGuide,
-  currentUser,
+  currentUser: propUser,
   onLogout,
   onQuickRoleSelect,
   onInvestigate,
   stats = { totalNodes: 0, totalEdges: 0, totalAmount: '₹0' }
 }) {
+  const navigate = useNavigate();
+  const { currentUser: authUser, openAuthModal: authOpenModal } = useAuth();
+  const currentUser = propUser !== undefined ? propUser : authUser;
+  const openAuthModal = authOpenModal || onOpenAuth;
   const { toast } = useToast();
   const [heroQuery, setHeroQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef(null);
+
+  const handleFeatureNavigate = (targetPath) => {
+    if (!currentUser) {
+      // 1. Cache the specific capability path for post-auth routing
+      sessionStorage.setItem('nexxus_pending_redirect', targetPath);
+
+      // 2. Alert the user with an instructional notice
+      toast.info('Please sign in or select an authorized role to access this module.');
+
+      // 3. Open the Authentication / Role selection modal
+      if (typeof openAuthModal === 'function') {
+        openAuthModal('login');
+      } else if (typeof onOpenAuth === 'function') {
+        onOpenAuth('login');
+      }
+      return;
+    }
+
+    // Authenticated / Role selected: Navigate directly to the module
+    navigate(targetPath);
+  };
 
   // Close profile dropdown on outside click or Escape
   useEffect(() => {
@@ -639,7 +666,10 @@ export default function HomePage({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
             {/* Card 1: Knowledge Graph */}
-            <div className="executive-card flex flex-col justify-between group cursor-pointer" onClick={onLaunchWorkspace}>
+            <div
+              className="executive-card flex flex-col justify-between group cursor-pointer"
+              onClick={() => handleFeatureNavigate('/workspace/graph')}
+            >
               <div>
                 <div className="w-12 h-12 rounded-2xl icon-blue flex items-center justify-center mb-5 shadow-xs">
                   <span className="material-symbols-outlined text-[24px]">hub</span>
@@ -651,14 +681,22 @@ export default function HomePage({
                   Model multi-tier syndicates, shell accounts and burner identities with advanced graph analytics.
                 </p>
               </div>
-              <div className="mt-6 pt-4 border-t border-[#E2E8F0] flex items-center gap-1 text-xs font-semibold text-[#2563EB] group-hover:translate-x-0.5 transition-transform">
-                <span>Explore Graph Analysis</span>
-                <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+              <div
+                className="mt-6 pt-4 border-t border-[#E2E8F0] flex items-center gap-1 text-xs font-semibold text-[#2563EB] group-hover:translate-x-0.5 transition-transform cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleFeatureNavigate('/workspace/graph');
+                }}
+              >
+                <span>Explore Graph Analysis →</span>
               </div>
             </div>
 
             {/* Card 2: Autonomous Multi-Agent Swarm */}
-            <div className="executive-card flex flex-col justify-between group cursor-pointer" onClick={onLaunchWorkspace}>
+            <div
+              className="executive-card flex flex-col justify-between group cursor-pointer"
+              onClick={() => handleFeatureNavigate('/workspace/investigation')}
+            >
               <div>
                 <div className="w-12 h-12 rounded-2xl icon-purple flex items-center justify-center mb-5 shadow-xs">
                   <span className="material-symbols-outlined text-[24px]">psychology</span>
@@ -670,14 +708,22 @@ export default function HomePage({
                   LangGraph v2.4 agents for hypothesis generation, cross-validation and judicial reasoning.
                 </p>
               </div>
-              <div className="mt-6 pt-4 border-t border-[#E2E8F0] flex items-center gap-1 text-xs font-semibold text-[#8B5CF6] group-hover:translate-x-0.5 transition-transform">
-                <span>Meet the AI Agents</span>
-                <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+              <div
+                className="mt-6 pt-4 border-t border-[#E2E8F0] flex items-center gap-1 text-xs font-semibold text-[#8B5CF6] group-hover:translate-x-0.5 transition-transform cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleFeatureNavigate('/workspace/investigation');
+                }}
+              >
+                <span>Meet the AI Agents →</span>
               </div>
             </div>
 
             {/* Card 3: Entity Resolution & Mule Detection */}
-            <div className="executive-card flex flex-col justify-between group cursor-pointer" onClick={onLaunchWorkspace}>
+            <div
+              className="executive-card flex flex-col justify-between group cursor-pointer"
+              onClick={() => handleFeatureNavigate('/workspace/resolution')}
+            >
               <div>
                 <div className="w-12 h-12 rounded-2xl icon-yellow flex items-center justify-center mb-5 shadow-xs">
                   <span className="material-symbols-outlined text-[24px]">fingerprint</span>
@@ -689,14 +735,22 @@ export default function HomePage({
                   Disambiguate identities, detect synthetic entities and match records using fuzzy algorithms.
                 </p>
               </div>
-              <div className="mt-6 pt-4 border-t border-[#E2E8F0] flex items-center gap-1 text-xs font-semibold text-[#F59E0B] group-hover:translate-x-0.5 transition-transform">
-                <span>See How It Works</span>
-                <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+              <div
+                className="mt-6 pt-4 border-t border-[#E2E8F0] flex items-center gap-1 text-xs font-semibold text-[#F59E0B] group-hover:translate-x-0.5 transition-transform cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleFeatureNavigate('/workspace/resolution');
+                }}
+              >
+                <span>See How It Works →</span>
               </div>
             </div>
 
             {/* Card 4: Hawala AML & Circular Smurfing */}
-            <div className="executive-card flex flex-col justify-between group cursor-pointer" onClick={onLaunchWorkspace}>
+            <div
+              className="executive-card flex flex-col justify-between group cursor-pointer"
+              onClick={() => handleFeatureNavigate('/workspace/financial')}
+            >
               <div>
                 <div className="w-12 h-12 rounded-2xl icon-red flex items-center justify-center mb-5 shadow-xs">
                   <span className="material-symbols-outlined text-[24px]">sync</span>
@@ -708,14 +762,22 @@ export default function HomePage({
                   Track layered transactions and detect circular money flows across institutions.
                 </p>
               </div>
-              <div className="mt-6 pt-4 border-t border-[#E2E8F0] flex items-center gap-1 text-xs font-semibold text-[#EF4444] group-hover:translate-x-0.5 transition-transform">
-                <span>Explore AML Tools</span>
-                <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+              <div
+                className="mt-6 pt-4 border-t border-[#E2E8F0] flex items-center gap-1 text-xs font-semibold text-[#EF4444] group-hover:translate-x-0.5 transition-transform cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleFeatureNavigate('/workspace/financial');
+                }}
+              >
+                <span>Explore AML Tools →</span>
               </div>
             </div>
 
             {/* Card 5: BSA §65B Cryptographic Vault */}
-            <div className="executive-card flex flex-col justify-between group cursor-pointer" onClick={onLaunchWorkspace}>
+            <div
+              className="executive-card flex flex-col justify-between group cursor-pointer"
+              onClick={() => handleFeatureNavigate('/workspace/vault')}
+            >
               <div>
                 <div className="w-12 h-12 rounded-2xl icon-blue flex items-center justify-center mb-5 shadow-xs">
                   <span className="material-symbols-outlined text-[24px]">gavel</span>
@@ -727,14 +789,22 @@ export default function HomePage({
                   Tamper-proof evidence storage with cryptographic attestation and audit trails.
                 </p>
               </div>
-              <div className="mt-6 pt-4 border-t border-[#E2E8F0] flex items-center gap-1 text-xs font-semibold text-[#2563EB] group-hover:translate-x-0.5 transition-transform">
-                <span>About the Vault</span>
-                <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+              <div
+                className="mt-6 pt-4 border-t border-[#E2E8F0] flex items-center gap-1 text-xs font-semibold text-[#2563EB] group-hover:translate-x-0.5 transition-transform cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleFeatureNavigate('/workspace/vault');
+                }}
+              >
+                <span>About the Vault →</span>
               </div>
             </div>
 
             {/* Card 6: CDR Telecom & Wiretap Intercept */}
-            <div className="executive-card flex flex-col justify-between group cursor-pointer" onClick={onLaunchWorkspace}>
+            <div
+              className="executive-card flex flex-col justify-between group cursor-pointer"
+              onClick={() => handleFeatureNavigate('/workspace/cdr')}
+            >
               <div>
                 <div className="w-12 h-12 rounded-2xl icon-blue flex items-center justify-center mb-5 shadow-xs">
                   <span className="material-symbols-outlined text-[24px]">sensors</span>
@@ -746,9 +816,14 @@ export default function HomePage({
                   Analyze call detail records, perform triangulation and detect communication patterns in real-time.
                 </p>
               </div>
-              <div className="mt-6 pt-4 border-t border-[#E2E8F0] flex items-center gap-1 text-xs font-semibold text-[#2563EB] group-hover:translate-x-0.5 transition-transform">
-                <span>View Telecom Module</span>
-                <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+              <div
+                className="mt-6 pt-4 border-t border-[#E2E8F0] flex items-center gap-1 text-xs font-semibold text-[#2563EB] group-hover:translate-x-0.5 transition-transform cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleFeatureNavigate('/workspace/cdr');
+                }}
+              >
+                <span>View Telecom Module →</span>
               </div>
             </div>
 
