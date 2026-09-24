@@ -691,7 +691,7 @@ export const apiService = {
           ...getOfficerHeaders(),
         },
         body: formData,
-        signal: AbortSignal.timeout(45000),
+        signal: AbortSignal.timeout(90000), // Extended 90-second timeout for document parsing, NLP extraction & graph writes
       });
 
       if (res.ok) {
@@ -705,6 +705,11 @@ export const apiService = {
     }
   },
 
+  // Alias for uploadDocument to support uploadEvidenceFile requests
+  async uploadEvidenceFile(file) {
+    return this.uploadDocument(file);
+  },
+
   // 17b. POST /api/graph/ingest — Ingest NLP Output Payload
   async ingestPayload(payload) {
     try {
@@ -712,7 +717,7 @@ export const apiService = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getOfficerHeaders() },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(10000)
+        signal: AbortSignal.timeout(90000) // Extended 90-second timeout
       });
       if (res.ok) {
         return { success: true, isLive: true, data: await res.json() };

@@ -36,7 +36,7 @@ function WorkspaceAuthGuard({ currentUser, onOpenAuth, children }) {
       interceptedRef.current = true;
       try {
         sessionStorage.setItem('nexxus_pending_redirect', location.pathname);
-      } catch (e) {}
+      } catch (e) { }
       toast.info(
         'Authentication Required',
         'Please authenticate with your agency credentials to enter the workspace.'
@@ -147,7 +147,7 @@ export default function App() {
     setInvestigationQuery('');
     try {
       sessionStorage.removeItem('nexxus_investigation_query');
-    } catch (e) {}
+    } catch (e) { }
   }, []);
 
   // Full global state reset — called ONLY on login and logout to wipe the workspace.
@@ -170,7 +170,7 @@ export default function App() {
     try {
       sessionStorage.removeItem('nexxus_investigation_response');
       sessionStorage.removeItem('nexxus_investigation_query');
-    } catch (e) {}
+    } catch (e) { }
   }, []);
 
   // Health-only check on mount — NO automatic graph data fetch
@@ -387,7 +387,7 @@ export default function App() {
     setInvestigationQuery(queryText);
     try {
       sessionStorage.setItem('nexxus_investigation_query', queryText);
-    } catch (e) {}
+    } catch (e) { }
 
     setLoadingQuery(true);
     const result = await apiService.runInvestigation({
@@ -411,7 +411,7 @@ export default function App() {
       setAgentResponse(resPayload);
       try {
         sessionStorage.setItem('nexxus_investigation_response', JSON.stringify(resPayload));
-      } catch (e) {}
+      } catch (e) { }
 
       if (result.data.highlighted_nodes) {
         setHighlightedNodeIds(result.data.highlighted_nodes);
@@ -443,7 +443,7 @@ export default function App() {
       setAgentResponse(errPayload);
       try {
         sessionStorage.setItem('nexxus_investigation_response', JSON.stringify(errPayload));
-      } catch (e) {}
+      } catch (e) { }
     }
     setLoadingQuery(false);
   };
@@ -623,331 +623,331 @@ export default function App() {
                   onLaunchWorkspace={() => navigate('/workspace/graph')}
                 />
 
-              {/* Main App Body Row: Sidebar + Primary Workspace */}
-              <div className="flex-1 flex overflow-hidden w-full relative min-h-0">
-                {/* 2. Tactical Ops Left Sidebar */}
-                <Sidebar
-                  activeTab={activeTab}
-                  nodeCount={rawGraphData?.nodes?.length || 0}
-                  pendingReviewCount={scopedReviewCount}
-                  backendStatus={backendStatus}
-                  officerRole={officerRole}
-                  onGoHome={() => navigate('/')}
-                />
+                {/* Main App Body Row: Sidebar + Primary Workspace */}
+                <div className="flex-1 flex overflow-hidden w-full relative min-h-0">
+                  {/* 2. Tactical Ops Left Sidebar */}
+                  <Sidebar
+                    activeTab={activeTab}
+                    nodeCount={rawGraphData?.nodes?.length || 0}
+                    pendingReviewCount={scopedReviewCount}
+                    backendStatus={backendStatus}
+                    officerRole={officerRole}
+                    onGoHome={() => navigate('/')}
+                  />
 
-                {/* 3. Primary Tactical Workspace Body */}
-                <div className="flex-1 flex flex-col h-full w-full overflow-hidden relative min-h-0 min-w-0 bg-slate-50/70">
-                  {/* Ambient Subtle Grid */}
-                  <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-                    <div className="absolute inset-0 opacity-70 bg-[radial-gradient(rgba(15,23,42,0.06)_1px,transparent_1px)] [background-size:24px_24px]"></div>
-                  </div>
+                  {/* 3. Primary Tactical Workspace Body */}
+                  <div className="flex-1 flex flex-col h-full w-full overflow-hidden relative min-h-0 min-w-0 bg-slate-50/70">
+                    {/* Ambient Subtle Grid */}
+                    <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+                      <div className="absolute inset-0 opacity-70 bg-[radial-gradient(rgba(15,23,42,0.06)_1px,transparent_1px)] [background-size:24px_24px]"></div>
+                    </div>
 
-                  <main className="relative z-10 flex-1 flex flex-col overflow-hidden w-full min-h-0 min-w-0">
-                    <Routes>
-                      {/* VIEW 1: INTERACTIVE GRAPH CANVAS */}
-                      <Route
-                        path="graph"
-                        element={
-                          hasGraphData ? (
-                          <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-                            {/* 1-Click Tactical Forensic Playbook Leads */}
-                            <InvestigationPlaybook
+                    <main className="relative z-10 flex-1 flex flex-col overflow-hidden w-full min-h-0 min-w-0">
+                      <Routes>
+                        {/* VIEW 1: INTERACTIVE GRAPH CANVAS */}
+                        <Route
+                          path="graph"
+                          element={
+                            hasGraphData ? (
+                              <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+                                {/* 1-Click Tactical Forensic Playbook Leads */}
+                                <InvestigationPlaybook
+                                  nodes={rawGraphData?.nodes || []}
+                                  onSelectNodeById={(id) => {
+                                    const node = rawGraphData?.nodes?.find((n) => n.id === id);
+                                    if (node) {
+                                      setSelectedNode(node);
+                                      setHighlightedNodeIds([node.id]);
+                                    }
+                                  }}
+                                  onHighlightSubgraph={(nodeIds, edgeIds) => {
+                                    setHighlightedNodeIds(nodeIds || []);
+                                    setHighlightedEdgeIds(edgeIds || []);
+                                  }}
+                                  onSetTimelineDate={(date) => {
+                                    setTimelineDate(date);
+                                    setTimelinePlaying(false);
+                                  }}
+                                />
+
+                                {/* Filter and Timeline Controls */}
+                                <FilterBar
+                                  searchQuery={searchQuery}
+                                  setSearchQuery={setSearchQuery}
+                                  riskThreshold={riskThreshold}
+                                  setRiskThreshold={setRiskThreshold}
+                                  selectedTypes={selectedTypes}
+                                  toggleType={toggleType}
+                                  selectedCluster={selectedCluster}
+                                  setSelectedCluster={setSelectedCluster}
+                                  timelineDate={timelineDate}
+                                  setTimelineDate={setTimelineDate}
+                                  timelinePlaying={timelinePlaying}
+                                  setTimelinePlaying={setTimelinePlaying}
+                                  nodeCountsByType={nodeCountsByType}
+                                  resetFilters={resetFilters}
+                                  onSelectNode={(node) => {
+                                    const fullNode = rawGraphData?.nodes?.find((n) => n.id === node.id) || node;
+                                    setSelectedNode(fullNode);
+                                    setHighlightedNodeIds([fullNode.id]);
+                                  }}
+                                />
+
+                                {/* Force Canvas */}
+                                <div className="flex-1 relative overflow-hidden min-h-0">
+                                  <GraphCanvas
+                                    nodes={filteredNodes}
+                                    edges={filteredEdges}
+                                    selectedNode={selectedNode}
+                                    onSelectNode={(node) => setSelectedNode(node)}
+                                    selectedEdge={selectedEdge}
+                                    onSelectEdge={(edge) => setSelectedEdge(edge)}
+                                    highlightedNodeIds={highlightedNodeIds}
+                                    highlightedEdgeIds={highlightedEdgeIds}
+                                    timelineDate={timelineDate}
+                                    activeLayout={activeLayout}
+                                    onLayoutChange={(layout) => setActiveLayout(layout)}
+                                  />
+                                </div>
+                              </div>
+                            ) : (
+                              <AwaitingDirective
+                                icon="hub"
+                                title="Knowledge Graph — Awaiting Directive"
+                                subtitle="No active investigation query. Navigate to the AI Investigation tab and enter a case directive to populate the knowledge graph with live entity-relationship data."
+                                context="Graph canvas will render nodes, edges, and cluster topology from investigation results."
+                              />
+                            )
+                          }
+                        />
+
+                        {/* VIEW 2: AI AGENTIC INVESTIGATION CONSOLE */}
+                        <Route
+                          path="investigation"
+                          element={
+                            <AgentQueryBar
+                              onRunAgentQuery={handleRunAgentQuery}
+                              onCancelQuery={handleCancelAgentQuery}
+                              onClearQuery={handleClearAgentQuery}
+                              query={investigationQuery}
+                              onQueryChange={setInvestigationQuery}
                               nodes={rawGraphData?.nodes || []}
-                              onSelectNodeById={(id) => {
-                                const node = rawGraphData?.nodes?.find((n) => n.id === id);
-                                if (node) {
-                                  setSelectedNode(node);
-                                  setHighlightedNodeIds([node.id]);
-                                }
-                              }}
-                              onHighlightSubgraph={(nodeIds, edgeIds) => {
+                              agentResponse={agentResponse}
+                              loadingQuery={loadingQuery}
+                              officerRole={officerRole}
+                              currentUser={currentUser}
+                              onRoleChange={handleRoleChange}
+                              onFocusSubgraph={(nodeIds, edgeIds) => {
                                 setHighlightedNodeIds(nodeIds || []);
                                 setHighlightedEdgeIds(edgeIds || []);
-                              }}
-                              onSetTimelineDate={(date) => {
-                                setTimelineDate(date);
-                                setTimelinePlaying(false);
+                                navigate('/workspace/graph');
                               }}
                             />
+                          }
+                        />
 
-                            {/* Filter and Timeline Controls */}
-                            <FilterBar
-                              searchQuery={searchQuery}
-                              setSearchQuery={setSearchQuery}
-                              riskThreshold={riskThreshold}
-                              setRiskThreshold={setRiskThreshold}
-                              selectedTypes={selectedTypes}
-                              toggleType={toggleType}
-                              selectedCluster={selectedCluster}
-                              setSelectedCluster={setSelectedCluster}
-                              timelineDate={timelineDate}
-                              setTimelineDate={setTimelineDate}
-                              timelinePlaying={timelinePlaying}
-                              setTimelinePlaying={setTimelinePlaying}
-                              nodeCountsByType={nodeCountsByType}
-                              resetFilters={resetFilters}
-                              onSelectNode={(node) => {
-                                const fullNode = rawGraphData?.nodes?.find((n) => n.id === node.id) || node;
-                                setSelectedNode(fullNode);
-                                setHighlightedNodeIds([fullNode.id]);
-                              }}
-                            />
-
-                            {/* Force Canvas */}
-                            <div className="flex-1 relative overflow-hidden min-h-0">
-                              <GraphCanvas
-                                nodes={filteredNodes}
-                                edges={filteredEdges}
-                                selectedNode={selectedNode}
-                                onSelectNode={(node) => setSelectedNode(node)}
-                                selectedEdge={selectedEdge}
-                                onSelectEdge={(edge) => setSelectedEdge(edge)}
-                                highlightedNodeIds={highlightedNodeIds}
-                                highlightedEdgeIds={highlightedEdgeIds}
-                                timelineDate={timelineDate}
-                                activeLayout={activeLayout}
-                                onLayoutChange={(layout) => setActiveLayout(layout)}
+                        {/* VIEW 3: ENTITY RESOLUTION & DUPLICATE REVIEW QUEUE */}
+                        <Route
+                          path="resolution"
+                          element={
+                            hasGraphData ? (
+                              <EntityResolutionView
+                                graphData={rawGraphData}
+                                officerRole={officerRole}
+                                currentUser={currentUser}
+                                onRoleChange={handleRoleChange}
+                                onFocusEntity={(node) => {
+                                  setSelectedNode(node);
+                                  navigate('/workspace/graph');
+                                }}
+                                onJumpToGraph={() => navigate('/workspace/graph')}
+                                onInvestigateEntity={(node) => {
+                                  handleTriggerInvestigation(`Perform graph entity resolution and investigate network for ${node.name} (${node.id})`, node.id);
+                                }}
                               />
-                            </div>
-                          </div>
-                          ) : (
-                            <AwaitingDirective
-                              icon="hub"
-                              title="Knowledge Graph — Awaiting Directive"
-                              subtitle="No active investigation query. Navigate to the AI Investigation tab and enter a case directive to populate the knowledge graph with live entity-relationship data."
-                              context="Graph canvas will render nodes, edges, and cluster topology from investigation results."
-                            />
-                          )
-                        }
-                      />
+                            ) : (
+                              <AwaitingDirective
+                                icon="fingerprint"
+                                title="Entity Resolution — Awaiting Directive"
+                                subtitle="No entity resolution queue available. Run an investigation query to populate the entity deduplication and merge review queue."
+                                context="Duplicate entity pairs will appear here after investigation results are processed."
+                              />
+                            )
+                          }
+                        />
 
-                      {/* VIEW 2: AI AGENTIC INVESTIGATION CONSOLE */}
-                      <Route
-                        path="investigation"
-                        element={
-                          <AgentQueryBar
-                            onRunAgentQuery={handleRunAgentQuery}
-                            onCancelQuery={handleCancelAgentQuery}
-                            onClearQuery={handleClearAgentQuery}
-                            query={investigationQuery}
-                            onQueryChange={setInvestigationQuery}
-                            nodes={rawGraphData?.nodes || []}
-                            agentResponse={agentResponse}
-                            loadingQuery={loadingQuery}
-                            officerRole={officerRole}
-                            currentUser={currentUser}
-                            onRoleChange={handleRoleChange}
-                            onFocusSubgraph={(nodeIds, edgeIds) => {
-                              setHighlightedNodeIds(nodeIds || []);
-                              setHighlightedEdgeIds(edgeIds || []);
-                              navigate('/workspace/graph');
-                            }}
-                          />
-                        }
-                      />
+                        {/* VIEW 4: CIRCULAR MONEY TRAIL & AML FLOW */}
+                        <Route
+                          path="financial"
+                          element={
+                            hasGraphData ? (
+                              <FinancialFlowView
+                                graphData={rawGraphData}
+                                onSelectEntity={(nodeId) => {
+                                  const found = rawGraphData.nodes.find((n) => n.id === nodeId);
+                                  if (found) {
+                                    setSelectedNode(found);
+                                    navigate('/workspace/graph');
+                                  }
+                                }}
+                              />
+                            ) : (
+                              <AwaitingDirective
+                                icon="account_balance"
+                                title="Money Trail & Hawala — Awaiting Directive"
+                                subtitle="No financial transaction data loaded. Execute an investigation directive to extract money flow trails, circular transfers, and AML flags."
+                                context="Hawala corridors, mule accounts, and circular transaction chains will be visualized here."
+                              />
+                            )
+                          }
+                        />
 
-                      {/* VIEW 3: ENTITY RESOLUTION & DUPLICATE REVIEW QUEUE */}
-                      <Route
-                        path="resolution"
-                        element={
-                          hasGraphData ? (
-                          <EntityResolutionView
-                            graphData={rawGraphData}
-                            officerRole={officerRole}
-                            currentUser={currentUser}
-                            onRoleChange={handleRoleChange}
-                            onFocusEntity={(node) => {
-                              setSelectedNode(node);
-                              navigate('/workspace/graph');
-                            }}
-                            onJumpToGraph={() => navigate('/workspace/graph')}
-                            onInvestigateEntity={(node) => {
-                              handleTriggerInvestigation(`Perform graph entity resolution and investigate network for ${node.name} (${node.id})`, node.id);
-                            }}
-                          />
-                          ) : (
-                            <AwaitingDirective
-                              icon="fingerprint"
-                              title="Entity Resolution — Awaiting Directive"
-                              subtitle="No entity resolution queue available. Run an investigation query to populate the entity deduplication and merge review queue."
-                              context="Duplicate entity pairs will appear here after investigation results are processed."
-                            />
-                          )
-                        }
-                      />
+                        {/* VIEW 5: CDR TELEMETRY & CALL SPIKE MATRIX */}
+                        <Route
+                          path="cdr"
+                          element={
+                            hasGraphData ? (
+                              <CdrTelemetryView graphData={rawGraphData} />
+                            ) : (
+                              <AwaitingDirective
+                                icon="cell_tower"
+                                title="CDR Telemetry — Awaiting Directive"
+                                subtitle="No call detail records loaded. Run an investigation to extract CDR telemetry, tower triangulation data, and call-spike analysis."
+                                context="Call frequency heatmaps and mastermind communication patterns will populate here."
+                              />
+                            )
+                          }
+                        />
 
-                      {/* VIEW 4: CIRCULAR MONEY TRAIL & AML FLOW */}
-                      <Route
-                        path="financial"
-                        element={
-                          hasGraphData ? (
-                          <FinancialFlowView
-                            graphData={rawGraphData}
-                            onSelectEntity={(nodeId) => {
-                              const found = rawGraphData.nodes.find((n) => n.id === nodeId);
-                              if (found) {
-                                setSelectedNode(found);
-                                navigate('/workspace/graph');
-                              }
-                            }}
-                          />
-                          ) : (
-                            <AwaitingDirective
-                              icon="account_balance"
-                              title="Money Trail & Hawala — Awaiting Directive"
-                              subtitle="No financial transaction data loaded. Execute an investigation directive to extract money flow trails, circular transfers, and AML flags."
-                              context="Hawala corridors, mule accounts, and circular transaction chains will be visualized here."
-                            />
-                          )
-                        }
-                      />
+                        {/* VIEW 6: FIR CORPUS & IN-TEXT NER HIGHLIGHTER */}
+                        <Route
+                          path="fir"
+                          element={
+                            hasGraphData ? (
+                              <FirCorpusView
+                                graphData={rawGraphData}
+                                onSelectEntity={(entityName) => {
+                                  const found = rawGraphData.nodes.find((n) => n.name.includes(entityName));
+                                  if (found) {
+                                    setSelectedNode(found);
+                                    navigate('/workspace/graph');
+                                  }
+                                }}
+                                onJumpToGraph={() => navigate('/workspace/graph')}
+                                onInvestigateFir={(fir) => {
+                                  handleTriggerInvestigation(`Investigate FIR ${fir.fir_no} (${fir.doc_id}) involving ${fir.accused.join(', ')}`);
+                                }}
+                              />
+                            ) : (
+                              <AwaitingDirective
+                                icon="policy"
+                                title="FIR Documents — Awaiting Directive"
+                                subtitle="No FIR corpus loaded. Execute an investigation query to retrieve digitized police First Information Reports and perform NER entity extraction."
+                                context="FIR documents with highlighted named entities will appear in the reader pane."
+                              />
+                            )
+                          }
+                        />
 
-                      {/* VIEW 5: CDR TELEMETRY & CALL SPIKE MATRIX */}
-                      <Route
-                        path="cdr"
-                        element={
-                          hasGraphData ? (
-                            <CdrTelemetryView graphData={rawGraphData} />
-                          ) : (
-                            <AwaitingDirective
-                              icon="cell_tower"
-                              title="CDR Telemetry — Awaiting Directive"
-                              subtitle="No call detail records loaded. Run an investigation to extract CDR telemetry, tower triangulation data, and call-spike analysis."
-                              context="Call frequency heatmaps and mastermind communication patterns will populate here."
-                            />
-                          )
-                        }
-                      />
+                        {/* VIEW 7: BSA SECTION 65B LEGAL AUDIT VAULT */}
+                        <Route
+                          path="audit"
+                          element={
+                            hasGraphData ? (
+                              <RbacRoute
+                                allowedRoles={['LEAD_INVESTIGATOR', 'AUDITOR']}
+                                currentRole={officerRole}
+                                currentUser={currentUser}
+                                onRoleChange={handleRoleChange}
+                                pageTitle="Legal Audit Vault (BSA §65B)"
+                              >
+                                <LegalAuditVault
+                                  caseInfo={rawGraphData.case_info}
+                                  nodes={rawGraphData.nodes}
+                                  edges={rawGraphData.edges}
+                                  officerRole={officerRole}
+                                  currentUser={currentUser}
+                                  onRoleChange={handleRoleChange}
+                                />
+                              </RbacRoute>
+                            ) : (
+                              <AwaitingDirective
+                                icon="verified_user"
+                                title="Legal Audit Vault — Awaiting Directive"
+                                subtitle="No audit ledger entries available. Run an investigation to generate cryptographic chain-of-custody audit logs for court admissibility under BSA §65B."
+                                context="Immutable hash-chain ledger entries will be displayed after investigation operations are logged."
+                              />
+                            )
+                          }
+                        />
+                        <Route
+                          path="vault"
+                          element={
+                            hasGraphData ? (
+                              <RbacRoute
+                                allowedRoles={['LEAD_INVESTIGATOR', 'AUDITOR']}
+                                currentRole={officerRole}
+                                currentUser={currentUser}
+                                onRoleChange={handleRoleChange}
+                                pageTitle="Legal Audit Vault (BSA §65B)"
+                              >
+                                <LegalAuditVault
+                                  caseInfo={rawGraphData.case_info}
+                                  nodes={rawGraphData.nodes}
+                                  edges={rawGraphData.edges}
+                                  officerRole={officerRole}
+                                  currentUser={currentUser}
+                                  onRoleChange={handleRoleChange}
+                                />
+                              </RbacRoute>
+                            ) : (
+                              <AwaitingDirective
+                                icon="verified_user"
+                                title="Legal Audit Vault — Awaiting Directive"
+                                subtitle="No audit ledger entries available. Run an investigation to generate cryptographic chain-of-custody audit logs for court admissibility under BSA §65B."
+                                context="Immutable hash-chain ledger entries will be displayed after investigation operations are logged."
+                              />
+                            )
+                          }
+                        />
 
-                      {/* VIEW 6: FIR CORPUS & IN-TEXT NER HIGHLIGHTER */}
-                      <Route
-                        path="fir"
-                        element={
-                          hasGraphData ? (
-                          <FirCorpusView
-                            graphData={rawGraphData}
-                            onSelectEntity={(entityName) => {
-                              const found = rawGraphData.nodes.find((n) => n.name.includes(entityName));
-                              if (found) {
-                                setSelectedNode(found);
-                                navigate('/workspace/graph');
-                              }
-                            }}
-                            onJumpToGraph={() => navigate('/workspace/graph')}
-                            onInvestigateFir={(fir) => {
-                              handleTriggerInvestigation(`Investigate FIR ${fir.fir_no} (${fir.doc_id}) involving ${fir.accused.join(', ')}`);
-                            }}
-                          />
-                          ) : (
-                            <AwaitingDirective
-                              icon="policy"
-                              title="FIR Documents — Awaiting Directive"
-                              subtitle="No FIR corpus loaded. Execute an investigation query to retrieve digitized police First Information Reports and perform NER entity extraction."
-                              context="FIR documents with highlighted named entities will appear in the reader pane."
-                            />
-                          )
-                        }
-                      />
-
-                      {/* VIEW 7: BSA SECTION 65B LEGAL AUDIT VAULT */}
-                      <Route
-                        path="audit"
-                        element={
-                          hasGraphData ? (
-                          <RbacRoute
-                            allowedRoles={['LEAD_INVESTIGATOR', 'AUDITOR']}
-                            currentRole={officerRole}
-                            currentUser={currentUser}
-                            onRoleChange={handleRoleChange}
-                            pageTitle="Legal Audit Vault (BSA §65B)"
-                          >
-                            <LegalAuditVault
-                              caseInfo={rawGraphData.case_info}
-                              nodes={rawGraphData.nodes}
-                              edges={rawGraphData.edges}
-                              officerRole={officerRole}
-                              currentUser={currentUser}
-                              onRoleChange={handleRoleChange}
-                            />
-                          </RbacRoute>
-                          ) : (
-                            <AwaitingDirective
-                              icon="verified_user"
-                              title="Legal Audit Vault — Awaiting Directive"
-                              subtitle="No audit ledger entries available. Run an investigation to generate cryptographic chain-of-custody audit logs for court admissibility under BSA §65B."
-                              context="Immutable hash-chain ledger entries will be displayed after investigation operations are logged."
-                            />
-                          )
-                        }
-                      />
-                      <Route
-                        path="vault"
-                        element={
-                          hasGraphData ? (
-                          <RbacRoute
-                            allowedRoles={['LEAD_INVESTIGATOR', 'AUDITOR']}
-                            currentRole={officerRole}
-                            currentUser={currentUser}
-                            onRoleChange={handleRoleChange}
-                            pageTitle="Legal Audit Vault (BSA §65B)"
-                          >
-                            <LegalAuditVault
-                              caseInfo={rawGraphData.case_info}
-                              nodes={rawGraphData.nodes}
-                              edges={rawGraphData.edges}
-                              officerRole={officerRole}
-                              currentUser={currentUser}
-                              onRoleChange={handleRoleChange}
-                            />
-                          </RbacRoute>
-                          ) : (
-                            <AwaitingDirective
-                              icon="verified_user"
-                              title="Legal Audit Vault — Awaiting Directive"
-                              subtitle="No audit ledger entries available. Run an investigation to generate cryptographic chain-of-custody audit logs for court admissibility under BSA §65B."
-                              context="Immutable hash-chain ledger entries will be displayed after investigation operations are logged."
-                            />
-                          )
-                        }
-                      />
-
-                      {/* Sub-workspace fallback */}
-                      <Route path="*" element={<Navigate to="/workspace/graph" replace />} />
-                    </Routes>
-                  </main>
+                        {/* Sub-workspace fallback */}
+                        <Route path="*" element={<Navigate to="/workspace/graph" replace />} />
+                      </Routes>
+                    </main>
+                  </div>
                 </div>
-              </div>
 
-              {/* Slide-Over Evidence & Investigation Drawer — Strictly visible only on Knowledge Graph page */}
-              {selectedNode && activeTab === 'graph' && (
-                <EvidenceDrawer
-                  selectedNode={selectedNode}
-                  officerRole={officerRole}
-                  currentUser={currentUser}
-                  onClose={() => setSelectedNode(null)}
-                  onFocusNode={(node) => {
-                    setHighlightedNodeIds([node.id]);
-                  }}
-                  onTraceKingpin={handleTraceKingpin}
-                  onOpenFirDoc={(docId) => {
-                    navigate('/workspace/fir');
-                  }}
-                  onExpandSubgraph={handleExpandSubgraph}
-                  onInvestigateNode={(node) => {
-                    handleTriggerInvestigation(`Investigate suspect ${node.name} (${node.id}) and map connected syndicate operations`, node.id);
-                  }}
-                  allEdges={rawGraphData?.edges || []}
-                  onOpenDossierModal={() => setShowDossierModal(true)}
+                {/* Slide-Over Evidence & Investigation Drawer — Strictly visible only on Knowledge Graph page */}
+                {selectedNode && activeTab === 'graph' && (
+                  <EvidenceDrawer
+                    selectedNode={selectedNode}
+                    officerRole={officerRole}
+                    currentUser={currentUser}
+                    onClose={() => setSelectedNode(null)}
+                    onFocusNode={(node) => {
+                      setHighlightedNodeIds([node.id]);
+                    }}
+                    onTraceKingpin={handleTraceKingpin}
+                    onOpenFirDoc={(docId) => {
+                      navigate('/workspace/fir');
+                    }}
+                    onExpandSubgraph={handleExpandSubgraph}
+                    onInvestigateNode={(node) => {
+                      handleTriggerInvestigation(`Investigate suspect ${node.name} (${node.id}) and map connected syndicate operations`, node.id);
+                    }}
+                    allEdges={rawGraphData?.edges || []}
+                    onOpenDossierModal={() => setShowDossierModal(true)}
+                  />
+                )}
+
+                {/* Ingestion Modal */}
+                <IngestModal
+                  isOpen={showIngestModal}
+                  onClose={() => setShowIngestModal(false)}
+                  onIngestSuccess={loadData}
                 />
-              )}
-
-              {/* Ingestion Modal */}
-              <IngestModal
-                isOpen={showIngestModal}
-                onClose={() => setShowIngestModal(false)}
-                onIngestSuccess={loadData}
-              />
-            </div>
+              </div>
             </WorkspaceAuthGuard>
           }
         />
