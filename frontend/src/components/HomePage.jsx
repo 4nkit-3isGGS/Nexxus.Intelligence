@@ -1,26 +1,124 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useToast } from '../context/ToastContext';
 
 export default function HomePage({
   onLaunchWorkspace,
   onOpenAuth,
   onOpenFieldGuide,
   currentUser,
+  onLogout,
   onQuickRoleSelect,
   onInvestigate,
   stats = { totalNodes: 0, totalEdges: 0, totalAmount: '₹0' }
 }) {
+  const { toast } = useToast();
   const [heroQuery, setHeroQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const profileMenuRef = useRef(null);
+
+  // Close profile dropdown on outside click or Escape
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) {
+        setShowProfileMenu(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowProfileMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  const handleLaunchWorkspaceClick = () => {
+    if (!currentUser) {
+      try {
+        sessionStorage.setItem('nexxus_pending_redirect', '/workspace/graph');
+      } catch (e) {}
+      toast.info(
+        'Authentication Required',
+        'Please authenticate with your agency credentials to enter the workspace.'
+      );
+      onOpenAuth?.('login');
+      return;
+    }
+    onLaunchWorkspace?.();
+  };
+
+  const handleStartInvestigationClick = () => {
+    if (!currentUser) {
+      try {
+        sessionStorage.setItem('nexxus_pending_redirect', '/workspace/graph');
+      } catch (e) {}
+      toast.info(
+        'Authentication Required',
+        'Please authenticate with your agency credentials to enter the workspace.'
+      );
+      onOpenAuth?.('login');
+      return;
+    }
+    onLaunchWorkspace?.();
+  };
 
   const handleHeroSubmit = (e) => {
     e.preventDefault();
     const q = heroQuery.trim();
+    if (!currentUser) {
+      if (q) {
+        try {
+          sessionStorage.setItem('nexxus_pending_query', q);
+          sessionStorage.setItem('nexxus_pending_redirect', '/workspace/investigation');
+        } catch (err) {}
+        toast.info(
+          'Authentication Required',
+          'Please authenticate with your agency credentials to start an investigation.'
+        );
+      } else {
+        try {
+          sessionStorage.setItem('nexxus_pending_redirect', '/workspace/graph');
+        } catch (err) {}
+        toast.info(
+          'Authentication Required',
+          'Please authenticate with your agency credentials to enter the workspace.'
+        );
+      }
+      onOpenAuth?.('login');
+      return;
+    }
+
     if (q) {
       if (onInvestigate) {
         onInvestigate(q);
       } else {
         onLaunchWorkspace?.();
       }
+    } else {
+      onLaunchWorkspace?.();
+    }
+  };
+
+  const handleQuickLeadClick = (queryText, subjectId = null) => {
+    if (!currentUser) {
+      try {
+        sessionStorage.setItem('nexxus_pending_query', queryText);
+        sessionStorage.setItem('nexxus_pending_redirect', '/workspace/investigation');
+      } catch (err) {}
+      toast.info(
+        'Authentication Required',
+        'Please authenticate with your agency credentials to start an investigation.'
+      );
+      onOpenAuth?.('login');
+      return;
+    }
+    if (onInvestigate) {
+      onInvestigate(queryText, subjectId);
     } else {
       onLaunchWorkspace?.();
     }
@@ -90,16 +188,81 @@ export default function HomePage({
               <span className="material-symbols-outlined text-[20px]">search</span>
             </button>
 
-            {/* Sign In / Officer Profile Button (Replaces Settings Icon) */}
+            {/* Sign In / Officer Profile Chip */}
             {currentUser ? (
-              <button
-                onClick={() => onOpenAuth?.('login')}
-                className="flex items-center gap-2 px-3 sm:px-3.5 py-2 rounded-xl border border-[#E2E8F0] hover:border-[#CBD5E1] bg-white hover:bg-slate-50 text-[#0F172A] text-xs sm:text-sm font-semibold shadow-2xs transition-all cursor-pointer active:scale-95 whitespace-nowrap"
-                title={`Signed in as ${currentUser.name} (${currentUser.role}) - Click to switch`}
-              >
-                <span className="w-2 h-2 rounded-full bg-[#10B981] ring-2 ring-emerald-100 flex-shrink-0"></span>
-                <span className="max-w-[120px] truncate">{currentUser.name}</span>
-              </button>
+              <div className="relative" ref={profileMenuRef}>
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-[#CBD5E1] hover:border-[#94A3B8] bg-white hover:bg-slate-50 text-[#0F172A] shadow-2xs transition-all cursor-pointer group active:scale-95"
+                  title={`Officer: ${currentUser.name} | Role: ${currentUser.role} - Click for profile details & sign out`}
+                >
+                  <div className="relative flex items-center justify-center w-7 h-7 rounded-lg bg-[#0F172A] text-white font-mono text-[11px] font-bold shrink-0">
+                    {currentUser.name?.charAt(0) || 'O'}
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#10B981] ring-2 ring-white"></span>
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-[#0F172A] max-w-[110px] sm:max-w-[130px] truncate leading-tight">
+                        {currentUser.name}
+                      </span>
+                      <span className="px-1.5 py-0.2 rounded bg-sky-50 text-sky-700 text-[10px] font-mono font-bold border border-sky-200/80 uppercase">
+                        {currentUser.role?.replace('_', ' ') || 'LEAD'}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-[#64748B] font-mono truncate max-w-[150px] leading-tight">
+                      {currentUser.department || currentUser.jurisdiction || 'CID Cyber Division'}
+                    </span>
+                  </div>
+                  <span className="material-symbols-outlined text-[16px] text-slate-400 group-hover:text-slate-600 transition-transform">
+                    {showProfileMenu ? 'expand_less' : 'expand_more'}
+                  </span>
+                </button>
+
+                {showProfileMenu && (
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl p-3 border border-[#E2E8F0] z-50 animate-fade-in text-xs">
+                    <div className="pb-2.5 border-b border-[#F1F5F9] flex flex-col gap-0.5">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-[#0F172A] text-xs">{currentUser.name}</span>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-mono text-[10px] font-bold border border-emerald-200">
+                          Active Session
+                        </span>
+                      </div>
+                      <span className="text-[#94A3B8] font-mono text-[10px]">Badge: {currentUser.badgeNumber || 'WB-CID-0941'}</span>
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-mono text-[10px] font-semibold border border-slate-200">
+                          {currentUser.role?.replace('_', ' ')}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-mono text-[10px] font-semibold border border-blue-200">
+                          {currentUser.rank || 'Investigative Officer'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 flex flex-col gap-1">
+                      <button
+                        onClick={() => {
+                          setShowProfileMenu(false);
+                          onOpenAuth?.('login');
+                        }}
+                        className="w-full py-2 px-2.5 text-left rounded-xl hover:bg-slate-50 text-slate-700 flex items-center gap-2 cursor-pointer font-medium transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[16px] text-slate-500">switch_account</span>
+                        <span>Switch Officer Clearance</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowProfileMenu(false);
+                          onLogout?.();
+                        }}
+                        className="w-full py-2 px-2.5 text-left rounded-xl hover:bg-rose-50 text-rose-700 flex items-center gap-2 cursor-pointer font-medium border-t border-slate-100 mt-1 pt-2 transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[16px] text-rose-600">logout</span>
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <button
                 onClick={() => onOpenAuth?.('login')}
@@ -112,8 +275,12 @@ export default function HomePage({
 
             {/* Main Primary CTA Button */}
             <button
-              onClick={onLaunchWorkspace}
-              className="flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-semibold shadow-xs hover:shadow transition-all cursor-pointer active:scale-95 whitespace-nowrap"
+              onClick={handleLaunchWorkspaceClick}
+              className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold shadow-xs hover:shadow transition-all cursor-pointer active:scale-95 whitespace-nowrap ${
+                currentUser 
+                  ? 'bg-[#2563EB] hover:bg-[#1D4ED8] text-white ring-2 ring-blue-400/30' 
+                  : 'bg-[#2563EB] hover:bg-[#1D4ED8] text-white'
+              }`}
             >
               <span>Launch Workspace</span>
               <span className="material-symbols-outlined text-[17px] sm:text-[18px]">arrow_forward</span>
@@ -176,15 +343,34 @@ export default function HomePage({
               </button>
               
               <div className="pt-3 border-t border-[#E2E8F0] flex flex-col gap-2.5">
+                {currentUser ? (
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col gap-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-slate-900 text-xs">{currentUser.name}</span>
+                      <span className="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 text-[10px] font-mono font-bold">
+                        {currentUser.role}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-slate-500 font-mono">{currentUser.department || currentUser.jurisdiction}</span>
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); onLogout?.(); }}
+                      className="mt-1 py-1 text-left text-xs text-rose-600 hover:text-rose-700 font-semibold flex items-center gap-1.5"
+                    >
+                      <span className="material-symbols-outlined text-[15px]">logout</span>
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); onOpenAuth?.('login'); }}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-50 border border-[#E2E8F0] text-xs font-semibold text-[#0F172A]"
+                  >
+                    <span className="material-symbols-outlined text-[18px] text-[#64748B]">login</span>
+                    <span>Officer Sign In</span>
+                  </button>
+                )}
                 <button
-                  onClick={() => { setMobileMenuOpen(false); onOpenAuth?.('login'); }}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-50 border border-[#E2E8F0] text-xs font-semibold text-[#0F172A]"
-                >
-                  <span className="material-symbols-outlined text-[18px] text-[#64748B]">badge</span>
-                  <span>{currentUser ? `${currentUser.name} (${currentUser.role})` : 'Officer Sign In'}</span>
-                </button>
-                <button
-                  onClick={() => { setMobileMenuOpen(false); onLaunchWorkspace?.(); }}
+                  onClick={() => { setMobileMenuOpen(false); handleLaunchWorkspaceClick(); }}
                   className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#2563EB] text-white text-xs font-semibold shadow-xs"
                 >
                   <span>Launch Workspace</span>
@@ -228,7 +414,7 @@ export default function HomePage({
               {/* CTAs */}
               <div className="mt-8 flex flex-wrap items-center gap-3 w-full sm:w-auto">
                 <button
-                  onClick={onLaunchWorkspace}
+                  onClick={handleStartInvestigationClick}
                   className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#0F172A] hover:bg-[#1E293B] text-white text-sm font-semibold shadow-xs transition-all cursor-pointer active:scale-95"
                 >
                   <span>Start Investigation</span>
@@ -292,21 +478,21 @@ export default function HomePage({
                 <span className="text-[10px] text-[#94A3B8] font-mono font-medium uppercase">Quick Leads:</span>
                 <button
                   type="button"
-                  onClick={() => onInvestigate ? onInvestigate('Investigate Rahul Sharma P001 and map his associates', 'P001') : onLaunchWorkspace()}
+                  onClick={() => handleQuickLeadClick('Investigate Rahul Sharma P001 and map his associates', 'P001')}
                   className="px-2.5 py-0.5 rounded-full bg-white hover:bg-slate-50 border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] text-[11px] transition-all cursor-pointer shadow-2xs"
                 >
                   Rahul Sharma (P001)
                 </button>
                 <button
                   type="button"
-                  onClick={() => onInvestigate ? onInvestigate('Hypothesis H1: Evaluate Debasish Chatterjee covert cut-out bridge to Kolkata syndicates', 'P008') : onLaunchWorkspace()}
+                  onClick={() => handleQuickLeadClick('Hypothesis H1: Evaluate Debasish Chatterjee covert cut-out bridge to Kolkata syndicates', 'P008')}
                   className="px-2.5 py-0.5 rounded-full bg-white hover:bg-slate-50 border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] text-[11px] transition-all cursor-pointer shadow-2xs"
                 >
                   Apex Leader Debasish (P008)
                 </button>
                 <button
                   type="button"
-                  onClick={() => onInvestigate ? onInvestigate('Hypothesis H2: Trace ₹500,000 mule circular loop through Kolkata Comm Bank') : onLaunchWorkspace()}
+                  onClick={() => handleQuickLeadClick('Hypothesis H2: Trace ₹500,000 mule circular loop through Kolkata Comm Bank')}
                   className="px-2.5 py-0.5 rounded-full bg-white hover:bg-slate-50 border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] text-[11px] transition-all cursor-pointer shadow-2xs"
                 >
                   ₹500k Hawala Loop
@@ -779,7 +965,7 @@ export default function HomePage({
 
               <div className="mt-8 flex flex-wrap items-center gap-3 w-full sm:w-auto">
                 <button
-                  onClick={onLaunchWorkspace}
+                  onClick={handleLaunchWorkspaceClick}
                   className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-semibold shadow-lg shadow-blue-500/20 transition-all cursor-pointer active:scale-95"
                 >
                   <span>Launch Workspace</span>

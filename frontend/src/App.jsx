@@ -20,8 +20,38 @@ import ExportDossierModal from './components/ExportDossierModal';
 import OfficerFieldGuideModal from './components/OfficerFieldGuideModal';
 import InvestigationPlaybook from './components/InvestigationPlaybook';
 import AwaitingDirective from './components/AwaitingDirective';
-import { ToastProvider } from './context/ToastContext';
+import { useToast } from './context/ToastContext';
+import { useAuth } from './context/AuthContext';
 import { apiService } from './services/api';
+
+// Workspace Authentication Guard — Intercepts unauthenticated guests
+function WorkspaceAuthGuard({ currentUser, onOpenAuth, children }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { toast } = useToast();
+  const interceptedRef = useRef(false);
+
+  useEffect(() => {
+    if (!currentUser && !interceptedRef.current) {
+      interceptedRef.current = true;
+      try {
+        sessionStorage.setItem('nexxus_pending_redirect', location.pathname);
+      } catch (e) {}
+      toast.info(
+        'Authentication Required',
+        'Please authenticate with your agency credentials to enter the workspace.'
+      );
+      onOpenAuth?.('login');
+      navigate('/', { replace: true });
+    }
+  }, [currentUser, location.pathname, navigate, onOpenAuth, toast]);
+
+  if (!currentUser) {
+    return null;
+  }
+
+  return children;
+}
 
 export default function App() {
   const navigate = useNavigate();
@@ -50,10 +80,17 @@ export default function App() {
   const [scopedReviewCount, setScopedReviewCount] = useState(0);
 
   // Authentication & Law Enforcement RBAC State
-  const [currentUser, setCurrentUser] = useState(() => apiService.getCurrentUser());
-  const [officerRole, setOfficerRole] = useState(currentUser?.role || 'LEAD_INVESTIGATOR');
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authModalTab, setAuthModalTab] = useState('login');
+  const {
+    currentUser,
+    setCurrentUser,
+    officerRole,
+    setOfficerRole,
+    showAuthModal,
+    setShowAuthModal,
+    authModalTab,
+    setAuthModalTab
+  } = useAuth();
+  const { toast } = useToast();
   const [showDossierModal, setShowDossierModal] = useState(false);
   const [showFieldGuideModal, setShowFieldGuideModal] = useState(false);
 
@@ -176,9 +213,40 @@ export default function App() {
     setCurrentUser(user);
     setOfficerRole(user.role);
     apiService.setOfficerClearance(user.role);
-    handleClearAgentQuery();
-    navigate('/workspace/graph');
-    loadData();
+
+    // Check for cached directive / search query & redirect target
+    const cachedQuery = sessionStorage.getItem('nexxus_pending_query');
+    const cachedRedirect = sessionStorage.getItem('nexxus_pending_redirect');
+
+    // Clean up pending storage flags
+    sessionStorage.removeItem('nexxus_pending_query');
+    sessionStorage.removeItem('nexxus_pending_redirect');
+
+    if (cachedQuery && cachedQuery.trim()) {
+      // User entered a query before logging in:
+      // Populate investigationQuery, navigate to workspace, and automatically fire agent pipeline
+      const queryText = cachedQuery.trim();
+      setInvestigationQuery(queryText);
+      navigate('/workspace/investigation');
+      handleRunAgentQuery(queryText);
+      loadData();
+      toast.success(
+        'Investigation Directive Initiated',
+        `Authenticated as ${user.name}. Auto-executing investigation: "${queryText}".`
+      );
+    } else {
+      // Normal workspace entry: navigate to pending redirect or default to graph workspace
+      const targetPath = (cachedRedirect && cachedRedirect.startsWith('/workspace'))
+        ? cachedRedirect
+        : '/workspace/graph';
+      handleClearAgentQuery();
+      navigate(targetPath);
+      loadData();
+      toast.success(
+        'Clearance Verified',
+        `Welcome, ${user.name} (${user.rank || 'Officer'}). Access granted to intelligence workspace.`
+      );
+    }
   };
 
   // Quick 1-Click Role Select from Home Page
@@ -194,6 +262,7 @@ export default function App() {
     apiService.logout();
     setCurrentUser(null);
     handleClearAgentQuery();
+    toast.info('Session Terminated', 'Officer has been securely signed out.');
     navigate('/');
   };
 
@@ -476,8 +545,7 @@ export default function App() {
   }, []);
 
   return (
-    <ToastProvider>
-      <div className="h-screen w-screen overflow-hidden bg-slate-100 text-slate-900 flex flex-col font-sans selection:bg-sky-500/20 selection:text-sky-900 relative">
+    <div className="h-screen w-screen overflow-hidden bg-slate-100 text-slate-900 flex flex-col font-sans selection:bg-sky-500/20 selection:text-sky-900 relative">
       <Routes>
         {/* VIEW 1: ATTRACTIVE EXECUTIVE HOMEPAGE */}
         <Route
@@ -492,6 +560,7 @@ export default function App() {
                 }}
                 onOpenFieldGuide={() => setShowFieldGuideModal(true)}
                 currentUser={currentUser}
+                onLogout={handleLogout}
                 onQuickRoleSelect={handleQuickRoleSelect}
                 onInvestigate={(query, subjectId) => handleTriggerInvestigation(query, subjectId)}
                 stats={{
@@ -507,38 +576,52 @@ export default function App() {
         {/* WORKSPACE ROOT REDIRECT */}
         <Route
           path="/workspace"
-          element={<Navigate to="/workspace/graph" replace />}
+          element={
+            currentUser ? (
+              <Navigate to="/workspace/graph" replace />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
         />
 
         {/* WORKSPACE COMMAND CENTER LAYOUT */}
         <Route
           path="/workspace/*"
           element={
-            <div className="flex-1 flex flex-col h-full w-full overflow-hidden relative">
-              {/* 1. Tactical Header */}
-              <Header
-                activeTab={activeTab}
-                backendStatus={backendStatus}
-                refreshData={loadData}
-                caseInfo={rawGraphData?.case_info}
-                kpiStats={{
-                  totalNodes: rawGraphData?.nodes?.length || 0,
-                  totalEdges: rawGraphData?.edges?.length || 0,
-                }}
-                pendingReviewCount={3}
-                onOpenIngest={() => setShowIngestModal(true)}
-                officerRole={officerRole}
-                onRoleChange={handleRoleChange}
-                onGoHome={() => navigate('/')}
-                currentUser={currentUser}
-                onOpenAuth={(tab = 'login') => {
-                  setAuthModalTab(tab);
-                  setShowAuthModal(true);
-                }}
-                onLogout={handleLogout}
-                onOpenFieldGuide={() => setShowFieldGuideModal(true)}
-                onOpenDossier={() => setShowDossierModal(true)}
-              />
+            <WorkspaceAuthGuard
+              currentUser={currentUser}
+              onOpenAuth={(tab = 'login') => {
+                setAuthModalTab(tab);
+                setShowAuthModal(true);
+              }}
+            >
+              <div className="flex-1 flex flex-col h-full w-full overflow-hidden relative">
+                {/* 1. Tactical Header */}
+                <Header
+                  activeTab={activeTab}
+                  backendStatus={backendStatus}
+                  refreshData={loadData}
+                  caseInfo={rawGraphData?.case_info}
+                  kpiStats={{
+                    totalNodes: rawGraphData?.nodes?.length || 0,
+                    totalEdges: rawGraphData?.edges?.length || 0,
+                  }}
+                  pendingReviewCount={3}
+                  onOpenIngest={() => setShowIngestModal(true)}
+                  officerRole={officerRole}
+                  onRoleChange={handleRoleChange}
+                  onGoHome={() => navigate('/')}
+                  currentUser={currentUser}
+                  onOpenAuth={(tab = 'login') => {
+                    setAuthModalTab(tab);
+                    setShowAuthModal(true);
+                  }}
+                  onLogout={handleLogout}
+                  onOpenFieldGuide={() => setShowFieldGuideModal(true)}
+                  onOpenDossier={() => setShowDossierModal(true)}
+                  onLaunchWorkspace={() => navigate('/workspace/graph')}
+                />
 
               {/* Main App Body Row: Sidebar + Primary Workspace */}
               <div className="flex-1 flex overflow-hidden w-full relative min-h-0">
@@ -835,6 +918,7 @@ export default function App() {
                 onIngestSuccess={loadData}
               />
             </div>
+            </WorkspaceAuthGuard>
           }
         />
 
@@ -867,6 +951,5 @@ export default function App() {
         onClose={() => setShowFieldGuideModal(false)}
       />
     </div>
-    </ToastProvider>
   );
 }

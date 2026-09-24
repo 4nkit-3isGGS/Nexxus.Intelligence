@@ -58,32 +58,39 @@ const getStoredSession = () => {
     const raw = localStorage.getItem('nexxus_officer_session');
     if (raw) return JSON.parse(raw);
   } catch (e) {}
-  return DEMO_OFFICERS[0];
+  return null;
 };
 
 let currentOfficerSession = getStoredSession();
 
-export const getOfficerHeaders = () => ({
-  'X-User-Id': currentOfficerSession.userId,
-  'X-Role': currentOfficerSession.role,
-  'X-Badge-Number': currentOfficerSession.badgeNumber,
-  'X-Jurisdiction': currentOfficerSession.jurisdiction
-});
+export const getOfficerHeaders = () => {
+  if (!currentOfficerSession) {
+    return {
+      'X-Role': 'GUEST'
+    };
+  }
+  return {
+    'X-User-Id': currentOfficerSession.userId || 'GUEST',
+    'X-Role': currentOfficerSession.role || 'GUEST',
+    'X-Badge-Number': currentOfficerSession.badgeNumber || 'NONE',
+    'X-Jurisdiction': currentOfficerSession.jurisdiction || 'GUEST'
+  };
+};
 
 export const apiService = {
   // 0. Law Enforcement RBAC Clearance Management
   setOfficerClearance(roleOrObj, userId = null, badgeNumber = null, jurisdiction = null) {
-    let updatedRole = typeof roleOrObj === 'string' ? roleOrObj : roleOrObj?.role || currentOfficerSession.role;
+    let updatedRole = typeof roleOrObj === 'string' ? roleOrObj : roleOrObj?.role || currentOfficerSession?.role || 'LEAD_INVESTIGATOR';
     const matchedPreset = DEMO_OFFICERS.find((o) => o.role === updatedRole);
     if (matchedPreset && (!userId && !badgeNumber)) {
       currentOfficerSession = { ...matchedPreset };
     } else {
       currentOfficerSession = {
-        ...currentOfficerSession,
+        ...(currentOfficerSession || DEMO_OFFICERS[0]),
         role: updatedRole,
-        userId: userId || (typeof roleOrObj === 'object' ? roleOrObj.userId : currentOfficerSession.userId),
-        badgeNumber: badgeNumber || (typeof roleOrObj === 'object' ? roleOrObj.badgeNumber : currentOfficerSession.badgeNumber),
-        jurisdiction: jurisdiction || (typeof roleOrObj === 'object' ? roleOrObj.jurisdiction : currentOfficerSession.jurisdiction)
+        userId: userId || (typeof roleOrObj === 'object' ? roleOrObj.userId : currentOfficerSession?.userId),
+        badgeNumber: badgeNumber || (typeof roleOrObj === 'object' ? roleOrObj.badgeNumber : currentOfficerSession?.badgeNumber),
+        jurisdiction: jurisdiction || (typeof roleOrObj === 'object' ? roleOrObj.jurisdiction : currentOfficerSession?.jurisdiction)
       };
     }
     try {
@@ -93,7 +100,11 @@ export const apiService = {
   },
 
   getOfficerClearance() {
-    return { ...currentOfficerSession };
+    return currentOfficerSession ? { ...currentOfficerSession } : null;
+  },
+
+  isAuthenticated() {
+    return Boolean(currentOfficerSession && currentOfficerSession.userId);
   },
 
   // 1. GET /api/health — Knowledge Graph connectivity health check
@@ -987,7 +998,7 @@ export const apiService = {
   },
 
   logout() {
-    currentOfficerSession = DEMO_OFFICERS[0];
+    currentOfficerSession = null;
     try {
       localStorage.removeItem('nexxus_officer_session');
     } catch (e) {}
