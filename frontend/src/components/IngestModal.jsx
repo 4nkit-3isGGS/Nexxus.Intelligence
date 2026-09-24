@@ -198,28 +198,28 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess, onUpload
 
     // Client-Side Simulation for Pre-Ingested Demo Evidence (FIR_101.txt & FIR_102.txt)
     if (isSample) {
-      // 1. READ Document Text (~300ms)
+      // 1. READ Document Text (~650ms)
       stageTimersRef.current.push(
         setTimeout(() => {
-          setPipelineStage(2); // 2. HASH BSA §65B SHA-256 (~300ms)
-        }, 300)
+          setPipelineStage(2); // 2. HASH BSA §65B SHA-256 (~700ms)
+        }, 650)
       );
 
-      // 2. HASH BSA §65B SHA-256 (~300ms)
+      // 2. HASH BSA §65B SHA-256 (~700ms)
       stageTimersRef.current.push(
         setTimeout(() => {
-          setPipelineStage(3); // 3. EXTRACT Entities & Edges (~350ms)
-        }, 600)
+          setPipelineStage(3); // 3. EXTRACT Entities & Edges (~850ms)
+        }, 1350)
       );
 
-      // 3. EXTRACT Entities & Edges (~350ms)
+      // 3. EXTRACT Entities & Edges (~850ms)
       stageTimersRef.current.push(
         setTimeout(() => {
-          setPipelineStage(4); // 4. INGEST Knowledge Graph (~300ms)
-        }, 950)
+          setPipelineStage(4); // 4. INGEST Knowledge Graph (~650ms)
+        }, 2200)
       );
 
-      // 4. INGEST Knowledge Graph completion (~300ms)
+      // 4. INGEST Knowledge Graph completion (~650ms)
       stageTimersRef.current.push(
         setTimeout(() => {
           clearStageTimers();
@@ -258,7 +258,7 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess, onUpload
           toast?.success?.('Evidence Verified & Ingested into Graph', 'Pre-seeded demo evidence validated and synchronized with Knowledge Graph.');
           onUploadSuccess?.();
           onIngestSuccess?.();
-        }, 1250)
+        }, 2850)
       );
       return;
     }
@@ -515,7 +515,7 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess, onUpload
               if (isCurrentActive) {
                 pillStyle = 'border-cyan-500 bg-cyan-50 text-cyan-900 font-semibold ring-2 ring-cyan-400/20 shadow-xs animate-pulse';
               } else if (isCompleted) {
-                pillStyle = 'bg-emerald-50 border-emerald-300 text-emerald-900 font-semibold shadow-2xs';
+                pillStyle = 'bg-emerald-50 border-emerald-300 text-emerald-800 font-semibold shadow-2xs';
               }
 
               return (
@@ -537,25 +537,33 @@ export default function IngestModal({ isOpen, onClose, onIngestSuccess, onUpload
             })}
           </div>
 
-          {/* Loading Indicator - Refined Dark Slate Intelligence Theme */}
+          {/* Loading Indicator - Clean Light Cyan-Slate Intelligence Theme */}
           {loading && (
-            <div className="bg-slate-900 border border-slate-800 shadow-xl rounded-xl p-4 text-slate-100 flex items-center gap-3.5 transition-all animate-fade-in relative overflow-hidden">
-              {/* Subtle ambient cyan glow backdrop */}
-              <div className="absolute -top-10 -right-10 w-28 h-28 bg-cyan-500/10 rounded-full blur-xl pointer-events-none"></div>
+            <div className="w-full min-h-[76px] p-3.5 rounded-xl border border-cyan-200/80 bg-gradient-to-r from-cyan-50/90 via-sky-50/70 to-slate-50 flex items-center gap-3.5 shadow-sm transition-all duration-300 animate-fade-in relative overflow-hidden">
+              {/* Subtle ambient cyan glow accent */}
+              <div className="absolute -top-10 -right-10 w-28 h-28 bg-cyan-400/10 rounded-full blur-xl pointer-events-none"></div>
 
-              <div className="w-10 h-10 rounded-xl bg-slate-800/90 border border-slate-700/80 flex items-center justify-center shrink-0 shadow-inner">
-                <span className="material-symbols-outlined text-cyan-400 animate-spin w-5 h-5 text-[20px] flex items-center justify-center">
+              {/* Spinner / Loader Badge */}
+              <div className="w-10 h-10 rounded-lg bg-white border border-cyan-300/80 flex items-center justify-center shrink-0 shadow-sm">
+                <span className="material-symbols-outlined text-cyan-600 animate-spin w-5 h-5 text-[20px] flex items-center justify-center">
                   progress_activity
                 </span>
               </div>
+
+              {/* Status Typography */}
               <div className="flex flex-col min-w-0 flex-1">
-                <div className="text-sm font-semibold text-white tracking-wide flex items-center gap-2">
-                  <span>{activeStageData?.title || 'Extracting Case Entities & Building Network...'}</span>
-                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping shrink-0"></span>
+                <div className="text-sm font-semibold text-slate-800 tracking-tight leading-snug">
+                  {activeStageData?.title || 'Committing Graph Topology & Ingesting into Knowledge Graph...'}
                 </div>
-                <div className="text-xs font-mono text-cyan-300/80 mt-1 truncate">
-                  {activeStageData?.subtitle || 'Executing NLP parsing, deduplication, and BSA §65B cryptographic hashing'}
+                <div className="text-xs font-mono text-cyan-700/90 mt-0.5 leading-relaxed">
+                  {activeStageData?.subtitle || 'Persisting network graph nodes, relational edges, and spatial-temporal associations'}
                 </div>
+              </div>
+
+              {/* Pulsing Radar Ping Indicator */}
+              <div className="relative flex h-2.5 w-2.5 ml-auto mr-1 shrink-0" title="Active Analysis">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
               </div>
             </div>
           )}
