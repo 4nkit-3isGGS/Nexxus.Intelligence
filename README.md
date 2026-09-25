@@ -503,12 +503,16 @@ The FastAPI backend exposes modular, OpenAPI-compliant endpoints:
 
 ---
 
-##  11. Task Force Team (SIH 2026 — Team Nexxus)MemberSubsystem OwnershipCore DeliverablesAbhidha   NLP Pipeline & Information Extraction   • spaCy & RoBERTa Unstructured NER   • JSON Output Contract Normalization   • FIR & CDR Document Text Extraction |
-| Ankit | Knowledge Graph, Resolution & Security | • Neo4j Database Lifecycle & Driver Pool   • Multi-Stage Fuzzy Entity Resolution   • AES-256 Field Encryption & HMAC Blind Idx   • Append-Only SHA-256 Cryptographic Audit |
-| Arnish | Risk Analytics & Forensic Cyber Algorithms | • NetworkX PageRank & Betweenness Modeling   • Circular Transaction & Laundering Scans   • SIM-Box & Burner Call Burst Detection   • Time-Decayed Risk Engine Formulation |
-| Bishal | Multi-Agent Systems, APIs & Agent Tooling | • LangGraph 7-Agent Orchestration Engine   • Agent Tool Wrappers & Function Registry (@tool)   • FastAPI Endpoints (Graph, Search, Agent Copilot)   • 12 Validated Bounded Agent Execution Tools |
-| Jayanta | Frontend Architecture & UI Canvas Visualization | • React.js Application Shell & Layout   • Cytoscape.js Interactive Force Graph Canvas   • Dynamic PII Masking Presentation Layers   • Suspect Profile Drawers, Evidence Audit & Filtering |
-| Tanushka | Intelligence Reporting & Legal Compliance | • Court-Admissible Dossier Generation   • BSA §65B Admissibility Verification Docs   • Case Summary Scorecards & Evidence Trails  |
+## 👥 11. Task Force Team (SIH 2026 — Team Nexxus)
+
+| Member | Subsystem Ownership | Core Deliverables |
+| :--- | :--- | :--- |
+| **Abhidha** | NLP Pipeline & Information Extraction | • spaCy & RoBERTa unstructured NER<br>• JSON output contract normalization<br>• FIR & CDR document text extraction |
+| **Ankit** | Knowledge Graph, Resolution & Security | • Neo4j database lifecycle & driver pool<br>• Multi-stage fuzzy entity resolution<br>• AES-256 field encryption & HMAC blind indexing<br>• Append-only SHA-256 cryptographic audit |
+| **Arnish** | Risk Analytics & Forensic Cyber Algorithms | • NetworkX PageRank & Betweenness modeling<br>• Circular transaction & laundering scans<br>• SIM-box & burner call burst detection<br>• Time-decayed risk engine formulation |
+| **Bishal** | Multi-Agent Systems, APIs & Agent Tooling | • LangGraph 7-agent orchestration engine<br>• Agent tool wrappers & function registry (`@tool`)<br>• FastAPI endpoints (Graph, Search, Agent Copilot)<br>• 12 validated bounded agent execution tools |
+| **Jayanta** | Frontend Architecture & UI Canvas Visualization | • React.js application shell & layout<br>• Cytoscape.js interactive force graph canvas<br>• Dynamic PII masking presentation layers<br>• Suspect profile drawers, evidence audit & filtering |
+| **Tanushka** | Intelligence Reporting & Legal Compliance | • Court-admissible dossier generation<br>• BSA §65B admissibility verification docs<br>• Case summary scorecards & evidence trails |
 
 ---
 
