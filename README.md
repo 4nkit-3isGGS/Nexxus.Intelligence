@@ -274,88 +274,102 @@ Under Indian criminal law, electronic records are admissible only when accompani
 
 ```text
 Nexxus.Intelligence/
-├── backend/                              # High-Performance FastAPI & Graph Engine
+├── backend/                             # High-Performance FastAPI & Graph Engine
 │   ├── app/
-│   │   ├── main.py                       # FastAPI application entrypoint & middleware
-│   │   ├── neo4j_driver.py               # Neo4j driver lifecycle, query pooling & mock fallback
-│   │   ├── api/                          # REST API route controllers
-│   │   │   ├── health_routes.py          # Service health & database connectivity
-│   │   │   ├── ingestion_routes.py       # Contract ingestion endpoints
-│   │   │   ├── entity_routes.py          # Duplicate review queue & manual merge routes
-│   │   │   ├── graph_routes.py           # Overview, high-risk, & omnisearch endpoints
-│   │   │   ├── investigation_routes.py   # Multi-agent investigation & Cytoscape canvas APIs
-│   │   │   ├── audit_routes.py           # BSA §65B audit log verification & tampering check
-│   │   │   └── auth_routes.py            # RBAC login, token verification & role profiles
-│   │   ├── agents/                       # LangGraph Multi-Agent Platform
-│   │   │   ├── state.py                  # InvestigationState & Blackboard typed schemas
-│   │   │   ├── supervisor.py             # Supervisor agent & iterative dispatch coordinator
-│   │   │   ├── analysis_agent.py         # Hypothesis formulation & pattern analysis agent
-│   │   │   ├── critic_verifier.py        # BSA §65B auditor & quality loop agent
-│   │   │   ├── report_agent.py           # Court-admissible intelligence report generator
-│   │   │   ├── graph.py                  # Compiled 7-agent StateGraph pipeline
-│   │   │   ├── nodes/                    # Specialized worker nodes (Graph, Risk, Evidence, Cyber)
-│   │   │   └── tools/                    # 12 strictly bounded LangChain investigative tools
-│   │   ├── analytics/                    # Risk, Centrality & Cyber Forensic Anomaly Engine
-│   │   ├── audit/                        # BSA §65B append-only SHA-256 hash-chain ledger
-│   │   ├── auth/                         # Law enforcement RBAC models & PII masking rules
-│   │   ├── ingestion/                    # Graph ingestor, schema validator & relationship builders
-│   │   ├── models/                       # Pydantic v2 schemas & request/response contracts
-│   │   ├── resolution/                   # RapidFuzz fuzzy matcher & cloned plate fraud detector
-│   │   ├── security/                     # AES-256 encryption, HMAC blind indexes, ECDSA signatures
-│   │   └── services/                     # Graph query service layer (Cypher wrappers)
-│   ├── tests/                            # 161 Test items across 14 comprehensive test modules
-│   └── requirements.txt                  # Backend Python dependencies
+│   │   ├── main.py                      # FastAPI application entrypoint & middleware
+│   │   ├── neo4j_driver.py              # Neo4j driver lifecycle, query pooling & mock fallback
+│   │   ├── api/                         # REST API route controllers
+│   │   │   ├── health_routes.py         # Service health & database connectivity
+│   │   │   ├── ingestion_routes.py      # Contract & document ingestion endpoints
+│   │   │   ├── entity_routes.py         # Entity details, neighbors, subgraphs & merge routes
+│   │   │   ├── graph_routes.py          # Overview, high-risk, shortest path & search endpoints
+│   │   │   ├── investigation_routes.py  # Multi-agent investigation endpoints
+│   │   │   ├── audit_routes.py          # BSA §65B audit log verification & tampering check
+│   │   │   └── auth_routes.py           # RBAC demo users, registration, login & profile
+│   │   ├── agents/                      # LangGraph Multi-Agent Platform
+│   │   │   ├── state.py                 # InvestigationState & Blackboard typed schemas
+│   │   │   ├── supervisor.py            # Supervisor agent & iterative dispatch coordinator
+│   │   │   ├── analysis_agent.py        # Hypothesis formulation & pattern analysis agent
+│   │   │   ├── critic_verifier.py       # BSA §65B auditor & quality loop agent
+│   │   │   ├── report_agent.py          # Court-admissible intelligence report generator
+│   │   │   ├── graph.py                 # Compiled 7-agent StateGraph pipeline
+│   │   │   ├── nodes/                   # Specialized worker nodes (Graph, Risk, Evidence, Cyber)
+│   │   │   └── tools/                   # 12 strictly bounded LangChain investigative tools
+│   │   ├── analytics/                   # Risk, Centrality & Cyber Forensic Anomaly Engine
+│   │   ├── audit/                       # BSA §65B append-only SHA-256 hash-chain ledger
+│   │   ├── auth/                        # Law enforcement RBAC models & PII masking rules
+│   │   ├── ingestion/                   # Graph ingestor, schema validator & relationship builders
+│   │   ├── models/                      # Pydantic v2 schemas & request/response contracts
+│   │   ├── resolution/                  # RapidFuzz fuzzy matcher & cloned plate fraud detector
+│   │   ├── security/                    # AES-256 encryption, HMAC blind indexes, ECDSA signatures
+│   │   └── services/                    # Graph query service layer (Cypher wrappers)
+│   ├── tests/                           # 161 Test items across 14 comprehensive test modules
+│   └── requirements.txt                 # Backend Python dependencies
 │
-├── frontend/                             # Tactical React 18 + Vite Web Application
+├── frontend/                            # Tactical React 18 + Vite Web Application
 │   ├── src/
-│   │   ├── main.jsx                      # React application bootstrap
-│   │   ├── App.jsx                       # Master router, RBAC state & layout controller
-│   │   ├── index.css                     # Tactical styling & Tailwind directives
-│   │   ├── components/                   # Tactical Workspace Views & UI Components
-│   │   │   ├── HomePage.jsx              # Executive Command Center homepage
-│   │   │   ├── Header.jsx                # Tactical header with clearance status & case info
-│   │   │   ├── Sidebar.jsx               # Workspace navigation menu
-│   │   │   ├── FilterBar.jsx             # Entity type, risk threshold & timeline scrubber
-│   │   │   ├── GraphCanvas.jsx           # Cytoscape/Vis network graph visualization canvas
-│   │   │   ├── EvidenceDrawer.jsx        # Slide-over suspect dossier & kingpin trace inspector
-│   │   │   ├── AgentQueryBar.jsx         # Autonomous LangGraph investigation console
-│   │   │   ├── EntityResolutionView.jsx  # Fuzzy duplicate review queue & vehicle fraud view
-│   │   │   ├── FinancialFlowView.jsx     # Circular money trail & AML flow visualizer
-│   │   │   ├── CdrTelemetryView.jsx      # Burner phone & SIM-box burst matrix
-│   │   │   ├── FirCorpusView.jsx         # In-text NER highlighter for raw FIR documents
-│   │   │   ├── LegalAuditVault.jsx       # BSA §65B cryptographic audit vault
-│   │   │   ├── AuthModal.jsx             # Officer authentication & clearance login
-│   │   │   ├── ExportDossierModal.jsx    # Court-admissible dossier PDF/JSON exporter
-│   │   │   ├── IngestModal.jsx           # New incident & document ingestion modal
-│   │   │   ├── InvestigationPlaybook.jsx # 1-click forensic scenario quick-leads
+│   │   ├── main.jsx                     # React application bootstrap
+│   │   ├── App.jsx                      # Master router, RBAC state & layout controller
+│   │   ├── index.css                    # Tactical styling & Tailwind directives
+│   │   ├── components/                  # Tactical Workspace Views & UI Modals
+│   │   │   ├── AccessDeniedView.jsx     # Tier-based clearance restriction fallback screen
+│   │   │   ├── AgentQueryBar.jsx        # Autonomous LangGraph investigation console
+│   │   │   ├── AuthModal.jsx            # Officer authentication & clearance login
+│   │   │   ├── AwaitingDirective.jsx    # Agent placeholder & idle directive state
+│   │   │   ├── CdrTelemetryView.jsx     # Burner phone & SIM-box burst matrix
+│   │   │   ├── DemoVideoModal.jsx       # Google Drive / YouTube video walkthrough modal
+│   │   │   ├── EntityResolutionView.jsx # Fuzzy duplicate review queue & vehicle fraud view
+│   │   │   ├── EvidenceDrawer.jsx       # Slide-over suspect dossier & kingpin trace inspector
+│   │   │   ├── ExportDossierModal.jsx   # Court-admissible dossier PDF/JSON exporter
+│   │   │   ├── FilterBar.jsx            # Entity type, risk threshold & timeline scrubber
+│   │   │   ├── FinancialFlowView.jsx    # Circular money trail & AML flow visualizer
+│   │   │   ├── FirCorpusView.jsx        # In-text NER highlighter for raw FIR documents
+│   │   │   ├── GraphCanvas.jsx          # Cytoscape/Vis network graph visualization canvas
+│   │   │   ├── Header.jsx               # Tactical header with clearance status & case info
+│   │   │   ├── HomePage.jsx             # Executive Command Center homepage
+│   │   │   ├── IngestModal.jsx          # New incident & document ingestion modal
+│   │   │   ├── InvestigationPlaybook.jsx# 1-click forensic scenario quick-leads
+│   │   │   ├── LegalAuditVault.jsx      # BSA §65B cryptographic audit vault
+│   │   │   ├── NotFoundPage.jsx         # 404 Route handling screen
 │   │   │   ├── OfficerFieldGuideModal.jsx# SOP manual & field investigation playbook
-│   │   │   └── RbacRoute.jsx             # Route guard enforcing officer clearance tiers
-│   │   ├── context/                      # Toast & UI context providers
-│   │   ├── data/                         # Mock intelligence data & agent presets
-│   │   └── services/                     # API client layer (FastAPI bridge + offline fallback)
-│   ├── package.json                      # Frontend dependencies & scripts
-│   ├── tailwind.config.js                # Tailwind theme configuration
-│   └── vite.config.js                    # Vite bundler configuration
+│   │   │   ├── RbacRoute.jsx            # Route guard enforcing officer clearance tiers
+│   │   │   └── Sidebar.jsx              # Workspace navigation menu
+│   │   ├── config/                      # Global Configuration & Environment Constants
+│   │   │   └── constants.js             # Platform thresholds & demo video URL config
+│   │   ├── context/                     # Application Context Providers
+│   │   │   ├── AuthContext.jsx          # Clearance session state & login persistence
+│   │   │   └── ToastContext.jsx         # Global notifications & tactical toast feedback
+│   │   ├── data/                        # Static & Seeded Intelligence Assets
+│   │   │   └── mockIntelligenceData.js  # Offline fallback graph nodes & edges
+│   │   ├── services/                    # API Client Bridge & Integrations
+│   │   │   ├── api.js                   # Axios/Fetch client with 90s timeout headroom
+│   │   │   ├── apiService.js            # Modular API service exports
+│   │   │   └── googleDriveService.js    # Google Drive picker & integration bridge
+│   │   └── utils/                       # Utility Functions & Formatters
+│   │       └── formatters.js            # Cryptographic hash truncation & date formatters
+│   ├── package.json                     # Frontend dependencies & scripts
+│   ├── tailwind.config.js               # Tailwind theme configuration
+│   └── vite.config.js                   # Vite bundler configuration
 │
-├── backend/app/ingestion/                # Unified Case Ingestion & Risk Scoring Engine
-│   ├── document_extractor.py             # Multi-format NLP extraction, BSA §65B hashing & Arnish risk hook
-│   └── graph_ingestor.py                 # Entity resolution, PII encryption & Neo4j persistence
+├── backend/app/ingestion/               # Unified Case Ingestion & Risk Scoring Engine
+│   ├── document_extractor.py            # Multi-format NLP extraction, BSA §65B hashing & risk scoring
+│   └── graph_ingestor.py                # Entity resolution, PII encryption & Neo4j persistence
 │
-├── cypher/                               # Graph Database Scripts
-│   ├── schema.cypher                     # Constraints, indexes & uniqueness rules
-│   ├── seed.cypher                       # Synthetic criminal network seed data
-│   └── queries.cypher                    # Pre-built investigative Cypher queries
+├── cypher/                              # Graph Database Scripts
+│   ├── schema.cypher                    # Constraints, indexes & uniqueness rules
+│   ├── seed.cypher                      # Synthetic criminal network seed data
+│   └── queries.cypher                   # Pre-built investigative Cypher queries
 │
-├── data/                                 # Datasets & Documents
-│   └── raw/                              # Raw FIR documents (101, 102, 103), CDRs, and Bank records
+├── data/                                # Datasets & Documents
+│   └── raw/                             # Raw FIR documents (101, 102, 103), CDRs, and Bank records
 │
-├── docs/                                 # Technical Documentation
-│   └── UI_INTEGRATION_GUIDE.md           # UI-Backend integration contract documentation
+├── docs/                                # Technical Documentation
+│   └── UI_INTEGRATION_GUIDE.md          # UI-Backend integration contract documentation
 │
-├── .env.example                          # Environment variable configuration template
-├── output_contract.json                  # Validated JSON ingestion contract
-├── pytest.ini                            # Pytest configuration
-└── requirements.txt                      # Root/NLP Python dependencies
+├── .env.example                         # Environment variable configuration template
+├── output_contract.json                 # Validated JSON ingestion contract
+├── pytest.ini                           # Pytest configuration
+└── requirements.txt                     # Root/NLP Python dependencies
 ```
 
 ---
@@ -489,15 +503,12 @@ The FastAPI backend exposes modular, OpenAPI-compliant endpoints:
 
 ---
 
-## 👥 11. Task Force Team (SIH 2026 — Team Nexxus)
-
-| Member | Subsystem Ownership | Core Deliverables |
-| :--- | :--- | :--- |
-| **Ankit** | **Graph Database, Neo4j Engine & Resolution Lead** | Neo4j driver lifecycle, Cypher schema & constraints, RapidFuzz entity resolution engine, vehicle fraud detection, field-level cryptography & HMAC blind indexing. |
-| **Abhidha** | **NLP Extraction & Data Pipeline** | spaCy transformer NER (`en_core_web_trf`), custom regex extraction, structural org patterns, and relationship contract validation (`output_contract.json`). |
-| **Arnish** | **Risk Analytics & Forensic Detection** | Centrality modeling (PageRank, Betweenness), Louvain community syndicate detection, circular transaction loops, SIM-box bursts & crypto tracing. |
-| **Bishal & Jayanta** | **Multi-Agent Platform & Frontend Command Center** | LangGraph 7-agent compiled StateGraph, dynamic supervisor dispatch, bounded LangChain tools, React 18 / Vite tactical UI canvas, and 7 workspace consoles. |
-| **Tanushree** | **Legal Audit Vault & Court-Admissibility** | Section 65B Bharatiya Sakshya Adhiniyam (BSA, 2023) SHA-256 hash-chain ledger, ECDSA digital signatures, evidence verification, and court dossier reporting. |
+##  11. Task Force Team (SIH 2026 — Team Nexxus)MemberSubsystem OwnershipCore DeliverablesAbhidha   NLP Pipeline & Information Extraction   • spaCy & RoBERTa Unstructured NER   • JSON Output Contract Normalization   • FIR & CDR Document Text Extraction |
+| Ankit | Knowledge Graph, Resolution & Security | • Neo4j Database Lifecycle & Driver Pool   • Multi-Stage Fuzzy Entity Resolution   • AES-256 Field Encryption & HMAC Blind Idx   • Append-Only SHA-256 Cryptographic Audit |
+| Arnish | Risk Analytics & Forensic Cyber Algorithms | • NetworkX PageRank & Betweenness Modeling   • Circular Transaction & Laundering Scans   • SIM-Box & Burner Call Burst Detection   • Time-Decayed Risk Engine Formulation |
+| Bishal | Multi-Agent Systems, APIs & Agent Tooling | • LangGraph 7-Agent Orchestration Engine   • Agent Tool Wrappers & Function Registry (@tool)   • FastAPI Endpoints (Graph, Search, Agent Copilot)   • 12 Validated Bounded Agent Execution Tools |
+| Jayanta | Frontend Architecture & UI Canvas Visualization | • React.js Application Shell & Layout   • Cytoscape.js Interactive Force Graph Canvas   • Dynamic PII Masking Presentation Layers   • Suspect Profile Drawers, Evidence Audit & Filtering |
+| Tanushka | Intelligence Reporting & Legal Compliance | • Court-Admissible Dossier Generation   • BSA §65B Admissibility Verification Docs   • Case Summary Scorecards & Evidence Trails  |
 
 ---
 
