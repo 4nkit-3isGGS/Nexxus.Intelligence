@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import DemoVideoModal from './DemoVideoModal';
+import { DEMO_VIDEO_URL } from '../config/constants';
 
 export default function HomePage({
   onLaunchWorkspace,
@@ -21,6 +23,7 @@ export default function HomePage({
   const [heroQuery, setHeroQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
   const profileMenuRef = useRef(null);
 
   const handleFeatureNavigate = (targetPath) => {
@@ -449,10 +452,7 @@ export default function HomePage({
                 </button>
 
                 <button
-                  onClick={() => {
-                    const el = document.getElementById('capabilities');
-                    el?.scrollIntoView({ behavior: 'smooth' });
-                  }}
+                  onClick={() => setIsDemoModalOpen(true)}
                   className="flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-white hover:bg-slate-50 text-[#0F172A] text-sm font-semibold border border-[#E2E8F0] shadow-2xs transition-all cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[18px] text-[#2563EB]">play_circle</span>
@@ -1106,6 +1106,13 @@ export default function HomePage({
           </div>
         </div>
       </footer>
+
+      {/* Demo Video Lightbox Modal */}
+      <DemoVideoModal
+        isOpen={isDemoModalOpen}
+        onClose={() => setIsDemoModalOpen(false)}
+        videoUrl={DEMO_VIDEO_URL}
+      />
     </div>
   );
 }
